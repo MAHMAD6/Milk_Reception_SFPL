@@ -6,12 +6,12 @@ This application manages the complete milk reception workflow from dispatch thro
 
 ## Technology Stack
 
-* Next.js
-* TypeScript
-* PostgreSQL
-* Prisma ORM
-* Tailwind CSS
-* JWT-based authentication
+* Next.js 16 (App Router, Turbopack) · React 19
+* TypeScript 7 (type checking) — `typescript` resolves to the TS 6 API for tooling
+* PostgreSQL 18 · Prisma 7 (node-postgres driver adapter, `prisma.config.ts`)
+* Tailwind CSS 4 · shadcn/ui (Radix) · framer-motion · sonner — see `docs/ui-guidelines.md`
+* JWT authentication (jose)
+* Node.js 24 LTS (`.nvmrc`; minimum 22.12)
 
 ## Current Architecture
 

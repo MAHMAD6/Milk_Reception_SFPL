@@ -13,7 +13,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:16-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgrespassword
@@ -39,7 +39,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
 
       - name: Install dependencies
@@ -67,4 +67,8 @@ jobs:
         run: npm run lint
 
       - name: Run Next.js production build
+        # The job runs with NODE_ENV=development for the seed scripts' safety guard;
+        # next build must run as production (Next 16 fails to prerender otherwise).
+        env:
+          NODE_ENV: production
         run: npm run build
