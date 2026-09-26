@@ -9,6 +9,9 @@ import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentSer
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
 import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 import type { LabTestResultOption } from '@/lib/validations/labTest';
+import type { VisitPortion } from '@prisma/client';
+import type { QualityEvaluationSnapshot } from '@/backend/services/qualityRuleService';
+import { toJsonInput } from '@/lib/json';
 
 class RouteError extends Error {
   statusCode: number;
@@ -128,10 +131,10 @@ export async function POST(
         const options = (reqTest.result_options_snapshot as LabTestResultOption[] | null) || null;
         if (Array.isArray(options) && options.length > 0) {
           const val = (res.textValue || '').trim().toUpperCase();
-          const match = options.find((opt: any) => opt.value.trim().toUpperCase() === val);
+          const match = options.find((opt) => opt.value.trim().toUpperCase() === val);
           if (!match) {
             return NextResponse.json(
-              { error: `Invalid option "${res.textValue}" for test "${reqTest.test_name_snapshot}". Allowed options: ${options.map((o: any) => o.label || o.value).join(', ')}.` },
+              { error: `Invalid option "${res.textValue}" for test "${reqTest.test_name_snapshot}". Allowed options: ${options.map((o) => o.label || o.value).join(', ')}.` },
               { status: 400 }
             );
           }
@@ -148,7 +151,8 @@ export async function POST(
     const now = new Date();
     const targetOpTs = body.operationalTimestamp ? new Date(body.operationalTimestamp) : (body.opTimestamp ? new Date(body.opTimestamp) : now);
 
-    let lockedPortionRecord: any = null;
+    // Assigned inside the transaction callback (which TS does not track), so declare it widened.
+    let lockedPortionRecord = null as VisitPortion | null;
     let finalPlantDecision = 'ACCEPTED';
     let finalManagerReviewStatus = 'NONE';
     let systemQualityOutcome: string = 'PASS';
@@ -212,13 +216,13 @@ export async function POST(
         testId: bigint;
         performanceStatus: string;
         notPerformedReason: string | null;
-        numericValue: any;
+        numericValue: number | null;
         textValue: string | null;
         appliedRuleId: bigint | null;
         appliedRuleVersion: number | null;
         evaluationStatus: string;
         isPassed: boolean | null;
-        evaluationSnapshot?: any;
+        evaluationSnapshot?: QualityEvaluationSnapshot | null;
       }> = [];
 
       for (const res of validated.results) {
@@ -244,7 +248,7 @@ export async function POST(
         const numVal = res.numericValue !== undefined && res.numericValue !== null ? res.numericValue : null;
         const textVal = res.textValue ? res.textValue.trim() : null;
         const activeRule = activeRulesMap.get(res.testId) || null;
-        const snapshotOptions = (testDef?.result_options_snapshot as any[]) || null;
+        const snapshotOptions = (testDef?.result_options_snapshot as LabTestResultOption[] | null) || null;
 
         const evalRes = QualityRuleService.evaluateQualityResult({
           testId: res.testId,
@@ -313,7 +317,7 @@ export async function POST(
               applied_rule_version: entry.appliedRuleVersion,
               evaluation_status: entry.evaluationStatus,
               is_passed: entry.isPassed,
-              evaluation_snapshot: (entry as any).evaluationSnapshot as any,
+              evaluation_snapshot: entry.evaluationSnapshot ? toJsonInput(entry.evaluationSnapshot) : undefined,
               tested_by: userIdBigInt,
             },
           });
@@ -333,7 +337,7 @@ export async function POST(
               applied_rule_version: entry.appliedRuleVersion,
               evaluation_status: entry.evaluationStatus,
               is_passed: entry.isPassed,
-              evaluation_snapshot: (entry as any).evaluationSnapshot as any,
+              evaluation_snapshot: entry.evaluationSnapshot ? toJsonInput(entry.evaluationSnapshot) : undefined,
               tested_by: userIdBigInt,
             },
           });

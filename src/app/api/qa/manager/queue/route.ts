@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
+import type { QualityEvaluationSnapshot } from '@/backend/services/qualityRuleService';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -70,7 +71,10 @@ export async function GET(req: Request) {
       managerReviewRequestedAt: p.manager_review_requested_at?.toISOString() || null,
       requesterName: p.manager_requester?.full_name || p.manager_requester?.username || 'Unknown',
       vehicleExited: !!p.visit.gate_log?.exit_timestamp,
-      results: p.plant_lab_results.map((r) => ({
+      results: p.plant_lab_results.map((r) => {
+        // evaluation_snapshot is written by QualityRuleService as a QualityEvaluationSnapshot.
+        const snapshot = r.evaluation_snapshot as QualityEvaluationSnapshot | null;
+        return {
         id: r.id.toString(),
         testCode: r.lab_test.testCode,
         testName: r.lab_test.testName,
@@ -81,15 +85,15 @@ export async function GET(req: Request) {
         notPerformedReason: r.not_performed_reason,
         evaluationStatus: r.evaluation_status,
         isPassed: r.is_passed,
-        appliedRuleVersion: (r as any).evaluation_snapshot?.releaseRule?.version || r.applied_rule?.version || r.applied_rule_version || null,
-        appliedRule: (r as any).evaluation_snapshot?.releaseRule
+        appliedRuleVersion: snapshot?.releaseRule?.version || r.applied_rule?.version || r.applied_rule_version || null,
+        appliedRule: snapshot?.releaseRule
           ? {
-              id: (r as any).evaluation_snapshot.releaseRule.id,
-              version: (r as any).evaluation_snapshot.releaseRule.version,
-              category: (r as any).evaluation_snapshot.releaseRule.category,
-              minValue: (r as any).evaluation_snapshot.releaseRule.minValue,
-              maxValue: (r as any).evaluation_snapshot.releaseRule.maxValue,
-              acceptableOption: (r as any).evaluation_snapshot.releaseRule.acceptableOption,
+              id: snapshot.releaseRule.id,
+              version: snapshot.releaseRule.version,
+              category: snapshot.releaseRule.category,
+              minValue: snapshot.releaseRule.minValue,
+              maxValue: snapshot.releaseRule.maxValue,
+              acceptableOption: snapshot.releaseRule.acceptableOption,
             }
           : (r.applied_rule
             ? {
@@ -101,9 +105,10 @@ export async function GET(req: Request) {
                 acceptableOption: r.applied_rule.acceptable_option,
               }
             : null),
-        monitoringRule: (r as any).evaluation_snapshot?.monitoringRule || null,
-        evaluationSnapshot: (r as any).evaluation_snapshot || null,
-      })),
+        monitoringRule: snapshot?.monitoringRule || null,
+        evaluationSnapshot: snapshot || null,
+        };
+      }),
     }));
 
     return NextResponse.json({

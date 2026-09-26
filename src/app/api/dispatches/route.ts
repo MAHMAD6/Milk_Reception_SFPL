@@ -18,8 +18,23 @@ import { PaperReferenceType } from '@prisma/client';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
 import { getErrorCode, getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 import type { LabTestResultOption } from '@/lib/validations/labTest';
+import { jsonString } from '@/lib/json';
 
-function serializeDispatch(visit: any) {
+const dispatchListInclude = {
+  creator: true,
+  procurement_source: true,
+  portions: {
+    include: {
+      dispatch_info: true,
+    },
+    orderBy: { portion_number: 'asc' },
+  },
+  gate_log: true,
+} satisfies Prisma.VehicleVisitInclude;
+
+type DispatchListVisit = Prisma.VehicleVisitGetPayload<{ include: typeof dispatchListInclude }>;
+
+function serializeDispatch(visit: DispatchListVisit) {
   const portions = visit.portions || [];
   const firstPortion = portions[0];
   const firstDispatchInfo = firstPortion?.dispatch_info;
@@ -97,7 +112,7 @@ function serializeDispatch(visit: any) {
     dispatch_testing_mode: firstDispatchInfo?.dispatch_testing_mode || 'FULL',
     dispatch_testing_reason: firstDispatchInfo?.dispatch_testing_reason || null,
     has_gate_entry: !!gateLog?.entry_timestamp,
-    portions: portions.map((p: any) => ({
+    portions: portions.map((p) => ({
       id: p.id.toString(),
       portion_number: p.portion_number,
       dispatch_quantity_value: p.dispatch_quantity_value !== null && p.dispatch_quantity_value !== undefined
@@ -175,7 +190,7 @@ export async function GET(req: Request) {
     }
   }
 
-  const whereClause: any = {
+  const whereClause: Prisma.VehicleVisitWhereInput = {
     current_status: statusFilter ? statusFilter : { notIn: ['CANCELLED', 'DRAFT_DISPATCH'] },
   };
 
@@ -288,26 +303,18 @@ export async function GET(req: Request) {
       LIMIT ${pageSize} OFFSET ${offset}
     `;
 
-    let visits: any[] = [];
+    let visits: DispatchListVisit[] = [];
     if (idRows.length > 0) {
       const visitIds = idRows.map((r) => r.id);
       const fetchedVisits = await prisma.vehicleVisit.findMany({
         where: { id: { in: visitIds } },
-        include: {
-          creator: true,
-          procurement_source: true,
-          portions: {
-            include: {
-              dispatch_info: true,
-            },
-            orderBy: { portion_number: 'asc' },
-          },
-          gate_log: true,
-        },
+        include: dispatchListInclude,
       });
 
       const visitMap = new Map(fetchedVisits.map((v) => [v.id.toString(), v]));
-      visits = visitIds.map((id) => visitMap.get(id.toString())).filter(Boolean);
+      visits = visitIds
+        .map((id) => visitMap.get(id.toString()))
+        .filter((v): v is DispatchListVisit => Boolean(v));
     }
 
     return NextResponse.json({
@@ -432,7 +439,7 @@ export async function POST(req: Request) {
     }
 
     // Validate Raw Milk Dispatch Note against operational policy
-    const rawDispatchNoteInput = validated.rawMilkDispatchNoteNumber || validated.raw_milk_dispatch_note_number || (body as any).rawMilkDispatchNoteNumber || (body as any).raw_milk_dispatch_note_number;
+    const rawDispatchNoteInput = validated.rawMilkDispatchNoteNumber || validated.raw_milk_dispatch_note_number || jsonString(body, 'rawMilkDispatchNoteNumber') || jsonString(body, 'raw_milk_dispatch_note_number');
     let validatedDispatchNote: string | null = null;
     try {
       validatedDispatchNote = await PaperReferenceService.validateAndVerify(
@@ -548,10 +555,10 @@ export async function POST(req: Request) {
           const snapshotOptions = (reqTest.result_options_snapshot as LabTestResultOption[] | null) || null;
           if (Array.isArray(snapshotOptions) && snapshotOptions.length > 0) {
             const val = (submitted.textValue || '').trim().toUpperCase();
-            const match = snapshotOptions.find((opt: any) => opt.value.trim().toUpperCase() === val);
+            const match = snapshotOptions.find((opt) => opt.value.trim().toUpperCase() === val);
             if (!match) {
               return NextResponse.json(
-                { error: `Invalid option "${submitted.textValue}" for "${reqTest.test_name_snapshot}" in Portion ${portion.portionNumber}. Allowed options: ${snapshotOptions.map((o: any) => o.label || o.value).join(', ')}.` },
+                { error: `Invalid option "${submitted.textValue}" for "${reqTest.test_name_snapshot}" in Portion ${portion.portionNumber}. Allowed options: ${snapshotOptions.map((o) => o.label || o.value).join(', ')}.` },
                 { status: 400 }
               );
             }
@@ -803,7 +810,7 @@ export async function POST(req: Request) {
         const targetTankId = activeTanks[0].id;
 
         // Row lock FOR UPDATE and revalidate active state under lock
-        const lockedTankRows: Array<{ id: bigint; zmcc_id: bigint; capacity_liters: any; is_active: boolean }> = await tx.$queryRaw`
+        const lockedTankRows: Array<{ id: bigint; zmcc_id: bigint; capacity_liters: Prisma.Decimal; is_active: boolean }> = await tx.$queryRaw`
           SELECT id, zmcc_id, capacity_liters, is_active FROM zmcc_tank WHERE id = ${targetTankId} FOR UPDATE
         `;
         if (!lockedTankRows || lockedTankRows.length === 0) {

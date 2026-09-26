@@ -1,5 +1,6 @@
 import { prisma } from '@core/db';
 import { Prisma, LabTestRule } from '@prisma/client';
+import type { LabTestResultOption } from '@/lib/validations/labTest';
 
 export type QualityEvaluationStatus =
   | 'PASS'
@@ -289,7 +290,7 @@ export class QualityRuleService {
     monitoringRule?: LabTestRule | null;
     isConfigurationError?: boolean;
     configurationErrorReason?: string;
-    resultOptions?: any;
+    resultOptions?: unknown;
     testingPoint?: string;
   }): QualityResultEvaluation {
     const raw = this._evaluateRawQualityResult(params);
@@ -297,7 +298,7 @@ export class QualityRuleService {
       params.releaseRule || (params.rule && params.rule.rule_category === 'RELEASE' ? params.rule : null);
     const effectiveMonitoringRule: LabTestRule | null =
       params.monitoringRule ||
-      (params.rule && params.rule.rule_category === 'MONITORING' ? params.rule : ((params.rule as any)?.monitoringRule || null));
+      (params.rule && params.rule.rule_category === 'MONITORING' ? params.rule : (params.rule?.monitoringRule || null));
 
     raw.evaluationSnapshot = this.buildEvaluationSnapshot(
       params,
@@ -305,9 +306,9 @@ export class QualityRuleService {
       raw.isPassed,
       raw.reason,
       effectiveReleaseRule,
-      (raw as any).releaseStatus || (effectiveReleaseRule ? raw.evaluationStatus : null),
+      raw.releaseStatus || (effectiveReleaseRule ? raw.evaluationStatus : null),
       effectiveMonitoringRule,
-      (raw as any).monitoringStatus || (raw.evaluationStatus === 'WARNING' ? 'WARNING' : null)
+      raw.monitoringStatus || (raw.evaluationStatus === 'WARNING' ? 'WARNING' : null)
     );
     return raw;
   }
@@ -323,19 +324,19 @@ export class QualityRuleService {
     monitoringRule?: LabTestRule | null;
     isConfigurationError?: boolean;
     configurationErrorReason?: string;
-    resultOptions?: any;
+    resultOptions?: unknown;
     testingPoint?: string;
   }): QualityResultEvaluation & { releaseStatus?: QualityEvaluationStatus; monitoringStatus?: QualityEvaluationStatus } {
     const { resultType, numericValue, textValue, rule, resultOptions } = params;
 
     // 1. Configuration Error Check
-    if (params.isConfigurationError || (rule as any)?.isConfigurationError) {
+    if (params.isConfigurationError || rule?.isConfigurationError) {
       return {
         appliedRuleId: rule?.id || null,
         appliedRuleVersion: rule?.version || null,
         evaluationStatus: 'RULE_CONFIGURATION_ERROR',
         isPassed: false,
-        reason: (rule as any)?.configurationErrorReason || params.configurationErrorReason || 'Rule configuration error: overlapping active release rules',
+        reason: rule?.configurationErrorReason || params.configurationErrorReason || 'Rule configuration error: overlapping active release rules',
       };
     }
 
@@ -344,7 +345,7 @@ export class QualityRuleService {
 
     const effectiveMonitoringRule: LabTestRule | null =
       params.monitoringRule ||
-      (rule && rule.rule_category === 'MONITORING' ? rule : ((rule as any)?.monitoringRule || null));
+      (rule && rule.rule_category === 'MONITORING' ? rule : (rule?.monitoringRule || null));
 
     // Validate Rule Configuration bounds min_value <= max_value
     if (
@@ -382,7 +383,7 @@ export class QualityRuleService {
       if (Array.isArray(resultOptions) && resultOptions.length > 0 && textValue) {
         const rawText = textValue.trim().toUpperCase();
         const matched = resultOptions.find(
-          (opt: any) => opt.value && opt.value.trim().toUpperCase() === rawText
+          (opt: Partial<LabTestResultOption>) => opt.value && opt.value.trim().toUpperCase() === rawText
         );
         if (matched) {
           if (matched.isPassing === true) {
@@ -542,7 +543,7 @@ export class QualityRuleService {
       // Structured resultOptions fallback
       if (Array.isArray(resultOptions) && resultOptions.length > 0) {
         const matched = resultOptions.find(
-          (opt: any) => opt.value && opt.value.trim().toUpperCase() === rawText
+          (opt: Partial<LabTestResultOption>) => opt.value && opt.value.trim().toUpperCase() === rawText
         );
         if (matched) {
           if (matched.isPassing === true) {

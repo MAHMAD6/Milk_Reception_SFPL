@@ -15,6 +15,7 @@ import {
   isPlantFatTest,
   VehicleCalculationPortion,
 } from './vehicleQuantityService';
+import { Prisma } from '@prisma/client';
 
 export type RetrievalMode = 'live' | 'recent' | 'search' | 'report';
 
@@ -86,10 +87,38 @@ function formatTimeOnly(ts?: Date | string | null): string | null {
   }).format(d);
 }
 
+/** Relations needed to build operational logs for a visit (shared by list and detail reads). */
+const operationalVisitInclude = {
+  procurement_source: true,
+  gate_log: true,
+  weight_ticket: true,
+  portions: {
+    orderBy: { portion_number: 'asc' },
+    include: {
+      dispatch_info: true,
+      dispatch_lab_results: {
+        include: { lab_test: true },
+      },
+      plant_lab_results: {
+        include: { lab_test: true },
+      },
+      unloading_log: {
+        include: { silo: true },
+      },
+    },
+  },
+  inventory_transactions: {
+    where: { transaction_type: 'RECEIPT' },
+  },
+  dual_reconciliation: true,
+} satisfies Prisma.VehicleVisitInclude;
+
+export type OperationalVisit = Prisma.VehicleVisitGetPayload<{ include: typeof operationalVisitInclude }>;
+
 function extractTestNumericValue(
   results: Array<{
     performance_status?: string | null;
-    numeric_value?: any;
+    numeric_value?: Prisma.Decimal | number | string | null;
     lab_test?: { testCode?: string | null; testName?: string | null } | null;
   }>,
   matcher: (code?: string | null, name?: string | null) => boolean
@@ -146,7 +175,7 @@ function isConfiguredTsTest(code?: string | null, name?: string | null): boolean
  * Maps a single Prisma VehicleVisit (with relations) to flat, unit-safe MilkProcessLog[]
  */
 export function mapVisitToLogs(
-  visit: any,
+  visit: OperationalVisit,
   masterLabTests: Array<{
     id: bigint;
     testCode: string;
@@ -185,7 +214,7 @@ export function mapVisitToLogs(
 
   // Dispatch Calendar Date
   let dispatchDateStr: string | null = null;
-  const firstDispatchTs = visit.portions.find((p: any) => p.dispatch_info?.dispatch_timestamp)?.dispatch_info?.dispatch_timestamp;
+  const firstDispatchTs = visit.portions.find((p) => p.dispatch_info?.dispatch_timestamp)?.dispatch_info?.dispatch_timestamp;
   if (firstDispatchTs) {
     const dt = new Date(firstDispatchTs);
     if (!isNaN(dt.getTime())) {
@@ -211,11 +240,11 @@ export function mapVisitToLogs(
   // Evaluate authoritative vehicle calculation if weights exist
   let vehicleCalcResult: ReturnType<typeof calculateVehicleReceivedQuantity> | null = null;
   if (firstWeightKg != null && secondWeightKg != null && firstWeightKg > secondWeightKg) {
-    const calcPortions: VehicleCalculationPortion[] = visit.portions.map((p: any) => ({
+    const calcPortions: VehicleCalculationPortion[] = visit.portions.map((p) => ({
       portionId: p.id,
       portionNumber: p.portion_number,
       plantDecision: p.plant_decision,
-      plantLabResults: p.plant_lab_results.map((r: any) => ({
+      plantLabResults: p.plant_lab_results.map((r) => ({
         testCode: r.lab_test?.testCode,
         testName: r.lab_test?.testName,
         numericValue: r.numeric_value ? Number(r.numeric_value) : null,
@@ -231,7 +260,7 @@ export function mapVisitToLogs(
   }
 
   // Posted Silo receipt if finalized
-  const finalizedReceipt = visit.inventory_transactions?.find((tx: any) => tx.transaction_type === 'RECEIPT');
+  const finalizedReceipt = visit.inventory_transactions?.find((tx) => tx.transaction_type === 'RECEIPT');
   const finalPhysicalLiters = finalizedReceipt?.quantity_liters
     ? Number(finalizedReceipt.quantity_liters)
     : vehicleCalcResult?.isCalculable
@@ -278,7 +307,7 @@ export function mapVisitToLogs(
     if (vDeclaredUnit === 'LITER') {
       vehicleDispatchGrossLiters = vDeclaredVal;
     } else if (vDeclaredUnit === 'KG') {
-      const firstPortionWithLr = visit.portions.find((p: any) =>
+      const firstPortionWithLr = visit.portions.find((p) =>
         extractTestNumericValue(p.dispatch_lab_results, isDispatchLrTest) != null
       );
       const vLr = firstPortionWithLr
@@ -681,7 +710,7 @@ export async function getPaginatedOperationalLogs(
   currentUser?: User | null
 ): Promise<PaginatedOperationalLogs> {
   const mode: RetrievalMode = filters?.mode || 'recent';
-  const conditions: any[] = [];
+  const conditions: Prisma.VehicleVisitWhereInput[] = [];
 
   // 1. Role-based scoping (Fail closed for source-scoped roles)
   if (currentUser?.role === 'CONTRACTOR_MANAGER' || currentUser?.role === 'CONTRACTOR_OPERATOR') {
@@ -764,7 +793,7 @@ export async function getPaginatedOperationalLogs(
     const startUtc = effectiveFromDate ? new Date(`${effectiveFromDate}T00:00:00.000+05:00`) : undefined;
     const endUtc = effectiveToDate ? new Date(`${effectiveToDate}T23:59:59.999+05:00`) : undefined;
 
-    const timeRangeCond: any = {};
+    const timeRangeCond: Prisma.DateTimeFilter = {};
     if (startUtc) timeRangeCond.gte = startUtc;
     if (endUtc) timeRangeCond.lte = endUtc;
 
@@ -840,7 +869,7 @@ export async function getPaginatedOperationalLogs(
     });
   }
 
-  const whereClause: any = conditions.length > 0 ? { AND: conditions } : {};
+  const whereClause: Prisma.VehicleVisitWhereInput = conditions.length > 0 ? { AND: conditions } : {};
 
   // 6. Pagination Bounds
   const defaultPageSize = mode === 'live' ? 100 : 20;
@@ -856,30 +885,7 @@ export async function getPaginatedOperationalLogs(
     }),
     prisma.vehicleVisit.findMany({
       where: whereClause,
-      include: {
-        procurement_source: true,
-        gate_log: true,
-        weight_ticket: true,
-        portions: {
-          orderBy: { portion_number: 'asc' },
-          include: {
-            dispatch_info: true,
-            dispatch_lab_results: {
-              include: { lab_test: true },
-            },
-            plant_lab_results: {
-              include: { lab_test: true },
-            },
-            unloading_log: {
-              include: { silo: true },
-            },
-          },
-        },
-        inventory_transactions: {
-          where: { transaction_type: 'RECEIPT' },
-        },
-        dual_reconciliation: true,
-      },
+      include: operationalVisitInclude,
       orderBy: { id: 'desc' },
       skip,
       take: pageSize,
@@ -977,30 +983,7 @@ export async function getOperationalLogById(
 
   const visit = await prisma.vehicleVisit.findUnique({
     where: { id: visitId },
-    include: {
-      procurement_source: true,
-      gate_log: true,
-      weight_ticket: true,
-      portions: {
-        orderBy: { portion_number: 'asc' },
-        include: {
-          dispatch_info: true,
-          dispatch_lab_results: {
-            include: { lab_test: true },
-          },
-          plant_lab_results: {
-            include: { lab_test: true },
-          },
-          unloading_log: {
-            include: { silo: true },
-          },
-        },
-      },
-      inventory_transactions: {
-        where: { transaction_type: 'RECEIPT' },
-      },
-      dual_reconciliation: true,
-    },
+    include: operationalVisitInclude,
   });
 
   if (!visit) return null;
