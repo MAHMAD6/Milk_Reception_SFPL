@@ -223,9 +223,9 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
 
   if (!isAuthorized) {
     return (
-      <div className="p-8 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-center space-y-2">
+      <div className="p-8 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-center space-y-2">
         <AlertTriangle className="w-8 h-8 text-rose-600 mx-auto" />
-        <h3 className="text-base font-black">Access Denied</h3>
+        <h3 className="text-base font-semibold">Access Denied</h3>
         <p className="text-xs">
           Only Super Admins, ZMCC Managers, and PHE Operators are permitted to view the Manager Journey Map.
         </p>
@@ -235,9 +235,9 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
 
   if (!journeyId) {
     return (
-      <div className="p-12 bg-white rounded-2xl border border-[#EAE4D5] text-center space-y-3">
+      <div className="p-12 bg-white rounded-xl border border-border text-center space-y-3">
         <MapPin className="w-10 h-10 text-slate-400 mx-auto" />
-        <h3 className="text-base font-black text-[#111311]">No Journey Selected</h3>
+        <h3 className="text-base font-semibold text-foreground">No Journey Selected</h3>
         <p className="text-xs text-slate-500 max-w-sm mx-auto">
           Please select a journey from the Active Journeys or Journey History list to view its live trail and stop status.
         </p>
@@ -247,25 +247,25 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
 
   if (loading) {
     return (
-      <div className="p-16 bg-white rounded-2xl border border-[#EAE4D5] text-center space-y-3">
-        <RotateCw className="w-8 h-8 text-[#1E3A8A] animate-spin mx-auto" />
-        <p className="text-xs font-bold text-slate-600">Loading live journey tracking data...</p>
+      <div className="p-16 bg-white rounded-xl border border-border text-center space-y-3">
+        <RotateCw className="w-8 h-8 text-primary animate-spin mx-auto" />
+        <p className="text-xs font-semibold text-slate-600">Loading live journey tracking data...</p>
       </div>
     );
   }
 
   if (error || !mapData) {
     return (
-      <div className="p-6 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 space-y-3">
+      <div className="p-6 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 space-y-3">
         <div className="flex items-center space-x-2">
           <AlertTriangle className="w-5 h-5 text-rose-600" />
-          <h3 className="text-sm font-bold">Failed to load journey map</h3>
+          <h3 className="text-sm font-semibold">Failed to load journey map</h3>
         </div>
         <p className="text-xs">{error || 'No map data available.'}</p>
         <button
           type="button"
           onClick={() => fetchMapData(journeyId)}
-          className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-bold hover:bg-rose-700"
+          className="px-3 py-1.5 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700"
         >
           Retry
         </button>
@@ -313,7 +313,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
           <button
             type="button"
             onClick={() => fetchMapData(journeyId)}
-            className="flex items-center space-x-1 px-2.5 py-1 bg-white border border-emerald-300 rounded-lg text-[11px] font-bold text-emerald-900 hover:bg-emerald-100"
+            className="flex items-center space-x-1 px-2.5 py-1 bg-white border border-emerald-300 rounded-lg text-[11px] font-semibold text-emerald-900 hover:bg-emerald-100"
           >
             <RotateCw className="w-3 h-3" />
             <span>Refresh Map</span>
@@ -331,53 +331,53 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
       </div>
 
       {/* Journey Header & Summary Metric Cards */}
-      <div className="p-5 bg-white rounded-2xl border border-[#EAE4D5] shadow-xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#EAE4D5] pb-3">
+      <div className="p-5 bg-white rounded-xl border border-border shadow-xs space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-3">
           <div>
-            <span className="text-[10px] font-black uppercase text-slate-500 tracking-wider">
+            <span className="text-[10px] font-semibold uppercase text-slate-500 tracking-wider">
               Journey Trail & Map
             </span>
             <div className="flex items-center space-x-2">
-              <h2 className="text-lg font-mono font-black text-[#1E3A8A]">
+              <h2 className="text-lg tabular-nums font-semibold text-primary">
                 #{journey.journey_number}
               </h2>
-              <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-[#1E3A8A] text-xs font-bold">
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-100 text-primary text-xs font-semibold">
                 {journey.status}
               </span>
             </div>
           </div>
           <div className="text-right text-xs text-slate-500">
             <div>
-              Route: <span className="font-bold text-slate-800">{journey.route?.name}</span> ({journey.route?.route_code})
+              Route: <span className="font-semibold text-slate-800">{journey.route?.name}</span> ({journey.route?.route_code})
             </div>
             <div>
-              MOT: <span className="font-bold text-slate-800">{journey.mot_profile?.name}</span> | Vehicle: <span className="font-bold text-slate-800">{journey.mot_vehicle?.vehicle_number}</span>
+              MOT: <span className="font-semibold text-slate-800">{journey.mot_profile?.name}</span> | Vehicle: <span className="font-semibold text-slate-800">{journey.mot_vehicle?.vehicle_number}</span>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          <div className="p-3 bg-[#FDFBF9] rounded-xl border border-[#EAE4D5]">
-            <span className="text-[10px] font-bold text-slate-500 uppercase block">Stops Visited</span>
-            <span className="text-sm font-black text-[#111311]">
+          <div className="p-3 bg-subtle rounded-xl border border-border">
+            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Stops Visited</span>
+            <span className="text-sm font-semibold text-foreground">
               {totals.visited_stops} / {totals.total_stops}
             </span>
           </div>
-          <div className="p-3 bg-[#FDFBF9] rounded-xl border border-[#EAE4D5]">
-            <span className="text-[10px] font-bold text-slate-500 uppercase block">Pending Stops</span>
-            <span className="text-sm font-black text-amber-600">{totals.pending_stops}</span>
+          <div className="p-3 bg-subtle rounded-xl border border-border">
+            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Pending Stops</span>
+            <span className="text-sm font-semibold text-amber-600">{totals.pending_stops}</span>
           </div>
-          <div className="p-3 bg-[#FDFBF9] rounded-xl border border-[#EAE4D5]">
-            <span className="text-[10px] font-bold text-slate-500 uppercase block">Total Gross Ltr</span>
-            <span className="text-sm font-black text-emerald-700">{totals.total_gross_liters} L</span>
+          <div className="p-3 bg-subtle rounded-xl border border-border">
+            <span className="text-[10px] font-semibold text-slate-500 uppercase block">Total Gross Ltr</span>
+            <span className="text-sm font-semibold text-emerald-700">{totals.total_gross_liters} L</span>
           </div>
-          <div className="p-3 bg-[#FDFBF9] rounded-xl border border-[#EAE4D5]">
-            <span className="text-[10px] font-bold text-slate-500 uppercase block">@13 TS Liters</span>
-            <span className="text-sm font-black text-emerald-700">{totals.total_at_13ts_liters} L</span>
+          <div className="p-3 bg-subtle rounded-xl border border-border">
+            <span className="text-[10px] font-semibold text-slate-500 uppercase block">@13 TS Liters</span>
+            <span className="text-sm font-semibold text-emerald-700">{totals.total_at_13ts_liters} L</span>
           </div>
-          <div className="p-3 bg-[#FDFBF9] rounded-xl border border-[#EAE4D5]">
-            <span className="text-[10px] font-bold text-slate-500 uppercase block">GPS Points / Sync</span>
-            <span className="text-xs font-bold text-slate-700">
+          <div className="p-3 bg-subtle rounded-xl border border-border">
+            <span className="text-[10px] font-semibold text-slate-500 uppercase block">GPS Points / Sync</span>
+            <span className="text-xs font-semibold text-slate-700">
               {totals.gps_point_count} pts
             </span>
             <span className="text-[10px] text-slate-400 block">
@@ -388,7 +388,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
       </div>
 
       {/* Interactive Map Visual (Schematic Canvas) */}
-      <div className="relative bg-slate-900 rounded-2xl border border-slate-800 overflow-hidden shadow-md">
+      <div className="relative bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-md">
         {/* Map Canvas / SVG */}
         <div className="w-full h-[480px] relative overflow-hidden flex items-center justify-center">
           {projection ? (
@@ -529,7 +529,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
           </div>
 
           {/* Endpoint Placeholder Status Badge */}
-          <div className="absolute top-3 right-3 bg-slate-800/90 backdrop-blur-xs border border-slate-700 px-3 py-1.5 rounded-xl text-[11px] font-bold text-slate-300">
+          <div className="absolute top-3 right-3 bg-slate-800/90 backdrop-blur-xs border border-slate-700 px-3 py-1.5 rounded-xl text-[11px] font-semibold text-slate-300">
             <span className="text-slate-400">Endpoint: </span>
             <span className="text-amber-400">{journey.endpoint_status}</span>
           </div>
@@ -540,14 +540,14 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
           <div className="p-4 bg-slate-800 border-t border-slate-700 text-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="space-y-1">
               <div className="flex items-center space-x-2">
-                <span className="px-2 py-0.5 bg-emerald-600 text-white rounded text-xs font-black">
+                <span className="px-2 py-0.5 bg-emerald-600 text-white rounded text-xs font-semibold">
                   Stop #{selectedStop.planned_sequence}
                 </span>
-                <span className="font-bold text-white text-sm">
+                <span className="font-semibold text-white text-sm">
                   {selectedStop.shop_name} ({selectedStop.shop_code})
                 </span>
                 <span
-                  className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                  className={`text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full ${
                     selectedStop.status === 'VISITED'
                       ? 'bg-emerald-900/60 text-emerald-300 border border-emerald-500'
                       : 'bg-amber-900/60 text-amber-300 border border-amber-500'
@@ -569,7 +569,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
             <button
               type="button"
               onClick={() => setSelectedStop(null)}
-              className="self-start sm:self-center px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-bold text-slate-200"
+              className="self-start sm:self-center px-3 py-1 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold text-slate-200"
             >
               Close Stop Info
             </button>
@@ -578,22 +578,22 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
       </div>
 
       {/* Stops List */}
-      <div className="p-4 bg-white rounded-2xl border border-[#EAE4D5] shadow-xs space-y-3">
-        <h3 className="text-xs font-black uppercase text-slate-500 tracking-wider">
+      <div className="p-4 bg-white rounded-xl border border-border shadow-xs space-y-3">
+        <h3 className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
           Journey Stops & Collections ({stops.length})
         </h3>
-        <div className="divide-y divide-[#EAE4D5]">
+        <div className="divide-y divide-border">
           {stops.map((s) => (
             <div
               key={s.id}
               onClick={() => setSelectedStop(s)}
-              className={`p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 cursor-pointer hover:bg-[#FDFBF9] rounded-xl transition-colors ${
+              className={`p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 cursor-pointer hover:bg-subtle rounded-xl transition-colors ${
                 selectedStop?.id === s.id ? 'bg-blue-50/50' : ''
               }`}
             >
               <div className="flex items-center space-x-3">
                 <span
-                  className={`w-6 h-6 rounded-full text-xs font-black flex items-center justify-center ${
+                  className={`w-6 h-6 rounded-full text-xs font-semibold flex items-center justify-center ${
                     s.status === 'VISITED'
                       ? 'bg-emerald-600 text-white'
                       : 'bg-amber-500 text-white'
@@ -602,8 +602,8 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
                   {s.planned_sequence}
                 </span>
                 <div>
-                  <p className="text-xs font-black text-[#111311]">
-                    {s.shop_name} <span className="font-mono text-slate-500">({s.shop_code})</span>
+                  <p className="text-xs font-semibold text-foreground">
+                    {s.shop_name} <span className="tabular-nums text-slate-500">({s.shop_code})</span>
                   </p>
                   <p className="text-[11px] text-slate-500">
                     {s.owner_name} &bull; {s.phone_number} &bull; {s.area_name}
@@ -614,7 +614,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
               <div className="flex items-center space-x-3 text-right">
                 {s.collection ? (
                   <div className="text-xs">
-                    <span className="font-black text-emerald-800">{s.collection.gross_liters} L</span>
+                    <span className="font-semibold text-emerald-800">{s.collection.gross_liters} L</span>
                     <span className="text-[10px] text-slate-500 block">
                       Fat {s.collection.fat}% &bull; LR {s.collection.lr}
                     </span>
@@ -623,7 +623,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
                   <span className="text-xs text-amber-700 font-medium">Pending Collection</span>
                 )}
                 <span
-                  className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                  className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                     s.status === 'VISITED'
                       ? 'bg-emerald-100 text-emerald-800'
                       : 'bg-amber-100 text-amber-800'

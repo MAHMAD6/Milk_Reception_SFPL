@@ -25,6 +25,7 @@ import {
 import { User } from '@core/types';
 import { ManagerJourneyMap } from './ManagerJourneyMap';
 import { SmsOutboxView } from './SmsOutboxView';
+import { Modal } from '@/components/ui/modal';
 
 export type MotWorkspaceTab =
   | 'DISPATCH'
@@ -632,13 +633,13 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
   return (
     <div className="space-y-5">
       {/* Header & ZMCC Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white rounded-2xl border border-[#EAE4D5] shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white rounded-xl border border-border shadow-xs">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-[#1E3A8A] text-white rounded-xl shadow-xs">
+          <div className="p-2.5 bg-primary text-white rounded-xl shadow-xs">
             <Truck className="w-5 h-5" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black text-[#111311] tracking-tight">
+            <h1 className="text-base sm:text-lg font-semibold text-foreground tracking-tight">
               MOT Operations & Dispatch
             </h1>
             <p className="text-xs text-slate-500 font-medium">
@@ -649,14 +650,14 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
         {isSuperAdmin && sources.length > 0 && (
           <div className="flex items-center space-x-2">
-            <label htmlFor="zmcc-select" className="text-xs font-bold text-slate-700 whitespace-nowrap">
+            <label htmlFor="zmcc-select" className="text-xs font-semibold text-slate-700 whitespace-nowrap">
               ZMCC Center:
             </label>
             <select
               id="zmcc-select"
               value={selectedZmccId}
               onChange={(e) => setSelectedZmccId(e.target.value)}
-              className="text-xs font-bold border border-[#EAE4D5] rounded-xl px-3 py-2 bg-[#FDFBF9] text-[#111311] focus:ring-2 focus:ring-[#1E3A8A] focus:outline-none"
+              className="text-xs font-semibold border border-border rounded-xl px-3 py-2 bg-subtle text-foreground focus:ring-2 focus:ring-primary focus:outline-none"
             >
               {sources.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -670,7 +671,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* Notifications */}
       {error && (
-        <div className="flex items-center justify-between p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold">
+        <div className="flex items-center justify-between p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold">
           <div className="flex items-center space-x-2">
             <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
@@ -686,7 +687,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       )}
 
       {successMessage && (
-        <div className="flex items-center justify-between p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold">
+        <div className="flex items-center justify-between p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold">
           <div className="flex items-center space-x-2">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
             <span>{successMessage}</span>
@@ -703,7 +704,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* Tabs */}
       {!hideTabBar && (
-        <div className="flex flex-wrap gap-1.5 p-1.5 bg-[#F4F0E6]/50 rounded-2xl border border-[#EAE4D5]">
+        <div className="flex flex-wrap gap-1.5 p-1.5 bg-muted/50 rounded-xl border border-border">
           {permittedTabs.map((tab) => {
             const IconComp = tab.icon;
             const isActive = activeTab === tab.id;
@@ -716,10 +717,10 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                   setError(null);
                   setSuccessMessage(null);
                 }}
-                className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-black transition-all ${
+                className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? 'bg-[#1E3A8A] text-white shadow-xs'
-                    : 'bg-transparent text-slate-700 hover:bg-white/80 hover:text-[#111311]'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'bg-transparent text-slate-700 hover:bg-white/80 hover:text-foreground'
                 }`}
               >
                 <IconComp className="w-4 h-4" />
@@ -734,15 +735,15 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       {activeTab === 'DISPATCH' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Dispatch Form */}
-          <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-[#EAE4D5] shadow-xs space-y-4">
-            <div className="flex items-center justify-between border-b border-[#EAE4D5] pb-3">
+          <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-border shadow-xs space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h2 className="text-sm font-black text-[#111311]">Physical Assign & Departure</h2>
+                <h2 className="text-sm font-semibold text-foreground">Physical Assign & Departure</h2>
                 <p className="text-xs text-slate-500 font-medium">
                   Assign MOT driver and vehicle when physically ready to depart for milk collection.
                 </p>
               </div>
-              <span className="px-2.5 py-1 rounded-full bg-blue-100 text-[#1E3A8A] text-[10px] font-black uppercase">
+              <span className="px-2.5 py-1 rounded-full bg-blue-100 text-primary text-[10px] font-semibold uppercase">
                 Immediate Departure
               </span>
             </div>
@@ -750,13 +751,13 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             <form onSubmit={handleAssignAndDispatch} className="space-y-4">
               {/* Route Selection */}
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Assigned Route <span className="text-rose-600">*</span>
                 </label>
                 <select
                   value={dispatchRouteId}
                   onChange={(e) => setDispatchRouteId(e.target.value)}
-                  className="w-full text-xs font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9] text-[#111311] focus:ring-2 focus:ring-[#1E3A8A]"
+                  className="w-full text-xs font-semibold border border-border rounded-xl p-2.5 bg-subtle text-foreground focus:ring-2 focus:ring-primary"
                   required
                 >
                   <option value="">-- Select Collection Route --</option>
@@ -775,13 +776,13 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
               {/* MOT Profile (Driver) */}
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   MOT Driver / Operator <span className="text-rose-600">*</span>
                 </label>
                 <select
                   value={dispatchProfileId}
                   onChange={(e) => setDispatchProfileId(e.target.value)}
-                  className="w-full text-xs font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9] text-[#111311] focus:ring-2 focus:ring-[#1E3A8A]"
+                  className="w-full text-xs font-semibold border border-border rounded-xl p-2.5 bg-subtle text-foreground focus:ring-2 focus:ring-primary"
                   required
                 >
                   <option value="">-- Select MOT Driver --</option>
@@ -800,13 +801,13 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
               {/* Vehicle Selection */}
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Collection Vehicle <span className="text-rose-600">*</span>
                 </label>
                 <select
                   value={dispatchVehicleId}
                   onChange={(e) => setDispatchVehicleId(e.target.value)}
-                  className="w-full text-xs font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9] text-[#111311] focus:ring-2 focus:ring-[#1E3A8A]"
+                  className="w-full text-xs font-semibold border border-border rounded-xl p-2.5 bg-subtle text-foreground focus:ring-2 focus:ring-primary"
                   required
                 >
                   <option value="">-- Select Vehicle --</option>
@@ -824,11 +825,11 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               </div>
 
               {/* GPS Coordinates Display & Trigger */}
-              <div className="p-3.5 rounded-xl border border-[#EAE4D5] bg-[#FDFBF9] space-y-2">
+              <div className="p-3.5 rounded-xl border border-border bg-subtle space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <MapPin className="w-4 h-4 text-[#1E3A8A]" />
-                    <span className="text-xs font-black text-[#111311]">
+                    <MapPin className="w-4 h-4 text-primary" />
+                    <span className="text-xs font-semibold text-foreground">
                       Assigning User GPS Coordinates
                     </span>
                   </div>
@@ -836,7 +837,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                     type="button"
                     onClick={acquireGps}
                     disabled={gpsStatus === 'ACQUIRING'}
-                    className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-[#EAE4D5] text-[11px] font-bold text-slate-700 hover:bg-[#F4F0E6]"
+                    className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-border text-[11px] font-semibold text-slate-700 hover:bg-muted"
                   >
                     <RotateCw className={`w-3 h-3 ${gpsStatus === 'ACQUIRING' ? 'animate-spin' : ''}`} />
                     <span>{gpsStatus === 'ACQUIRING' ? 'Acquiring...' : 'Refresh GPS'}</span>
@@ -844,7 +845,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                 </div>
 
                 {gpsStatus === 'SUCCESS' && gpsLocation && (
-                  <div className="flex items-center space-x-2 text-xs font-mono text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+                  <div className="flex items-center space-x-2 text-xs tabular-nums text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>
                       Lat: {gpsLocation.latitude.toFixed(6)}, Lng: {gpsLocation.longitude.toFixed(6)}
@@ -868,7 +869,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               <button
                 type="submit"
                 disabled={actionLoading || !gpsLocation || !dispatchRouteId || !dispatchProfileId || !dispatchVehicleId}
-                className="w-full min-h-[44px] flex items-center justify-center space-x-2 px-4 py-3 rounded-xl bg-[#1E3A8A] text-white text-xs font-black hover:bg-[#1E3A8A]/90 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full min-h-[44px] flex items-center justify-center space-x-2 px-4 py-3 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Send className="w-4 h-4" />
                 <span>{actionLoading ? 'Assigning & Dispatching...' : 'Assign & Dispatch (Begin Journey)'}</span>
@@ -877,31 +878,31 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
           </div>
 
           {/* Quick Rules & Architecture info panel */}
-          <div className="bg-white p-5 rounded-2xl border border-[#EAE4D5] shadow-xs space-y-3 h-fit">
-            <h3 className="text-xs font-black uppercase text-[#111311] tracking-wider">
+          <div className="bg-white p-5 rounded-xl border border-border shadow-xs space-y-3 h-fit">
+            <h3 className="text-xs font-semibold uppercase text-foreground tracking-wider">
               Operational Rules
             </h3>
             <ul className="text-xs text-slate-600 space-y-2 font-medium">
               <li className="flex items-start space-x-2">
-                <span className="text-[#1E3A8A] font-bold">•</span>
+                <span className="text-primary font-semibold">•</span>
                 <span>
                   <strong>No Accept Button:</strong> The MOT journey immediately transitions to <code>COLLECTING</code> upon dispatch.
                 </span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-[#1E3A8A] font-bold">•</span>
+                <span className="text-primary font-semibold">•</span>
                 <span>
                   <strong>Shop Snapshot:</strong> All active shops on the selected route are frozen into planned stops in stable sequence.
                 </span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-[#1E3A8A] font-bold">•</span>
+                <span className="text-primary font-semibold">•</span>
                 <span>
                   <strong>Single Active Journey:</strong> Neither the MOT Driver nor the Vehicle can have multiple concurrent active journeys.
                 </span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-[#1E3A8A] font-bold">•</span>
+                <span className="text-primary font-semibold">•</span>
                 <span>
                   <strong>Cancellation:</strong> Only Super Admin or the assigned ZMCC Manager can cancel a journey with a mandatory reason.
                 </span>
@@ -913,10 +914,10 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 2: ACTIVE JOURNEYS */}
       {activeTab === 'ACTIVE_JOURNEYS' && (
-        <div className="bg-white rounded-2xl border border-[#EAE4D5] shadow-xs overflow-hidden">
-          <div className="p-4 border-b border-[#EAE4D5] flex items-center justify-between">
+        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden">
+          <div className="p-4 border-b border-border flex items-center justify-between">
             <div>
-              <h2 className="text-sm font-black text-[#111311]">Active Collection Journeys</h2>
+              <h2 className="text-sm font-semibold text-foreground">Active Collection Journeys</h2>
               <p className="text-xs text-slate-500 font-medium">
                 Journeys currently in progress (<code>COLLECTING</code>).
               </p>
@@ -924,7 +925,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             <button
               type="button"
               onClick={loadData}
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 hover:bg-[#F4F0E6]"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
             >
               <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh</span>
@@ -932,15 +933,15 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">Loading active journeys...</div>
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">Loading active journeys...</div>
           ) : journeys.length === 0 ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">
               No active journeys currently in progress.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#F4F0E6]/60 text-slate-700 uppercase font-black tracking-wider text-[10px] border-b border-[#EAE4D5]">
+                <thead className="bg-muted/60 text-slate-700 uppercase font-semibold tracking-wider text-[10px] border-b border-border">
                   <tr>
                     <th className="p-3">Journey #</th>
                     <th className="p-3">Route</th>
@@ -952,22 +953,22 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                     <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAE4D5]">
+                <tbody className="divide-y divide-border">
                   {journeys.map((j) => (
-                    <tr key={j.id} className="hover:bg-[#FDFBF9]">
-                      <td className="p-3 font-mono font-black text-[#1E3A8A]">
+                    <tr key={j.id} className="hover:bg-subtle">
+                      <td className="p-3 tabular-nums font-semibold text-primary">
                         {j.journey_number}
                       </td>
-                      <td className="p-3 font-bold text-[#111311]">
+                      <td className="p-3 font-semibold text-foreground">
                         {j.route?.route_code} — {j.route?.name}
                       </td>
-                      <td className="p-3 font-bold text-[#111311]">
+                      <td className="p-3 font-semibold text-foreground">
                         {j.mot_profile?.name} ({j.mot_profile?.mot_code})
                       </td>
-                      <td className="p-3 font-mono font-bold text-slate-700">
+                      <td className="p-3 tabular-nums font-semibold text-slate-700">
                         {j.mot_vehicle?.vehicle_number}
                       </td>
-                      <td className="p-3 font-bold text-slate-700">
+                      <td className="p-3 font-semibold text-slate-700">
                         {j.total_stops != null ? `${j.total_stops} shops` : '—'}
                       </td>
                       <td className="p-3 font-medium text-slate-600">
@@ -981,14 +982,14 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                             setSelectedMapJourneyId(j.id);
                             setActiveTab('JOURNEY_MAP');
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-black hover:bg-emerald-100"
+                          className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-semibold hover:bg-emerald-100"
                         >
                           View Map
                         </button>
                         <button
                           type="button"
                           onClick={() => handleInspectJourney(j.id)}
-                          className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#1E3A8A] font-black hover:bg-blue-100"
+                          className="px-2.5 py-1 rounded-lg bg-blue-50 text-primary font-semibold hover:bg-blue-100"
                         >
                           View Stops
                         </button>
@@ -999,7 +1000,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                               setCancelModalJourney(j);
                               setCancelReason('');
                             }}
-                            className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-black hover:bg-rose-100"
+                            className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold hover:bg-rose-100"
                           >
                             Cancel
                           </button>
@@ -1016,17 +1017,17 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 3: JOURNEY HISTORY */}
       {activeTab === 'JOURNEY_HISTORY' && (
-        <div className="bg-white rounded-2xl border border-[#EAE4D5] shadow-xs overflow-hidden space-y-3">
-          <div className="p-4 border-b border-[#EAE4D5] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden space-y-3">
+          <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-sm font-black text-[#111311]">Journey Historical Ledger</h2>
+              <h2 className="text-sm font-semibold text-foreground">Journey Historical Ledger</h2>
               <p className="text-xs text-slate-500 font-medium">All historical dispatches and journey outcomes.</p>
             </div>
             <div className="flex items-center space-x-2">
               <select
                 value={historyStatusFilter}
                 onChange={(e) => setHistoryStatusFilter(e.target.value)}
-                className="text-xs font-bold border border-[#EAE4D5] rounded-xl px-3 py-1.5 bg-[#FDFBF9] text-[#111311]"
+                className="text-xs font-semibold border border-border rounded-xl px-3 py-1.5 bg-subtle text-foreground"
               >
                 <option value="all">All Statuses</option>
                 <option value="COLLECTING">Collecting</option>
@@ -1036,7 +1037,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={loadData}
-                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 hover:bg-[#F4F0E6]"
+                className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
               >
                 <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
@@ -1045,13 +1046,13 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">Loading journey history...</div>
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">Loading journey history...</div>
           ) : journeys.length === 0 ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">No journeys recorded.</div>
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">No journeys recorded.</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#F4F0E6]/60 text-slate-700 uppercase font-black tracking-wider text-[10px] border-b border-[#EAE4D5]">
+                <thead className="bg-muted/60 text-slate-700 uppercase font-semibold tracking-wider text-[10px] border-b border-border">
                   <tr>
                     <th className="p-3">Journey #</th>
                     <th className="p-3">Date</th>
@@ -1064,17 +1065,17 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                     <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAE4D5]">
+                <tbody className="divide-y divide-border">
                   {journeys.map((j) => (
-                    <tr key={j.id} className="hover:bg-[#FDFBF9]">
-                      <td className="p-3 font-mono font-black text-[#1E3A8A]">{j.journey_number}</td>
+                    <tr key={j.id} className="hover:bg-subtle">
+                      <td className="p-3 tabular-nums font-semibold text-primary">{j.journey_number}</td>
                       <td className="p-3 font-medium text-slate-600">{j.operational_date}</td>
-                      <td className="p-3 font-bold text-[#111311]">{j.route?.route_code}</td>
-                      <td className="p-3 font-bold text-[#111311]">{j.mot_profile?.name}</td>
-                      <td className="p-3 font-mono font-bold text-slate-700">{j.mot_vehicle?.vehicle_number}</td>
+                      <td className="p-3 font-semibold text-foreground">{j.route?.route_code}</td>
+                      <td className="p-3 font-semibold text-foreground">{j.mot_profile?.name}</td>
+                      <td className="p-3 tabular-nums font-semibold text-slate-700">{j.mot_vehicle?.vehicle_number}</td>
                       <td className="p-3">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                             j.status === 'COLLECTING'
                               ? 'bg-blue-100 text-blue-800'
                               : j.status === 'COMPLETED'
@@ -1104,14 +1105,14 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                             setSelectedMapJourneyId(j.id);
                             setActiveTab('JOURNEY_MAP');
                           }}
-                          className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-black hover:bg-emerald-100"
+                          className="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-semibold hover:bg-emerald-100"
                         >
                           View Map
                         </button>
                         <button
                           type="button"
                           onClick={() => handleInspectJourney(j.id)}
-                          className="px-2.5 py-1 rounded-lg bg-blue-50 text-[#1E3A8A] font-black hover:bg-blue-100"
+                          className="px-2.5 py-1 rounded-lg bg-blue-50 text-primary font-semibold hover:bg-blue-100"
                         >
                           View Stops
                         </button>
@@ -1128,15 +1129,15 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       {/* TAB: LIVE JOURNEY MAP */}
       {activeTab === 'JOURNEY_MAP' && (
         <div className="space-y-4">
-          <div className="p-3 bg-white rounded-xl border border-[#EAE4D5] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="p-3 bg-white rounded-xl border border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center space-x-2">
-              <label className="text-xs font-bold text-slate-700 whitespace-nowrap">
+              <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
                 Select Journey:
               </label>
               <select
                 value={selectedMapJourneyId || ''}
                 onChange={(e) => setSelectedMapJourneyId(e.target.value)}
-                className="text-xs font-bold border border-[#EAE4D5] rounded-xl px-3 py-1.5 bg-[#FDFBF9] text-[#111311]"
+                className="text-xs font-semibold border border-border rounded-xl px-3 py-1.5 bg-subtle text-foreground"
               >
                 <option value="">-- Choose Journey --</option>
                 {journeys.map((j) => (
@@ -1149,7 +1150,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             <button
               type="button"
               onClick={loadData}
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 hover:bg-[#F4F0E6]"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
             >
               <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh Journeys</span>
@@ -1171,10 +1172,10 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 4: MOT PROFILES (SUPER ADMIN & ZMCC MANAGER ONLY) */}
       {activeTab === 'PROFILES' && !isPheOperator && (
-        <div className="bg-white rounded-2xl border border-[#EAE4D5] shadow-xs overflow-hidden space-y-3">
-          <div className="p-4 border-b border-[#EAE4D5] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden space-y-3">
+          <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-sm font-black text-[#111311]">MOT Drivers & Profiles</h2>
+              <h2 className="text-sm font-semibold text-foreground">MOT Drivers & Profiles</h2>
               <p className="text-xs text-slate-500 font-medium">
                 Manage registered Milk Operators / Transporters for this ZMCC.
               </p>
@@ -1182,7 +1183,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             <button
               type="button"
               onClick={() => handleOpenProfileModal()}
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-[#1E3A8A] text-white text-xs font-black hover:bg-[#1E3A8A]/90 transition"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition"
             >
               <Plus className="w-4 h-4" />
               <span>Add MOT Profile</span>
@@ -1190,15 +1191,15 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">Loading profiles...</div>
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">Loading profiles...</div>
           ) : profiles.length === 0 ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">
               No MOT profiles registered for this ZMCC.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#F4F0E6]/60 text-slate-700 uppercase font-black tracking-wider text-[10px] border-b border-[#EAE4D5]">
+                <thead className="bg-muted/60 text-slate-700 uppercase font-semibold tracking-wider text-[10px] border-b border-border">
                   <tr>
                     <th className="p-3">MOT Code</th>
                     <th className="p-3">Name</th>
@@ -1210,19 +1211,19 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                     <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAE4D5]">
+                <tbody className="divide-y divide-border">
                   {profiles.map((p) => (
-                    <tr key={p.id} className="hover:bg-[#FDFBF9]">
-                      <td className="p-3 font-mono font-black text-[#1E3A8A]">{p.mot_code}</td>
-                      <td className="p-3 font-bold text-[#111311]">{p.name}</td>
+                    <tr key={p.id} className="hover:bg-subtle">
+                      <td className="p-3 tabular-nums font-semibold text-primary">{p.mot_code}</td>
+                      <td className="p-3 font-semibold text-foreground">{p.name}</td>
                       <td className="p-3 font-medium text-slate-700">{p.phone_number}</td>
-                      <td className="p-3 font-mono text-slate-600">{p.cnic}</td>
+                      <td className="p-3 tabular-nums text-slate-600">{p.cnic}</td>
                       <td className="p-3 text-slate-600 font-medium">
                         {p.user ? `@${p.user.username}` : <span className="text-slate-400">Unlinked</span>}
                       </td>
                       <td className="p-3">
                         {p.has_active_journey ? (
-                          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black">
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold">
                             #{p.active_journey?.journey_number}
                           </span>
                         ) : (
@@ -1231,7 +1232,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                       </td>
                       <td className="p-3">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                             p.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'
                           }`}
                         >
@@ -1242,7 +1243,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenProfileModal(p)}
-                          className="px-2.5 py-1 rounded-lg bg-[#F4F0E6] text-slate-800 font-bold hover:bg-[#EAE4D5]"
+                          className="px-2.5 py-1 rounded-lg bg-muted text-slate-800 font-semibold hover:bg-border"
                         >
                           Edit
                         </button>
@@ -1250,7 +1251,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                           type="button"
                           onClick={() => handleToggleProfileActive(p)}
                           disabled={p.has_active_journey && p.is_active}
-                          className={`px-2.5 py-1 rounded-lg font-bold ${
+                          className={`px-2.5 py-1 rounded-lg font-semibold ${
                             p.is_active
                               ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 disabled:opacity-50'
                               : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
@@ -1270,16 +1271,16 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 5: MOT VEHICLES (SUPER ADMIN & ZMCC MANAGER ONLY) */}
       {activeTab === 'VEHICLES' && !isPheOperator && (
-        <div className="bg-white rounded-2xl border border-[#EAE4D5] shadow-xs overflow-hidden space-y-3">
-          <div className="p-4 border-b border-[#EAE4D5] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden space-y-3">
+          <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
-              <h2 className="text-sm font-black text-[#111311]">MOT Vehicles Fleet</h2>
+              <h2 className="text-sm font-semibold text-foreground">MOT Vehicles Fleet</h2>
               <p className="text-xs text-slate-500 font-medium">Manage collection vehicles for this ZMCC.</p>
             </div>
             <button
               type="button"
               onClick={() => handleOpenVehicleModal()}
-              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-[#1E3A8A] text-white text-xs font-black hover:bg-[#1E3A8A]/90 transition"
+              className="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition"
             >
               <Plus className="w-4 h-4" />
               <span>Add Vehicle</span>
@@ -1287,15 +1288,15 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
           </div>
 
           {loading ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">Loading vehicles...</div>
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">Loading vehicles...</div>
           ) : vehicles.length === 0 ? (
-            <div className="p-8 text-center text-xs font-bold text-slate-500">
+            <div className="p-8 text-center text-xs font-semibold text-slate-500">
               No MOT vehicles registered for this ZMCC.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#F4F0E6]/60 text-slate-700 uppercase font-black tracking-wider text-[10px] border-b border-[#EAE4D5]">
+                <thead className="bg-muted/60 text-slate-700 uppercase font-semibold tracking-wider text-[10px] border-b border-border">
                   <tr>
                     <th className="p-3">Vehicle Number</th>
                     <th className="p-3">ZMCC Center</th>
@@ -1304,14 +1305,14 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                     <th className="p-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAE4D5]">
+                <tbody className="divide-y divide-border">
                   {vehicles.map((v) => (
-                    <tr key={v.id} className="hover:bg-[#FDFBF9]">
-                      <td className="p-3 font-mono font-black text-[#1E3A8A]">{v.vehicle_number}</td>
+                    <tr key={v.id} className="hover:bg-subtle">
+                      <td className="p-3 tabular-nums font-semibold text-primary">{v.vehicle_number}</td>
                       <td className="p-3 font-medium text-slate-700">{v.zmcc?.name}</td>
                       <td className="p-3">
                         {v.has_active_journey ? (
-                          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black">
+                          <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-semibold">
                             #{v.active_journey?.journey_number}
                           </span>
                         ) : (
@@ -1320,7 +1321,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                       </td>
                       <td className="p-3">
                         <span
-                          className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                          className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                             v.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'
                           }`}
                         >
@@ -1331,7 +1332,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                         <button
                           type="button"
                           onClick={() => handleOpenVehicleModal(v)}
-                          className="px-2.5 py-1 rounded-lg bg-[#F4F0E6] text-slate-800 font-bold hover:bg-[#EAE4D5]"
+                          className="px-2.5 py-1 rounded-lg bg-muted text-slate-800 font-semibold hover:bg-border"
                         >
                           Edit
                         </button>
@@ -1339,7 +1340,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                           type="button"
                           onClick={() => handleToggleVehicleActive(v)}
                           disabled={v.has_active_journey && v.is_active}
-                          className={`px-2.5 py-1 rounded-lg font-bold ${
+                          className={`px-2.5 py-1 rounded-lg font-semibold ${
                             v.is_active
                               ? 'bg-rose-50 text-rose-700 hover:bg-rose-100 disabled:opacity-50'
                               : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
@@ -1359,11 +1360,10 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* DETAIL MODAL: JOURNEY STOPS & LOCATIONS */}
       {selectedJourneyDetail && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl border border-[#EAE4D5] max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#EAE4D5] pb-3">
+        <Modal onClose={() => setSelectedJourneyDetail(null)} title="Journey details" closeOnOutsideClick className="max-w-2xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-black text-[#111311]">
+                <h3 className="text-base font-semibold text-foreground">
                   Journey #{selectedJourneyDetail.journey_number} — Planned Stops
                 </h3>
                 <p className="text-xs text-slate-500 font-medium">
@@ -1373,83 +1373,83 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedJourneyDetail(null)}
-                className="p-1 rounded-lg border border-[#EAE4D5] text-slate-500 hover:bg-[#F4F0E6]"
+                className="p-1 rounded-lg border border-border text-slate-500 hover:bg-muted"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {selectedJourneyDetail.summary && (
-              <div className="p-4 rounded-xl bg-slate-50 border border-[#EAE4D5] space-y-3">
+              <div className="p-4 rounded-xl bg-slate-50 border border-border space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black uppercase tracking-wider text-slate-700">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-slate-700">
                     MOT Journey Final Summary (v{selectedJourneyDetail.summary.summary_version} — Rev #{selectedJourneyDetail.summary.revision})
                   </span>
-                  <span className="text-[11px] font-bold text-slate-500">
+                  <span className="text-[11px] font-semibold text-slate-500">
                     Ended: {new Date(selectedJourneyDetail.summary.journey_ended_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} PKT
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-slate-500">Assigned Shops</div>
-                    <div className="text-sm font-black text-slate-900">{selectedJourneyDetail.summary.assigned_shop_count}</div>
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-slate-500">Assigned Shops</div>
+                    <div className="text-sm font-semibold text-slate-900">{selectedJourneyDetail.summary.assigned_shop_count}</div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-emerald-700">Collected Shops</div>
-                    <div className="text-sm font-black text-emerald-800">{selectedJourneyDetail.summary.collected_shop_count}</div>
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-emerald-700">Collected Shops</div>
+                    <div className="text-sm font-semibold text-emerald-800">{selectedJourneyDetail.summary.collected_shop_count}</div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-amber-700">Skipped Shops</div>
-                    <div className="text-sm font-black text-amber-800">{selectedJourneyDetail.summary.skipped_shop_count}</div>
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-amber-700">Skipped Shops</div>
+                    <div className="text-sm font-semibold text-amber-800">{selectedJourneyDetail.summary.skipped_shop_count}</div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-blue-700">Pending Sync</div>
-                    <div className="text-sm font-black text-blue-800">{selectedJourneyDetail.summary.pending_shop_count}</div>
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-blue-700">Pending Sync</div>
+                    <div className="text-sm font-semibold text-blue-800">{selectedJourneyDetail.summary.pending_shop_count}</div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-6 gap-2 text-center">
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-slate-500">Gross Liters</div>
-                    <div className="text-xs font-mono font-black text-slate-900">
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-slate-500">Gross Liters</div>
+                    <div className="text-xs tabular-nums font-semibold text-slate-900">
                       {selectedJourneyDetail.summary.total_gross_liters.toFixed(2)} L
                     </div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-slate-500">@13TS Liters</div>
-                    <div className="text-xs font-mono font-black text-slate-900">
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-slate-500">@13TS Liters</div>
+                    <div className="text-xs tabular-nums font-semibold text-slate-900">
                       {selectedJourneyDetail.summary.total_at_13ts_liters.toFixed(2)} L
                     </div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-slate-500">Weighted LR</div>
-                    <div className="text-xs font-mono font-black text-slate-800">
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-slate-500">Weighted LR</div>
+                    <div className="text-xs tabular-nums font-semibold text-slate-800">
                       {selectedJourneyDetail.summary.weighted_avg_lr != null ? selectedJourneyDetail.summary.weighted_avg_lr.toFixed(2) : '—'}
                     </div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-slate-500">Weighted Fat</div>
-                    <div className="text-xs font-mono font-black text-slate-800">
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-slate-500">Weighted Fat</div>
+                    <div className="text-xs tabular-nums font-semibold text-slate-800">
                       {selectedJourneyDetail.summary.weighted_avg_fat != null ? `${selectedJourneyDetail.summary.weighted_avg_fat.toFixed(2)}%` : '—'}
                     </div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-slate-500">Weighted SNF</div>
-                    <div className="text-xs font-mono font-black text-slate-800">
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-slate-500">Weighted SNF</div>
+                    <div className="text-xs tabular-nums font-semibold text-slate-800">
                       {selectedJourneyDetail.summary.weighted_avg_snf != null ? `${selectedJourneyDetail.summary.weighted_avg_snf.toFixed(2)}%` : '—'}
                     </div>
                   </div>
-                  <div className="p-2 bg-white rounded-lg border border-[#EAE4D5]">
-                    <div className="text-[10px] uppercase font-bold text-slate-500">Weighted TS</div>
-                    <div className="text-xs font-mono font-black text-slate-800">
+                  <div className="p-2 bg-white rounded-lg border border-border">
+                    <div className="text-[10px] uppercase font-semibold text-slate-500">Weighted TS</div>
+                    <div className="text-xs tabular-nums font-semibold text-slate-800">
                       {selectedJourneyDetail.summary.weighted_avg_ts != null ? `${selectedJourneyDetail.summary.weighted_avg_ts.toFixed(2)}%` : '—'}
                     </div>
                   </div>
                 </div>
 
                 {selectedJourneyDetail.summary.pending_shop_count > 0 && (
-                  <div className="flex items-center space-x-2 text-[11px] font-bold text-blue-800 bg-blue-50 p-2.5 rounded-lg border border-blue-200">
+                  <div className="flex items-center space-x-2 text-[11px] font-semibold text-blue-800 bg-blue-50 p-2.5 rounded-lg border border-blue-200">
                     <Clock className="w-4 h-4 shrink-0 text-blue-600" />
                     <span>
                       Waiting for delayed collection sync: {selectedJourneyDetail.summary.pending_shop_count} assigned shop record(s) are still unresolved.
@@ -1460,21 +1460,21 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             )}
 
             <div className="space-y-3">
-              <h4 className="text-xs font-black uppercase tracking-wider text-[#111311]">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
                 Frozen Route Stops ({selectedJourneyDetail.stops?.length || 0} shops)
               </h4>
               <div className="space-y-2">
                 {(selectedJourneyDetail.stops || []).map((stop) => (
                   <div
                     key={stop.id}
-                    className="flex items-center justify-between p-3 rounded-xl border border-[#EAE4D5] bg-[#FDFBF9]"
+                    className="flex items-center justify-between p-3 rounded-xl border border-border bg-subtle"
                   >
                     <div className="flex items-center space-x-3">
-                      <span className="w-6 h-6 rounded-full bg-[#1E3A8A] text-white text-xs font-black flex items-center justify-center">
+                      <span className="w-6 h-6 rounded-full bg-primary text-white text-xs font-semibold flex items-center justify-center">
                         {stop.planned_sequence}
                       </span>
                       <div>
-                        <p className="text-xs font-black text-[#111311]">
+                        <p className="text-xs font-semibold text-foreground">
                           {stop.shop?.shop_name} ({stop.shop?.shop_code})
                         </p>
                         <p className="text-[11px] text-slate-500">
@@ -1483,7 +1483,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                       </div>
                     </div>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${
+                      className={`px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase ${
                         stop.status === 'VISITED'
                           ? 'bg-emerald-100 text-emerald-800'
                           : stop.status === 'SKIPPED'
@@ -1502,22 +1502,20 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedJourneyDetail(null)}
-                className="px-4 py-2 rounded-xl bg-[#1E3A8A] text-white text-xs font-black"
+                className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold"
               >
                 Close
               </button>
             </div>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* CANCELLATION MODAL */}
       {cancelModalJourney && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl border border-[#EAE4D5]">
+        <Modal onClose={() => setCancelModalJourney(null)} title="Cancel collection journey" className="max-w-md p-5 space-y-4">
             <div className="flex items-center space-x-2 text-rose-700">
               <Ban className="w-5 h-5" />
-              <h3 className="text-sm font-black">Cancel Collection Journey</h3>
+              <h3 className="text-sm font-semibold">Cancel Collection Journey</h3>
             </div>
             <p className="text-xs text-slate-600 font-medium">
               You are cancelling active Journey <strong>#{cancelModalJourney.journey_number}</strong>. This operation is authoritative and cannot be undone.
@@ -1525,14 +1523,14 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
             <form onSubmit={handleCancelSubmit} className="space-y-3">
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">
+                <label className="block text-xs font-semibold text-foreground mb-1">
                   Reason for Cancellation <span className="text-rose-600">*</span>
                 </label>
                 <textarea
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="e.g. Mechanical breakdown, road blockage, vehicle swap required..."
-                  className="w-full text-xs font-medium border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9] text-[#111311] focus:ring-2 focus:ring-rose-500"
+                  className="w-full text-xs font-medium border border-border rounded-xl p-2.5 bg-subtle text-foreground focus:ring-2 focus:ring-rose-500"
                   rows={3}
                   required
                 />
@@ -1542,78 +1540,76 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={() => setCancelModalJourney(null)}
-                  className="px-3 py-2 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 hover:bg-[#F4F0E6]"
+                  className="px-3 py-2 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading || !cancelReason.trim()}
-                  className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-black hover:bg-rose-700 disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-rose-600 text-white text-xs font-semibold hover:bg-rose-700 disabled:opacity-50"
                 >
                   {actionLoading ? 'Cancelling...' : 'Confirm Cancellation'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* PROFILE CREATE/EDIT MODAL */}
       {profileModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl border border-[#EAE4D5]">
-            <h3 className="text-sm font-black text-[#111311]">
+        <Modal onClose={() => setProfileModalOpen(false)} title="MOT driver profile" className="max-w-md p-5 space-y-4">
+            <h3 className="text-sm font-semibold text-foreground">
               {editingProfile ? 'Edit MOT Profile' : 'New MOT Driver Profile'}
             </h3>
 
             <form onSubmit={handleSaveProfile} className="space-y-3">
               {!editingProfile && (
                 <div>
-                  <label className="block text-xs font-black text-[#111311] mb-1">MOT Code *</label>
+                  <label className="block text-xs font-semibold text-foreground mb-1">MOT Code *</label>
                   <input
                     type="text"
                     value={profileForm.mot_code}
                     onChange={(e) => setProfileForm({ ...profileForm, mot_code: e.target.value })}
                     placeholder="e.g. MOT-001"
-                    className="w-full text-xs font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9]"
+                    className="w-full text-xs font-semibold border border-border rounded-xl p-2.5 bg-subtle"
                     required
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">Driver Full Name *</label>
+                <label className="block text-xs font-semibold text-foreground mb-1">Driver Full Name *</label>
                 <input
                   type="text"
                   value={profileForm.name}
                   onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
                   placeholder="e.g. Muhammad Aslam"
-                  className="w-full text-xs font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9]"
+                  className="w-full text-xs font-semibold border border-border rounded-xl p-2.5 bg-subtle"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">Phone Number *</label>
+                <label className="block text-xs font-semibold text-foreground mb-1">Phone Number *</label>
                 <input
                   type="text"
                   value={profileForm.phone_number}
                   onChange={(e) => setProfileForm({ ...profileForm, phone_number: e.target.value })}
                   placeholder="0300-1234567"
-                  className="w-full text-xs font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9]"
+                  className="w-full text-xs font-semibold border border-border rounded-xl p-2.5 bg-subtle"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">CNIC Number *</label>
+                <label className="block text-xs font-semibold text-foreground mb-1">CNIC Number *</label>
                 <input
                   type="text"
                   value={profileForm.cnic}
                   onChange={(e) => setProfileForm({ ...profileForm, cnic: e.target.value })}
                   placeholder="35201-1234567-1"
-                  className="w-full text-xs font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9]"
+                  className="w-full text-xs font-semibold border border-border rounded-xl p-2.5 bg-subtle"
                   required
                 />
               </div>
@@ -1622,40 +1618,38 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={() => setProfileModalOpen(false)}
-                  className="px-3 py-2 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 hover:bg-[#F4F0E6]"
+                  className="px-3 py-2 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-4 py-2 rounded-xl bg-[#1E3A8A] text-white text-xs font-black hover:bg-[#1E3A8A]/90 disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Save Profile'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* VEHICLE CREATE/EDIT MODAL */}
       {vehicleModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-md w-full p-5 space-y-4 shadow-2xl border border-[#EAE4D5]">
-            <h3 className="text-sm font-black text-[#111311]">
+        <Modal onClose={() => setVehicleModalOpen(false)} title="MOT vehicle" className="max-w-md p-5 space-y-4">
+            <h3 className="text-sm font-semibold text-foreground">
               {editingVehicle ? 'Edit MOT Vehicle' : 'New MOT Collection Vehicle'}
             </h3>
 
             <form onSubmit={handleSaveVehicle} className="space-y-3">
               <div>
-                <label className="block text-xs font-black text-[#111311] mb-1">Vehicle Registration # *</label>
+                <label className="block text-xs font-semibold text-foreground mb-1">Vehicle Registration # *</label>
                 <input
                   type="text"
                   value={vehicleForm.vehicle_number}
                   onChange={(e) => setVehicleForm({ ...vehicleForm, vehicle_number: e.target.value })}
                   placeholder="e.g. LES-1234"
-                  className="w-full text-xs font-mono font-bold border border-[#EAE4D5] rounded-xl p-2.5 bg-[#FDFBF9]"
+                  className="w-full text-xs tabular-nums font-semibold border border-border rounded-xl p-2.5 bg-subtle"
                   required
                 />
               </div>
@@ -1664,21 +1658,20 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                 <button
                   type="button"
                   onClick={() => setVehicleModalOpen(false)}
-                  className="px-3 py-2 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 hover:bg-[#F4F0E6]"
+                  className="px-3 py-2 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={actionLoading}
-                  className="px-4 py-2 rounded-xl bg-[#1E3A8A] text-white text-xs font-black hover:bg-[#1E3A8A]/90 disabled:opacity-50"
+                  className="px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 disabled:opacity-50"
                 >
                   {actionLoading ? 'Saving...' : 'Save Vehicle'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
     </div>
   );

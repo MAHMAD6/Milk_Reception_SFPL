@@ -379,35 +379,35 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
     : null;
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 text-[#111311]">
+    <div className="w-full max-w-7xl mx-auto space-y-6 text-foreground">
       {/* Top Header & Page-Level Navigation Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#C4B9A3]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-strong">
         <div>
-          <h2 className="text-xl font-black tracking-tight text-[#111311] flex items-center gap-2">
-            <Scale className="w-6 h-6 text-[#1E3A8A]" />
+          <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+            <Scale className="w-6 h-6 text-primary" />
             Weighbridge Scale Controller
           </h2>
-          <p className="text-xs text-[#334155] font-semibold mt-0.5">
-            Operator: <strong className="text-[#111311]">{currentUser?.name || 'Weighbridge Operator'}</strong> | First (Gross) & Second (Tare) Weighments
+          <p className="text-xs text-slate-700 font-semibold mt-0.5">
+            Operator: <strong className="text-foreground">{currentUser?.name || 'Weighbridge Operator'}</strong> | First (Gross) & Second (Tare) Weighments
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#EFE9D9] p-1.5 rounded-2xl border border-[#C4B9A3] overflow-x-auto max-w-full">
+        <div className="flex items-center space-x-2 bg-muted p-1.5 rounded-xl border border-border-strong overflow-x-auto max-w-full">
           <button
             type="button"
             onClick={() => {
               setActiveTab('FIRST_WEIGHT');
               setStatusMsg(null);
             }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
               activeTab === 'FIRST_WEIGHT'
-                ? 'bg-[#1E3A8A] text-white shadow-sm'
-                : 'text-[#334155] hover:bg-amber-100/50'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-slate-700 hover:bg-amber-100/50'
             }`}
           >
             <span>First Weight (Loaded)</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
-              activeTab === 'FIRST_WEIGHT' ? 'bg-white/20 text-white' : 'bg-[#F4EFE3] text-slate-700'
+            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
+              activeTab === 'FIRST_WEIGHT' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
             }`}>
               {firstWeightVisits.length}
             </span>
@@ -419,22 +419,22 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
               setActiveTab('SECOND_WEIGHT');
               setStatusMsg(null);
             }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
               activeTab === 'SECOND_WEIGHT'
-                ? 'bg-[#1E3A8A] text-white shadow-sm'
-                : 'text-[#334155] hover:bg-amber-100/50'
+                ? 'bg-primary text-white shadow-sm'
+                : 'text-slate-700 hover:bg-amber-100/50'
             }`}
           >
             <span>Second Weight (Empty)</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
-              activeTab === 'SECOND_WEIGHT' ? 'bg-white/20 text-white' : 'bg-[#F4EFE3] text-slate-700'
+            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
+              activeTab === 'SECOND_WEIGHT' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
             }`}>
               {secondWeightVisits.length}
             </span>
           </button>
         </div>
 
-        <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white rounded-xl border border-[#C4B9A3] shrink-0">
+        <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white rounded-xl border border-border-strong shrink-0">
           <Scale className="w-4 h-4 text-slate-600" />
           <span>Active Scale</span>
         </div>
@@ -446,8 +446,8 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
           {/* LEFT (5/12): FIRST WEIGHT QUEUE */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-center justify-between px-1">
-              <h3 className="text-sm font-extrabold text-[#111311]">Ready for First Weight</h3>
-              <span className="text-xs font-mono font-bold text-slate-500">
+              <h3 className="text-sm font-semibold text-foreground">Ready for First Weight</h3>
+              <span className="text-xs tabular-nums font-semibold text-slate-500">
                 {firstWeightVisits.length} vehicle{firstWeightVisits.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -463,19 +463,19 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                   fetchFirstWeightQueue(e.target.value);
                 }}
                 placeholder="Search vehicle or token..."
-                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs font-mono font-bold rounded-xl border border-[#C4B9A3] bg-[#EFE9D9] text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Queue Cards */}
             <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
               {isLoading ? (
-                <div className="p-8 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+                <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
                   <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-700" />
                   Loading weighbridge queue...
                 </div>
               ) : firstWeightVisits.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+                <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
                   No vehicles currently waiting for first weight.
                 </div>
               ) : (
@@ -495,28 +495,28 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       }}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-[#1E3A8A] text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
-                          : 'bg-[#EFE9D9] text-[#111311] border-[#C4B9A3] hover:bg-amber-100/60'
+                          ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
+                          : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/60'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <span className="font-mono font-black text-sm">{v.vehicle_number}</span>
-                          <span className={`font-mono text-xs font-bold ${isSelected ? 'text-blue-200' : 'text-[#1E3A8A]'}`}>
+                          <span className="tabular-nums font-semibold text-sm">{v.vehicle_number}</span>
+                          <span className={`tabular-nums text-xs font-semibold ${isSelected ? 'text-blue-200' : 'text-primary'}`}>
                             ({v.token_number || 'No Token'})
                           </span>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}`}>
+                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-semibold tabular-nums ${isSelected ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}`}>
                           QA Approved
                         </span>
                       </div>
 
-                      <div className={`text-xs font-bold ${isSelected ? 'text-slate-200' : 'text-[#334155]'}`}>
+                      <div className={`text-xs font-semibold ${isSelected ? 'text-slate-200' : 'text-slate-700'}`}>
                         <div>{portionSummaryStr}</div>
-                        <div className="text-[11px] font-mono mt-0.5">Accepted Qty: {formatAcceptedQuantity(v)}</div>
+                        <div className="text-[11px] tabular-nums mt-0.5">Accepted Qty: {formatAcceptedQuantity(v)}</div>
                       </div>
 
-                      <div className={`flex items-center justify-between text-[11px] font-mono ${isSelected ? 'text-blue-100' : 'text-slate-600'}`}>
+                      <div className={`flex items-center justify-between text-[11px] tabular-nums ${isSelected ? 'text-blue-100' : 'text-slate-600'}`}>
                         <span>Date: {v.operational_date}</span>
                         <span>Waiting: {formatDuration(v.waiting_minutes)}</span>
                       </div>
@@ -530,19 +530,19 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
           {/* RIGHT (7/12): FIRST WEIGHT RECORDING PANEL */}
           <div className="lg:col-span-7">
             {!selectedFirstVisit ? (
-              <div className="p-12 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+              <div className="p-12 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
                 Select a ready vehicle from the left queue to record first weight.
               </div>
             ) : (
-              <div className="p-6 rounded-2xl bg-[#EFE9D9] border border-[#C4B9A3] shadow-md space-y-5 text-[#111311]">
-                <div className="pb-3 border-b border-[#C4B9A3]">
-                  <h3 className="text-base font-extrabold text-[#111311]">Record First Weight (Loaded Vehicle)</h3>
-                  <p className="text-xs text-[#334155] font-semibold mt-0.5">
-                    Vehicle: <strong className="font-mono text-[#111311]">{selectedFirstVisit.vehicle_number}</strong> | Token: <strong className="font-mono text-[#1E3A8A]">{selectedFirstVisit.token_number || 'NO-TOKEN'}</strong>
+              <div className="p-6 rounded-xl bg-muted border border-border-strong shadow-md space-y-5 text-foreground">
+                <div className="pb-3 border-b border-border-strong">
+                  <h3 className="text-base font-semibold text-foreground">Record First Weight (Loaded Vehicle)</h3>
+                  <p className="text-xs text-slate-700 font-semibold mt-0.5">
+                    Vehicle: <strong className="tabular-nums text-foreground">{selectedFirstVisit.vehicle_number}</strong> | Token: <strong className="tabular-nums text-primary">{selectedFirstVisit.token_number || 'NO-TOKEN'}</strong>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#F4EFE3] border border-[#C4B9A3] text-xs font-mono font-bold">
+                <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-muted border border-border-strong text-xs tabular-nums font-semibold">
                   <div>
                     <span className="text-slate-500 font-sans block text-[9.5px]">Operational Date</span>
                     <span>{selectedFirstVisit.operational_date}</span>
@@ -553,7 +553,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                   </div>
                   <div>
                     <span className="text-slate-500 font-sans block text-[9.5px]">Accepted Quantity</span>
-                    <span className="text-[#1E3A8A]">{formatAcceptedQuantity(selectedFirstVisit)}</span>
+                    <span className="text-primary">{formatAcceptedQuantity(selectedFirstVisit)}</span>
                   </div>
                   <div>
                     <span className="text-slate-500 font-sans block text-[9.5px]">Waiting Time</span>
@@ -564,7 +564,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                 {/* Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#111311]">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
                       First Weight (Loaded) (kg) <span className="text-rose-600">*</span>
                     </label>
                     <div className="relative">
@@ -574,18 +574,18 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                         value={grossInputKg}
                         onChange={(e) => setGrossInputKg(e.target.value)}
                         placeholder="e.g. 32500"
-                        className="w-full min-h-[48px] px-4 py-3 text-lg font-mono font-black rounded-xl border border-[#C4B9A3] bg-white text-[#111311] shadow-inner focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                        className="w-full min-h-[48px] px-4 py-3 text-lg tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground shadow-inner focus:outline-none focus:ring-2 focus:ring-primary"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-sm">
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 tabular-nums font-semibold text-slate-400 text-sm">
                         kg
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#111311] flex items-center justify-between">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-foreground flex items-center justify-between">
                       <span>First Weighment Time <span className="text-rose-600">*</span></span>
-                      <Clock className="w-3.5 h-3.5 text-[#1E3A8A]" />
+                      <Clock className="w-3.5 h-3.5 text-primary" />
                     </label>
                     <input
                       type="datetime-local"
@@ -593,7 +593,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       min={selectedFirstVisit.min_allowed_timestamp ? toLocalDatetimeInput(selectedFirstVisit.min_allowed_timestamp) : undefined}
                       max={toLocalDatetimeInput(new Date())}
                       onChange={(e) => setGrossDateTimeInput(e.target.value)}
-                      className="w-full min-h-[48px] px-3.5 py-3 text-xs font-mono font-bold rounded-xl border border-[#C4B9A3] bg-white text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                      className="w-full min-h-[48px] px-3.5 py-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -602,7 +602,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                   type="button"
                   disabled={isSubmitting || !grossInputKg}
                   onClick={handleRecordFirstWeight}
-                  className="w-full min-h-[44px] py-3.5 px-4 rounded-xl bg-[#1E3A8A] hover:bg-blue-900 disabled:opacity-50 text-white font-black text-xs transition shadow-md flex items-center justify-center space-x-2"
+                  className="w-full min-h-[44px] py-3.5 px-4 rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 text-white font-semibold text-xs transition shadow-md flex items-center justify-center space-x-2"
                 >
                   {isSubmitting ? (
                     <span>Recording First Weight...</span>
@@ -625,8 +625,8 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
           {/* LEFT (5/12): SECOND WEIGHT QUEUE */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-center justify-between px-1">
-              <h3 className="text-sm font-extrabold text-[#111311]">Ready for Second Weight</h3>
-              <span className="text-xs font-mono font-bold text-slate-500">
+              <h3 className="text-sm font-semibold text-foreground">Ready for Second Weight</h3>
+              <span className="text-xs tabular-nums font-semibold text-slate-500">
                 {secondWeightVisits.length} vehicle{secondWeightVisits.length !== 1 ? 's' : ''}
               </span>
             </div>
@@ -642,19 +642,19 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                   fetchSecondWeightQueue(e.target.value);
                 }}
                 placeholder="Search vehicle or token..."
-                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs font-mono font-bold rounded-xl border border-[#C4B9A3] bg-[#EFE9D9] text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
             {/* Queue Cards */}
             <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
               {isLoading ? (
-                <div className="p-8 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+                <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
                   <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-700" />
                   Loading weighbridge queue...
                 </div>
               ) : secondWeightVisits.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+                <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
                   No vehicles currently waiting for second weight.
                 </div>
               ) : (
@@ -670,28 +670,28 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       }}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-[#1E3A8A] text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
-                          : 'bg-[#EFE9D9] text-[#111311] border-[#C4B9A3] hover:bg-amber-100/60'
+                          ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
+                          : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/60'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
-                          <span className="font-mono font-black text-sm">{v.vehicle_number}</span>
-                          <span className={`font-mono text-xs font-bold ${isSelected ? 'text-blue-200' : 'text-[#1E3A8A]'}`}>
+                          <span className="tabular-nums font-semibold text-sm">{v.vehicle_number}</span>
+                          <span className={`tabular-nums text-xs font-semibold ${isSelected ? 'text-blue-200' : 'text-primary'}`}>
                             ({v.token_number || 'No Token'})
                           </span>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-bold font-mono ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-100 text-[#1E3A8A] border border-blue-300'}`}>
+                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-semibold tabular-nums ${isSelected ? 'bg-white/20 text-white' : 'bg-blue-100 text-primary border border-blue-300'}`}>
                           Unloading Completed
                         </span>
                       </div>
 
-                      <div className={`flex items-center justify-between text-xs font-bold ${isSelected ? 'text-slate-200' : 'text-[#334155]'}`}>
+                      <div className={`flex items-center justify-between text-xs font-semibold ${isSelected ? 'text-slate-200' : 'text-slate-700'}`}>
                         <span>First Weight: {v.gross_weight_kg.toLocaleString()} kg</span>
                         <span>Date: {v.operational_date}</span>
                       </div>
 
-                      <div className={`text-[11px] font-mono ${isSelected ? 'text-blue-100' : 'text-slate-600'}`}>
+                      <div className={`text-[11px] tabular-nums ${isSelected ? 'text-blue-100' : 'text-slate-600'}`}>
                         Waiting for second weight
                       </div>
                     </div>
@@ -704,22 +704,22 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
           {/* RIGHT (7/12): SECOND WEIGHT RECORDING PANEL */}
           <div className="lg:col-span-7">
             {!selectedSecondVisit ? (
-              <div className="p-12 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+              <div className="p-12 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
                 Select a vehicle from the left queue to record second weight.
               </div>
             ) : (
-              <div className="p-6 rounded-2xl bg-[#EFE9D9] border border-[#C4B9A3] shadow-md space-y-5 text-[#111311]">
-                <div className="pb-3 border-b border-[#C4B9A3]">
-                  <h3 className="text-base font-extrabold text-[#111311]">Record Second Weight (After Unloading)</h3>
-                  <p className="text-xs text-[#334155] font-semibold mt-0.5">
-                    Vehicle: <strong className="font-mono text-[#111311]">{selectedSecondVisit.vehicle_number}</strong> | Token: <strong className="font-mono text-[#1E3A8A]">{selectedSecondVisit.token_number || 'NO-TOKEN'}</strong>
+              <div className="p-6 rounded-xl bg-muted border border-border-strong shadow-md space-y-5 text-foreground">
+                <div className="pb-3 border-b border-border-strong">
+                  <h3 className="text-base font-semibold text-foreground">Record Second Weight (After Unloading)</h3>
+                  <p className="text-xs text-slate-700 font-semibold mt-0.5">
+                    Vehicle: <strong className="tabular-nums text-foreground">{selectedSecondVisit.vehicle_number}</strong> | Token: <strong className="tabular-nums text-primary">{selectedSecondVisit.token_number || 'NO-TOKEN'}</strong>
                   </p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#F4EFE3] border border-[#C4B9A3] text-xs font-mono font-bold">
+                <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-muted border border-border-strong text-xs tabular-nums font-semibold">
                   <div>
                     <span className="text-slate-500 font-sans block text-[9.5px]">First Weight (Loaded Vehicle)</span>
-                    <span className="text-base text-[#1E3A8A] font-black">{selectedSecondVisit.gross_weight_kg.toLocaleString()} kg</span>
+                    <span className="text-base text-primary font-semibold">{selectedSecondVisit.gross_weight_kg.toLocaleString()} kg</span>
                   </div>
                   <div>
                     <span className="text-slate-500 font-sans block text-[9.5px]">First Weight Time</span>
@@ -738,7 +738,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                 {/* Inputs */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#111311]">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
                       Second Weight (Empty) (kg) <span className="text-rose-600">*</span>
                     </label>
                     <div className="relative">
@@ -748,18 +748,18 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                         value={tareInputKg}
                         onChange={(e) => setTareInputKg(e.target.value)}
                         placeholder="e.g. 12200"
-                        className="w-full min-h-[48px] px-4 py-3 text-lg font-mono font-black rounded-xl border border-[#C4B9A3] bg-white text-[#111311] shadow-inner focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                        className="w-full min-h-[48px] px-4 py-3 text-lg tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground shadow-inner focus:outline-none focus:ring-2 focus:ring-primary"
                       />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 font-mono font-bold text-slate-400 text-sm">
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 tabular-nums font-semibold text-slate-400 text-sm">
                         kg
                       </span>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-xs font-black uppercase tracking-wider text-[#111311] flex items-center justify-between">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-foreground flex items-center justify-between">
                       <span>Second Weighment Time <span className="text-rose-600">*</span></span>
-                      <Clock className="w-3.5 h-3.5 text-[#1E3A8A]" />
+                      <Clock className="w-3.5 h-3.5 text-primary" />
                     </label>
                     <input
                       type="datetime-local"
@@ -767,7 +767,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       min={selectedSecondVisit.min_allowed_timestamp ? toLocalDatetimeInput(selectedSecondVisit.min_allowed_timestamp) : undefined}
                       max={toLocalDatetimeInput(new Date())}
                       onChange={(e) => setTareDateTimeInput(e.target.value)}
-                      className="w-full min-h-[48px] px-3.5 py-3 text-xs font-mono font-bold rounded-xl border border-[#C4B9A3] bg-white text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                      className="w-full min-h-[48px] px-3.5 py-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -775,15 +775,15 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                 {/* Calculated Net Weight */}
                 {previewNetKg !== null && (
                   <div className="space-y-2 pt-1">
-                    <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between text-emerald-900 font-mono font-bold text-xs">
+                    <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 flex items-center justify-between text-emerald-900 tabular-nums font-semibold text-xs">
                       <span>Net Milk Weight:</span>
-                      <span className="text-base font-black text-emerald-800">{previewNetKg.toLocaleString()} kg</span>
+                      <span className="text-base font-semibold text-emerald-800">{previewNetKg.toLocaleString()} kg</span>
                     </div>
 
                     {selectedSecondVisit.destination_silo_text && (
-                      <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs font-mono font-bold flex items-center justify-between text-blue-950">
+                      <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs tabular-nums font-semibold flex items-center justify-between text-blue-950">
                         <span className="font-sans text-[11px] text-slate-600">Destination Silo:</span>
-                        <span className="px-2 py-0.5 rounded bg-blue-200 text-blue-900 font-extrabold text-[10px]">
+                        <span className="px-2 py-0.5 rounded bg-blue-200 text-blue-900 font-semibold text-[10px]">
                           {selectedSecondVisit.is_multi_silo_different ? 'Multi-Silo Allocation Required' : `Silo: ${selectedSecondVisit.destination_silo_text}`}
                         </span>
                       </div>
@@ -795,7 +795,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                   type="button"
                   disabled={isSubmitting || !tareInputKg}
                   onClick={handleRecordSecondWeight}
-                  className="w-full min-h-[44px] py-3.5 px-4 rounded-xl bg-[#1E3A8A] hover:bg-blue-900 disabled:opacity-50 text-white font-black text-xs transition shadow-md flex items-center justify-center space-x-2"
+                  className="w-full min-h-[44px] py-3.5 px-4 rounded-xl bg-primary hover:bg-primary-hover disabled:opacity-50 text-white font-semibold text-xs transition shadow-md flex items-center justify-center space-x-2"
                 >
                   {isSubmitting ? (
                     <span>Recording Second Weight...</span>

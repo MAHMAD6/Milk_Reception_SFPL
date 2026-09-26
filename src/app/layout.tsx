@@ -1,11 +1,17 @@
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
 import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { ToastProvider } from '@/frontend/context/ToastContext';
 import { PwaShell } from '@/frontend/modules/pwa/PwaShell';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 export const metadata: Metadata = {
-  title: 'MilkReception - Physical Plant Kanban & Supply Chain Dashboard',
-  description: 'Enterprise 5-stage milk reception pipeline and automated quality tracking platform.',
+  title: {
+    default: 'Milk Reception · SFPL',
+    template: '%s · SFPL Milk Reception',
+  },
+  description: 'Milk reception, quality and supply-chain operations for Shakarganj Food Products Ltd.',
   manifest: '/manifest.webmanifest',
 };
 
@@ -20,11 +26,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased bg-[#FDFBF9] text-[#111311] min-h-screen" suppressHydrationWarning>
-        <ToastProvider>
-          {children}
-          <PwaShell />
-        </ToastProvider>
+      <body className="min-h-screen bg-background font-sans text-foreground antialiased" suppressHydrationWarning>
+        <TooltipProvider delayDuration={250}>
+          <ToastProvider>
+            {children}
+            <PwaShell />
+          </ToastProvider>
+        </TooltipProvider>
       </body>
     </html>
   );

@@ -2,10 +2,9 @@
 
 import React from 'react';
 import { User } from '@core/types';
-import { useRouter } from 'next/navigation';
-import { LogOut, Shield, Menu } from 'lucide-react';
-import { logoutUser } from '@/frontend/modules/auth/logout';
-import { NotificationBell } from '@/frontend/modules/notifications/NotificationBell';
+import { usePathname } from 'next/navigation';
+import { Header } from '@/frontend/modules/shared/Header';
+import { SUPER_ADMIN_NAV_ITEMS } from './SuperAdminSidebar';
 
 interface SuperAdminHeaderProps {
   currentUser: User | null;
@@ -14,71 +13,19 @@ interface SuperAdminHeaderProps {
   menuButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }
 
-export const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({
-  currentUser,
-  onMenuClick,
-  isOpen = false,
-  menuButtonRef,
-}) => {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await logoutUser();
-  };
+export const SuperAdminHeader: React.FC<SuperAdminHeaderProps> = ({ currentUser, onMenuClick, menuButtonRef }) => {
+  const pathname = usePathname();
+  const current =
+    SUPER_ADMIN_NAV_ITEMS.find((item) => item.href === pathname) ??
+    SUPER_ADMIN_NAV_ITEMS.find((item) => item.href !== '/super-admin' && pathname.startsWith(item.href));
 
   return (
-    <header className="bg-white border-b border-[#C4B9A3] px-3 sm:px-6 py-3 flex items-center justify-between shrink-0 w-full max-w-full shadow-xs">
-      <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1 mr-2">
-        {onMenuClick && (
-          <button
-            ref={menuButtonRef}
-            type="button"
-            onClick={onMenuClick}
-            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl border border-[#C4B9A3] bg-[#FDFBF9] text-[#111311] hover:bg-[#EFE9D9]/60 transition shrink-0 focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
-            aria-label="Open navigation drawer"
-            aria-expanded={isOpen}
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-        )}
-
-        <div className="p-2 bg-[#EFE9D9]/60 rounded-xl border border-[#C4B9A3] shrink-0">
-          <Shield className="w-4 h-4 text-[#1E3A8A]" />
-        </div>
-        <div className="min-w-0">
-          <h1 className="text-xs sm:text-sm md:text-base font-black tracking-tight text-[#111311] truncate">
-            Shakarganj Food Products Limited
-          </h1>
-        </div>
-      </div>
-
-      <div className="flex items-center space-x-2 sm:space-x-3 shrink-0">
-        <div className="text-right text-xs font-semibold max-w-[120px] sm:max-w-none">
-          <div className="text-[#111311] font-bold text-xs truncate">
-            {currentUser?.name || currentUser?.username || 'User'}
-          </div>
-          {currentUser?.username && (
-            <div className="text-xs text-slate-500 font-mono hidden sm:block truncate">
-              {currentUser.username}
-            </div>
-          )}
-        </div>
-
-        {/* Notification Bell */}
-        <NotificationBell currentUser={currentUser} />
-
-        {/* Sign Out Button */}
-        <button
-          type="button"
-          onClick={handleLogout}
-          className="flex items-center justify-center space-x-1.5 px-3 py-2 min-h-[44px] min-w-[44px] rounded-xl border border-[#FECACA] bg-[#FEF2F2] hover:bg-rose-100 text-[#991B1B] text-xs font-bold transition shadow-xs focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer"
-          title="Sign Out"
-          aria-label="Sign Out"
-        >
-          <LogOut className="w-4 h-4 text-[#991B1B]" />
-          <span className="hidden sm:inline">Sign Out</span>
-        </button>
-      </div>
-    </header>
+    <Header
+      currentUser={currentUser}
+      title={current?.label ?? 'Administration'}
+      showBranding
+      onMenuClick={onMenuClick}
+      menuButtonRef={menuButtonRef}
+    />
   );
 };

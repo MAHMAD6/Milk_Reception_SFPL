@@ -60,13 +60,13 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
   return (
     <div className="space-y-4">
       {/* Header & Controls */}
-      <div className="p-4 bg-white rounded-2xl border border-[#EAE4D5] shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="p-4 bg-white rounded-xl border border-border shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-blue-50 text-[#1E3A8A] rounded-xl">
+          <div className="p-2.5 bg-blue-50 text-primary rounded-xl">
             <Phone className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-black text-[#111311]">Collection SMS Outbox</h2>
+            <h2 className="text-base font-semibold text-foreground">Collection SMS Outbox</h2>
             <p className="text-xs text-slate-500">
               Real-time audit log of shopkeeper collection notification SMS messages
             </p>
@@ -77,7 +77,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-1.5 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 bg-white"
+            className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 bg-white"
           >
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending Delivery</option>
@@ -87,7 +87,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
           <button
             type="button"
             onClick={fetchOutbox}
-            className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-[#EAE4D5] text-xs font-bold text-slate-700 hover:bg-[#F4F0E6]"
+            className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
           >
             <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
@@ -96,18 +96,18 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
           <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Outbox Table */}
-      <div className="bg-white rounded-2xl border border-[#EAE4D5] shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-[#EAE4D5] bg-[#FDFBF9] text-[10px] font-black uppercase text-slate-500 tracking-wider">
+              <tr className="border-b border-border bg-subtle text-[10px] font-semibold uppercase text-slate-500 tracking-wider">
                 <th className="p-3">Recipient & Shop</th>
                 <th className="p-3">SMS Message Content</th>
                 <th className="p-3">Collection Details</th>
@@ -115,10 +115,10 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
                 <th className="p-3">Created At</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE4D5] text-xs">
+            <tbody className="divide-y divide-border text-xs">
               {loading && items.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center text-slate-500 font-bold">
+                  <td colSpan={5} className="p-8 text-center text-slate-500 font-semibold">
                     Loading SMS queue...
                   </td>
                 </tr>
@@ -130,20 +130,20 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
                 </tr>
               ) : (
                 items.map((item) => (
-                  <tr key={item.id} className="hover:bg-[#FDFBF9]">
+                  <tr key={item.id} className="hover:bg-subtle">
                     <td className="p-3">
-                      <div className="font-bold text-[#111311]">{item.recipient_phone}</div>
+                      <div className="font-semibold text-foreground">{item.recipient_phone}</div>
                       <div className="text-[11px] text-slate-500">
                         {item.collection?.shop_name} ({item.collection?.shop_code})
                       </div>
                     </td>
                     <td className="p-3 max-w-xs">
-                      <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-700 whitespace-pre-line break-words">
+                      <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-[11px] tabular-nums text-slate-700 whitespace-pre-line break-words">
                         {item.message_body}
                       </div>
                     </td>
                     <td className="p-3">
-                      <div className="font-mono font-bold text-blue-900">
+                      <div className="tabular-nums font-semibold text-blue-900">
                         {item.collection?.collection_number}
                       </div>
                       <div className="text-[11px] text-slate-600">
@@ -152,7 +152,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
                     </td>
                     <td className="p-3">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase inline-flex items-center space-x-1 ${
+                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase inline-flex items-center space-x-1 ${
                           item.status === 'SENT'
                             ? 'bg-emerald-100 text-emerald-800'
                             : item.status === 'FAILED'

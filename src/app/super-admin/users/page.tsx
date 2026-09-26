@@ -2,13 +2,22 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Users, Plus, KeyRound, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X } from 'lucide-react';
+import { Users, Plus, KeyRound, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X, MoreHorizontal, UserX, UserCheck } from 'lucide-react';
 import {
   CREATABLE_ROLES,
   CreatableRole,
   ROLE_ASSIGNMENT_POLICIES,
   getRoleAssignmentPolicy,
 } from '@/lib/user-assignment-policy';
+import { Modal } from '@/components/ui/modal';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface Source {
   id: string;
@@ -414,59 +423,57 @@ export default function SuperAdminUsersPage() {
   return (
     <div className="space-y-4 w-full max-w-full overflow-x-hidden">
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
           <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center space-x-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* USERS TABLE */}
-      <div className="bg-white rounded-xl border border-[#EAE4D5]/80 shadow-sm overflow-hidden w-full max-w-full">
-        <div className="p-3 sm:px-4 sm:py-3 border-b border-[#EAE4D5] flex items-center justify-between">
+      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
+        <div className="p-3 sm:px-4 sm:py-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h2 className="text-sm font-bold text-[#111311]">Users</h2>
-            <span className="text-[11px] font-mono px-2 py-0.5 bg-[#FDFBF9] border border-[#EAE4D5] text-slate-600 rounded-full">
+            <h2 className="text-sm font-semibold text-foreground">Users</h2>
+            <span className="text-[11px] tabular-nums px-2 py-0.5 bg-subtle border border-border text-slate-600 rounded-full">
               {users.length}
             </span>
           </div>
-          <button
-            type="button"
+          <Button
+            size="sm"
             onClick={() => {
               resetForm();
               setShowCreateModal(true);
             }}
-            aria-label="Add user"
-            title="Add user"
-            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#1E3A8A] text-white hover:bg-blue-900 transition shadow-xs"
           >
-            <Plus className="w-4 h-4" />
-          </button>
+            <Plus />
+            Add user
+          </Button>
         </div>
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-xs min-w-[700px]">
-            <thead className="bg-[#FDFBF9] text-slate-600 border-b border-[#EAE4D5]">
+            <thead className="bg-subtle text-slate-600 border-b border-border">
               <tr>
-                <th className="p-3 font-bold">User</th>
-                <th className="p-3 font-bold">Email</th>
-                <th className="p-3 font-bold">Role</th>
-                <th className="p-3 font-bold">Department</th>
-                <th className="p-3 font-bold">Data Scope</th>
-                <th className="p-3 font-bold">Last Login</th>
-                <th className="p-3 font-bold">Status</th>
-                <th className="p-3 font-bold text-right">Actions</th>
+                <th className="p-3 font-semibold">User</th>
+                <th className="p-3 font-semibold">Email</th>
+                <th className="p-3 font-semibold">Role</th>
+                <th className="p-3 font-semibold">Department</th>
+                <th className="p-3 font-semibold">Data Scope</th>
+                <th className="p-3 font-semibold">Last Login</th>
+                <th className="p-3 font-semibold">Status</th>
+                <th className="p-3 font-semibold text-right"><span className="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE4D5]/60 font-medium">
+            <tbody className="divide-y divide-border/60 font-medium">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="p-6 text-center text-slate-400 font-mono">
+                  <td colSpan={8} className="p-6 text-center text-slate-400 tabular-nums">
                     Loading users...
                   </td>
                 </tr>
@@ -482,10 +489,10 @@ export default function SuperAdminUsersPage() {
                   return (
                     <tr key={u.id} className="hover:bg-slate-50">
                       <td className="p-3">
-                        <div className="font-bold text-[#111311]">{u.name}</div>
-                        <div className="font-mono text-[10px] text-slate-500">@{u.username}</div>
+                        <div className="font-semibold text-foreground">{u.name}</div>
+                        <div className="tabular-nums text-[10px] text-slate-500">@{u.username}</div>
                       </td>
-                      <td className="p-3 font-mono text-[11px] text-slate-600">
+                      <td className="p-3 tabular-nums text-[11px] text-slate-600">
                         {u.email ? (
                           u.email
                         ) : (
@@ -496,8 +503,8 @@ export default function SuperAdminUsersPage() {
                       </td>
                       <td className="p-3">
                         <span
-                          className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
-                            u.role === 'SUPER_ADMIN' ? 'bg-indigo-100 text-indigo-900' : 'bg-slate-100 text-slate-800'
+                          className={`inline-block whitespace-nowrap px-2 py-0.5 rounded-md text-[11px] font-medium ${
+                            u.role === 'SUPER_ADMIN' ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-700'
                           }`}
                         >
                           {ROLE_ASSIGNMENT_POLICIES[u.role as CreatableRole]?.label || u.role}
@@ -505,67 +512,68 @@ export default function SuperAdminUsersPage() {
                       </td>
                       <td className="p-3 text-slate-600">{u.department || '—'}</td>
                       <td className="p-3">
-                        <div className="font-bold text-slate-700">{displayScope}</div>
+                        <div className="font-semibold text-slate-700">{displayScope}</div>
                         {u.procurementSource && (
-                          <div className="text-[10px] text-slate-500 font-mono">
+                          <div className="text-[10px] text-slate-500 tabular-nums">
                             {u.procurementSource.name} ({u.procurementSource.sourceType})
                           </div>
                         )}
                       </td>
-                      <td className="p-3 font-mono text-[11px] text-slate-500">
+                      <td className="p-3 tabular-nums text-[11px] text-slate-500 whitespace-nowrap">
                         {u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString() : 'Never'}
                       </td>
                       <td className="p-3">
                         {u.isActive ? (
-                          <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-700">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                             Active
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-bold">
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500">
+                            <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
                             Deactivated
                           </span>
                         )}
                       </td>
                       <td className="p-3 text-right">
-                        <div className="flex items-center justify-end space-x-1.5 sm:space-x-2">
-                          <button
-                            onClick={() => openEditModal(u)}
-                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center space-x-1"
-                            title="Edit User Metadata"
-                          >
-                            <Edit2 className="w-3 h-3" />
-                            <span>Edit</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              setShowResetModal(u);
-                              setNewPassword('');
-                              setConfirmNewPassword('');
-                              setResetModalError(null);
-                            }}
-                            className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center space-x-1"
-                            title="Reset Password"
-                          >
-                            <KeyRound className="w-3 h-3" />
-                            <span>Reset Pass</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              setShowConfirmModal({
-                                user: u,
-                                targetStatus: !u.isActive,
-                              });
-                              setConfirmModalError(null);
-                            }}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
-                              u.isActive
-                                ? 'bg-rose-50 hover:bg-rose-100 text-rose-700'
-                                : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
-                            }`}
-                          >
-                            {u.isActive ? 'Deactivate' : 'Activate'}
-                          </button>
-                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon-sm" aria-label={`Actions for ${u.name}`}>
+                              <MoreHorizontal />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuItem onSelect={() => openEditModal(u)}>
+                              <Edit2 />
+                              Edit details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onSelect={() => {
+                                setShowResetModal(u);
+                                setNewPassword('');
+                                setConfirmNewPassword('');
+                                setResetModalError(null);
+                              }}
+                            >
+                              <KeyRound />
+                              Reset password
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              destructive={u.isActive}
+                              onSelect={() => {
+                                setShowConfirmModal({
+                                  user: u,
+                                  targetStatus: !u.isActive,
+                                });
+                                setConfirmModalError(null);
+                              }}
+                            >
+                              {u.isActive ? <UserX /> : <UserCheck />}
+                              {u.isActive ? 'Deactivate' : 'Activate'}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
                   );
@@ -578,10 +586,9 @@ export default function SuperAdminUsersPage() {
 
       {/* CREATE USER MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-5 sm:p-6 w-full max-w-md my-auto space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#EAE4D5] pb-3">
-              <h3 className="text-base font-extrabold text-[#111311]">Create New User Account</h3>
+        <Modal onClose={closeCreateModal} title="Create user account" preventClose={isSubmittingCreate} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-base font-semibold text-foreground">Create New User Account</h3>
               <button
                 type="button"
                 onClick={() => {
@@ -596,7 +603,7 @@ export default function SuperAdminUsersPage() {
             </div>
 
             {createModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{createModalError}</span>
               </div>
@@ -604,7 +611,7 @@ export default function SuperAdminUsersPage() {
 
             <form onSubmit={handleCreateUser} className="space-y-3.5 text-xs">
               <div>
-                <label htmlFor="create-username" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-username" className="font-semibold text-slate-700 block mb-1">
                   Username <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -613,14 +620,14 @@ export default function SuperAdminUsersPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="e.g. john.doe"
                   disabled={isSubmittingCreate}
                 />
               </div>
 
               <div>
-                <label htmlFor="create-email" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-email" className="font-semibold text-slate-700 block mb-1">
                   Email Address <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -630,14 +637,14 @@ export default function SuperAdminUsersPage() {
                   maxLength={254}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="e.g. john.doe@example.com"
                   disabled={isSubmittingCreate}
                 />
               </div>
 
               <div>
-                <label htmlFor="create-name" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-name" className="font-semibold text-slate-700 block mb-1">
                   Full Name
                 </label>
                 <input
@@ -645,14 +652,14 @@ export default function SuperAdminUsersPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="e.g. John Doe"
                   disabled={isSubmittingCreate}
                 />
               </div>
 
               <div>
-                <label htmlFor="create-password" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-password" className="font-semibold text-slate-700 block mb-1">
                   Password <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -661,21 +668,21 @@ export default function SuperAdminUsersPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="At least 8 characters"
                   disabled={isSubmittingCreate}
                 />
               </div>
 
               <div>
-                <label htmlFor="create-role" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-role" className="font-semibold text-slate-700 block mb-1">
                   Canonical Role <span className="text-rose-600">*</span>
                 </label>
                 <select
                   id="create-role"
                   value={role}
                   onChange={(e) => handleCreateRoleChange(e.target.value as CreatableRole)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   disabled={isSubmittingCreate}
                 >
                   {CREATABLE_ROLES.map((r) => (
@@ -688,7 +695,7 @@ export default function SuperAdminUsersPage() {
 
               {createPolicy.requiresSource && (
                 <div>
-                  <label htmlFor="create-source" className="font-bold text-slate-700 block mb-1">
+                  <label htmlFor="create-source" className="font-semibold text-slate-700 block mb-1">
                     Assigned Source <span className="text-rose-600">*</span>
                   </label>
                   <select
@@ -696,7 +703,7 @@ export default function SuperAdminUsersPage() {
                     required
                     value={procurementSourceId}
                     onChange={(e) => setProcurementSourceId(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                     disabled={isSubmittingCreate}
                   >
                     <option value="">Select Assigned Source...</option>
@@ -715,7 +722,7 @@ export default function SuperAdminUsersPage() {
                     <span>Source not listed?</span>
                     <Link
                       href="/super-admin/procurement-sources"
-                      className="text-[#1E3A8A] font-bold hover:underline shrink-0"
+                      className="text-primary font-semibold hover:underline shrink-0"
                     >
                       Add it in Procurement Sources →
                     </Link>
@@ -725,7 +732,7 @@ export default function SuperAdminUsersPage() {
 
               {/* Read-Only Role Assignment Summary */}
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-xs text-slate-600">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assignment Details</div>
+                <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Assignment Details</div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-slate-500">Department:</span>
                   <span className="font-semibold text-slate-800">{createPolicy.department}</span>
@@ -736,7 +743,7 @@ export default function SuperAdminUsersPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   disabled={isSubmittingCreate}
@@ -745,30 +752,28 @@ export default function SuperAdminUsersPage() {
                       closeCreateModal();
                     }
                   }}
-                  className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold hover:bg-slate-50 transition"
+                  className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingCreate}
-                  className="px-4 py-2 rounded-lg bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary-hover transition disabled:opacity-50"
                 >
                   {isSubmittingCreate ? 'Creating...' : 'Create User'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* EDIT USER MODAL */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-5 sm:p-6 w-full max-w-md my-auto space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#EAE4D5] pb-3">
-              <h3 className="text-base font-extrabold text-[#111311]">
-                Edit User: <span className="font-mono text-[#1E3A8A]">@{showEditModal.username}</span>
+        <Modal onClose={closeEditModal} title="Edit user" preventClose={isSubmittingEdit} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-base font-semibold text-foreground">
+                Edit User: <span className="tabular-nums text-primary">@{showEditModal.username}</span>
               </h3>
               <button
                 type="button"
@@ -782,7 +787,7 @@ export default function SuperAdminUsersPage() {
             </div>
 
             {editModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{editModalError}</span>
               </div>
@@ -790,7 +795,7 @@ export default function SuperAdminUsersPage() {
 
             <form onSubmit={handleEditUser} className="space-y-3.5 text-xs">
               <div>
-                <label htmlFor="edit-username" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="edit-username" className="font-semibold text-slate-700 block mb-1">
                   Username (Read-Only)
                 </label>
                 <input
@@ -798,12 +803,12 @@ export default function SuperAdminUsersPage() {
                   type="text"
                   readOnly
                   value={showEditModal.username}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-100 text-slate-600 font-mono cursor-not-allowed"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-100 text-slate-600 tabular-nums cursor-not-allowed"
                 />
               </div>
 
               <div>
-                <label htmlFor="edit-email" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="edit-email" className="font-semibold text-slate-700 block mb-1">
                   Email Address {showEditModal.email ? <span className="text-slate-400 font-normal">(Cannot be cleared)</span> : <span className="text-amber-600 font-normal">(Required to activate)</span>}
                 </label>
                 <input
@@ -812,14 +817,14 @@ export default function SuperAdminUsersPage() {
                   maxLength={254}
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder={showEditModal.email || 'e.g. user@example.com'}
                   disabled={isSubmittingEdit}
                 />
               </div>
 
               <div>
-                <label htmlFor="edit-name" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="edit-name" className="font-semibold text-slate-700 block mb-1">
                   Full Name
                 </label>
                 <input
@@ -827,21 +832,21 @@ export default function SuperAdminUsersPage() {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="e.g. John Doe"
                   disabled={isSubmittingEdit}
                 />
               </div>
 
               <div>
-                <label htmlFor="edit-role" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="edit-role" className="font-semibold text-slate-700 block mb-1">
                   Canonical Role <span className="text-rose-600">*</span>
                 </label>
                 <select
                   id="edit-role"
                   value={editRole}
                   onChange={(e) => handleEditRoleChange(e.target.value as CreatableRole)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   disabled={isSubmittingEdit}
                 >
                   {CREATABLE_ROLES.map((r) => (
@@ -854,7 +859,7 @@ export default function SuperAdminUsersPage() {
 
               {editPolicy.requiresSource && (
                 <div>
-                  <label htmlFor="edit-source" className="font-bold text-slate-700 block mb-1">
+                  <label htmlFor="edit-source" className="font-semibold text-slate-700 block mb-1">
                     Assigned Source <span className="text-rose-600">*</span>
                   </label>
                   <select
@@ -862,7 +867,7 @@ export default function SuperAdminUsersPage() {
                     required
                     value={editProcurementSourceId}
                     onChange={(e) => setEditProcurementSourceId(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                     disabled={isSubmittingEdit}
                   >
                     <option value="">Select Assigned Source...</option>
@@ -881,7 +886,7 @@ export default function SuperAdminUsersPage() {
                     <span>Source not listed?</span>
                     <Link
                       href="/super-admin/procurement-sources"
-                      className="text-[#1E3A8A] font-bold hover:underline shrink-0"
+                      className="text-primary font-semibold hover:underline shrink-0"
                     >
                       Add it in Procurement Sources →
                     </Link>
@@ -891,7 +896,7 @@ export default function SuperAdminUsersPage() {
 
               {/* Read-Only Role Assignment Summary */}
               <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-xs text-slate-600">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Assignment Details</div>
+                <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Assignment Details</div>
                 <div className="flex justify-between items-center">
                   <span className="font-medium text-slate-500">Department:</span>
                   <span className="font-semibold text-slate-800">{editPolicy.department}</span>
@@ -902,34 +907,32 @@ export default function SuperAdminUsersPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   disabled={isSubmittingEdit}
                   onClick={() => {
                     if (!isSubmittingEdit) closeEditModal();
                   }}
-                  className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold hover:bg-slate-50 transition"
+                  className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingEdit}
-                  className="px-4 py-2 rounded-lg bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-primary text-white font-semibold hover:bg-primary-hover transition disabled:opacity-50"
                 >
                   {isSubmittingEdit ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* CONFIRM ACTIVATION / DEACTIVATION MODAL */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-5 sm:p-6 w-full max-w-md my-auto space-y-4 shadow-xl">
+        <Modal onClose={closeConfirmModal} title="Confirm account status change" preventClose={isSubmittingConfirm} className="p-5 sm:p-6 max-w-md space-y-4">
             <div className="flex items-center space-x-3">
               <div
                 className={`p-2 rounded-xl shrink-0 ${
@@ -939,11 +942,11 @@ export default function SuperAdminUsersPage() {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-[#111311]">
+                <h3 className="text-base font-semibold text-foreground">
                   Confirm {showConfirmModal.targetStatus ? 'Activation' : 'Deactivation'}
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Target Account: <span className="font-mono font-bold text-slate-800">@{showConfirmModal.user.username}</span>
+                  Target Account: <span className="tabular-nums font-semibold text-slate-800">@{showConfirmModal.user.username}</span>
                 </p>
               </div>
             </div>
@@ -952,7 +955,7 @@ export default function SuperAdminUsersPage() {
               <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Current Status:</span>
                 <span
-                  className={`font-bold ${
+                  className={`font-semibold ${
                     showConfirmModal.user.isActive ? 'text-emerald-700' : 'text-rose-700'
                   }`}
                 >
@@ -962,7 +965,7 @@ export default function SuperAdminUsersPage() {
               <div className="flex justify-between">
                 <span className="text-slate-500 font-medium">Requested Status:</span>
                 <span
-                  className={`font-bold ${
+                  className={`font-semibold ${
                     showConfirmModal.targetStatus ? 'text-emerald-700' : 'text-rose-700'
                   }`}
                 >
@@ -991,20 +994,20 @@ export default function SuperAdminUsersPage() {
             )}
 
             {confirmModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{confirmModalError}</span>
               </div>
             )}
 
-            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
               <button
                 type="button"
                 disabled={isSubmittingConfirm}
                 onClick={() => {
                   if (!isSubmittingConfirm) closeConfirmModal();
                 }}
-                className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold hover:bg-slate-50 transition"
+                className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50 transition"
               >
                 Cancel
               </button>
@@ -1012,7 +1015,7 @@ export default function SuperAdminUsersPage() {
                 type="button"
                 disabled={isSubmittingConfirm}
                 onClick={handleConfirmToggleActive}
-                className={`px-4 py-2 rounded-lg text-white font-bold transition disabled:opacity-50 ${
+                className={`px-4 py-2 rounded-lg text-white font-semibold transition disabled:opacity-50 ${
                   showConfirmModal.targetStatus
                     ? 'bg-emerald-700 hover:bg-emerald-800'
                     : 'bg-rose-700 hover:bg-rose-800'
@@ -1025,18 +1028,16 @@ export default function SuperAdminUsersPage() {
                   : 'Confirm Deactivation'}
               </button>
             </div>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* RESET PASSWORD MODAL */}
       {showResetModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-5 sm:p-6 w-full max-w-md my-auto space-y-4 shadow-xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-[#EAE4D5] pb-3">
+        <Modal onClose={closeResetModal} title="Reset password" preventClose={isSubmittingReset} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
-                <h3 className="text-base font-extrabold text-[#111311]">
-                  Reset Password: <span className="font-mono text-[#1E3A8A]">@{showResetModal.username}</span>
+                <h3 className="text-base font-semibold text-foreground">
+                  Reset Password: <span className="tabular-nums text-primary">@{showResetModal.username}</span>
                 </h3>
                 <p className="text-[11px] text-slate-500 mt-0.5">
                   Password will be hashed with bcrypt. Password will NOT be stored in AuditLog.
@@ -1056,7 +1057,7 @@ export default function SuperAdminUsersPage() {
             </div>
 
             {resetModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{resetModalError}</span>
               </div>
@@ -1064,7 +1065,7 @@ export default function SuperAdminUsersPage() {
 
             <form onSubmit={handleResetPassword} className="space-y-3.5 text-xs">
               <div>
-                <label htmlFor="reset-new-password" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="reset-new-password" className="font-semibold text-slate-700 block mb-1">
                   New Password <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -1073,14 +1074,14 @@ export default function SuperAdminUsersPage() {
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="At least 8 characters"
                   disabled={isSubmittingReset}
                 />
               </div>
 
               <div>
-                <label htmlFor="reset-confirm-password" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="reset-confirm-password" className="font-semibold text-slate-700 block mb-1">
                   Confirm New Password <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -1089,13 +1090,13 @@ export default function SuperAdminUsersPage() {
                   required
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="Retype new password"
                   disabled={isSubmittingReset}
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   disabled={isSubmittingReset}
@@ -1104,21 +1105,20 @@ export default function SuperAdminUsersPage() {
                       closeResetModal();
                     }
                   }}
-                  className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-bold hover:bg-slate-50 transition"
+                  className="px-3.5 py-2 rounded-lg border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingReset}
-                  className="px-4 py-2 rounded-lg bg-rose-700 text-white font-bold hover:bg-rose-800 transition disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg bg-rose-700 text-white font-semibold hover:bg-rose-800 transition disabled:opacity-50"
                 >
                   {isSubmittingReset ? 'Resetting...' : 'Reset Password'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
     </div>
   );

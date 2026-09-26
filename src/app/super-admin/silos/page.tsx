@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, ShieldAlert, CheckCircle2, Edit2, AlertTriangle, X } from 'lucide-react';
+import { Modal } from '@/components/ui/modal';
 
 interface Silo {
   id: string;
@@ -222,7 +223,7 @@ export default function SuperAdminSilosPage() {
     <div className="space-y-6 w-full max-w-full overflow-x-hidden">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-black text-[#111311]">Silo Storage</h1>
+          <h1 className="text-xl font-semibold text-foreground">Silo Storage</h1>
           <p className="text-xs font-medium text-slate-500 mt-1">
             Plant silo capacity and active status. Stock is ledger-derived from recorded receipts and issues.
           </p>
@@ -233,7 +234,7 @@ export default function SuperAdminSilosPage() {
             setModalError(null);
             setShowCreateModal(true);
           }}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-2 px-4 py-2.5 bg-[#1E3A8A] text-white rounded-xl text-xs font-bold shadow-sm hover:bg-blue-900 transition shrink-0"
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary text-white rounded-xl text-xs font-semibold shadow-sm hover:bg-primary-hover transition shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add Silo</span>
@@ -241,38 +242,38 @@ export default function SuperAdminSilosPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
           <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center space-x-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* SILOS TABLE */}
-      <div className="bg-white rounded-xl border border-[#EAE4D5]/80 shadow-sm overflow-hidden w-full max-w-full">
+      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-xs min-w-[650px]">
-            <thead className="bg-[#FDFBF9] text-slate-600 border-b border-[#EAE4D5]">
+            <thead className="bg-subtle text-slate-600 border-b border-border">
               <tr>
-                <th className="p-3 font-bold">Code</th>
-                <th className="p-3 font-bold">Name</th>
-                <th className="p-3 font-bold">Total Capacity</th>
-                <th className="p-3 font-bold">Current Stock</th>
-                <th className="p-3 font-bold">Active Reservations</th>
-                <th className="p-3 font-bold">Status</th>
-                <th className="p-3 font-bold text-right">Actions</th>
+                <th className="p-3 font-semibold">Code</th>
+                <th className="p-3 font-semibold">Name</th>
+                <th className="p-3 font-semibold">Total Capacity</th>
+                <th className="p-3 font-semibold">Current Stock</th>
+                <th className="p-3 font-semibold">Active Reservations</th>
+                <th className="p-3 font-semibold">Status</th>
+                <th className="p-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE4D5]/60 font-medium">
+            <tbody className="divide-y divide-border/60 font-medium">
               {loading ? (
                 <tr>
-                  <td colSpan={7} className="p-6 text-center text-slate-400 font-mono">
+                  <td colSpan={7} className="p-6 text-center text-slate-400 tabular-nums">
                     Loading silo storage records...
                   </td>
                 </tr>
@@ -285,24 +286,24 @@ export default function SuperAdminSilosPage() {
               ) : (
                 silos.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50">
-                    <td className="p-3 font-mono font-bold text-[#111311]">{s.siloCode}</td>
-                    <td className="p-3 font-bold text-slate-800">{s.siloName}</td>
-                    <td className="p-3 font-mono font-bold text-blue-900">
+                    <td className="p-3 tabular-nums font-semibold text-foreground">{s.siloCode}</td>
+                    <td className="p-3 font-semibold text-slate-800">{s.siloName}</td>
+                    <td className="p-3 tabular-nums font-semibold text-blue-900">
                       {s.capacityLiters.toLocaleString()} L
                     </td>
-                    <td className="p-3 font-mono text-emerald-800 font-bold">
+                    <td className="p-3 tabular-nums text-emerald-800 font-semibold">
                       {s.currentStockLiters.toLocaleString()} L
                     </td>
-                    <td className="p-3 font-mono text-amber-800 font-semibold">
+                    <td className="p-3 tabular-nums text-amber-800 font-semibold">
                       {s.activeReservationsLiters.toLocaleString()} L
                     </td>
                     <td className="p-3">
                       {s.isActive ? (
-                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-semibold">
                           Active
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-semibold">
                           Inactive
                         </span>
                       )}
@@ -317,7 +318,7 @@ export default function SuperAdminSilosPage() {
                             setEditName(s.siloName);
                             setEditCapacity(s.capacityLiters);
                           }}
-                          className="min-h-[44px] px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-bold transition flex items-center space-x-1.5"
+                          className="min-h-[44px] px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[11px] font-semibold transition flex items-center space-x-1.5"
                           title="Edit Silo Capacity"
                         >
                           <Edit2 className="w-3.5 h-3.5" />
@@ -330,7 +331,7 @@ export default function SuperAdminSilosPage() {
                               setModalError(null);
                               setDeactivatingSilo(s);
                             }}
-                            className="min-h-[44px] px-3 py-2 rounded-lg text-[11px] font-bold transition bg-rose-50 hover:bg-rose-100 text-rose-700"
+                            className="min-h-[44px] px-3 py-2 rounded-lg text-[11px] font-semibold transition bg-rose-50 hover:bg-rose-100 text-rose-700"
                             title="Deactivate Silo"
                           >
                             Deactivate
@@ -340,7 +341,7 @@ export default function SuperAdminSilosPage() {
                             type="button"
                             onClick={() => handleActivate(s)}
                             disabled={isSubmitting}
-                            className="min-h-[44px] px-3 py-2 rounded-lg text-[11px] font-bold transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
+                            className="min-h-[44px] px-3 py-2 rounded-lg text-[11px] font-semibold transition bg-emerald-50 hover:bg-emerald-100 text-emerald-700"
                             title="Reactivate Silo"
                           >
                             Activate
@@ -358,15 +359,9 @@ export default function SuperAdminSilosPage() {
 
       {/* CREATE SILO MODAL */}
       {showCreateModal && (
-        <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Add Silo Storage"
-        >
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-md space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#EAE4D5] pb-3">
-              <h3 className="text-base font-extrabold text-[#111311]">Add Silo Storage</h3>
+        <Modal onClose={closeModals} title="Add silo" className="p-6 max-w-md space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-base font-semibold text-foreground">Add Silo Storage</h3>
               <button
                 type="button"
                 onClick={closeModals}
@@ -378,7 +373,7 @@ export default function SuperAdminSilosPage() {
             </div>
 
             {modalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{modalError}</span>
               </div>
@@ -386,7 +381,7 @@ export default function SuperAdminSilosPage() {
 
             <form onSubmit={handleCreateSilo} className="space-y-3.5 text-xs">
               <div>
-                <label htmlFor="create-silo-code" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-silo-code" className="font-semibold text-slate-700 block mb-1">
                   Silo Code <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -395,14 +390,14 @@ export default function SuperAdminSilosPage() {
                   required
                   value={siloCode}
                   onChange={(e) => setSiloCode(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] uppercase font-mono focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong uppercase tabular-nums focus:outline-none focus:border-primary"
                   placeholder="e.g. SILO-05"
                   disabled={isSubmitting}
                 />
               </div>
 
               <div>
-                <label htmlFor="create-silo-name" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-silo-name" className="font-semibold text-slate-700 block mb-1">
                   Silo Name <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -411,14 +406,14 @@ export default function SuperAdminSilosPage() {
                   required
                   value={siloName}
                   onChange={(e) => setSiloName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="e.g. Storage Silo Tank 05"
                   disabled={isSubmitting}
                 />
               </div>
 
               <div>
-                <label htmlFor="create-silo-capacity" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="create-silo-capacity" className="font-semibold text-slate-700 block mb-1">
                   Total Capacity (Liters) <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -428,44 +423,37 @@ export default function SuperAdminSilosPage() {
                   min={1}
                   value={capacityLiters}
                   onChange={(e) => setCapacityLiters(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] font-mono focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
                   disabled={isSubmitting}
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={closeModals}
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition"
+                  className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-5 py-2 rounded-xl bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition shadow-sm disabled:opacity-50"
+                  className="min-h-[44px] px-5 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Silo'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* EDIT SILO MODAL */}
       {showEditModal && (
-        <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Edit Silo Capacity"
-        >
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-md space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#EAE4D5] pb-3">
-              <h3 className="text-base font-extrabold text-[#111311]">
+        <Modal onClose={closeModals} title="Edit silo capacity" className="p-6 max-w-md space-y-4">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <h3 className="text-base font-semibold text-foreground">
                 Edit Silo ({showEditModal.siloCode})
               </h3>
               <button
@@ -496,7 +484,7 @@ export default function SuperAdminSilosPage() {
             </div>
 
             {modalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{modalError}</span>
               </div>
@@ -504,7 +492,7 @@ export default function SuperAdminSilosPage() {
 
             <form onSubmit={handleUpdateSilo} className="space-y-3.5 text-xs">
               <div>
-                <label htmlFor="edit-silo-name" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="edit-silo-name" className="font-semibold text-slate-700 block mb-1">
                   Silo Name <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -513,13 +501,13 @@ export default function SuperAdminSilosPage() {
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   disabled={isSubmitting}
                 />
               </div>
 
               <div>
-                <label htmlFor="edit-silo-capacity" className="font-bold text-slate-700 block mb-1">
+                <label htmlFor="edit-silo-capacity" className="font-semibold text-slate-700 block mb-1">
                   Capacity (Liters) <span className="text-rose-600">*</span>
                 </label>
                 <input
@@ -529,52 +517,45 @@ export default function SuperAdminSilosPage() {
                   min={1}
                   value={editCapacity}
                   onChange={(e) => setEditCapacity(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] font-mono focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
                   disabled={isSubmitting}
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={closeModals}
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition"
+                  className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-5 py-2 rounded-xl bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition shadow-sm disabled:opacity-50"
+                  className="min-h-[44px] px-5 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
                 >
                   {isSubmitting ? 'Updating...' : 'Update Silo'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* DEACTIVATION CONFIRMATION MODAL */}
       {deactivatingSilo && (
-        <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Confirm Silo Deactivation"
-        >
-          <div className="bg-white rounded-2xl border border-rose-200 p-6 w-full max-w-md space-y-4 shadow-xl">
+        <Modal onClose={closeModals} title="Confirm silo deactivation" className="border-rose-200 p-6 max-w-md space-y-4">
             <div className="flex items-center space-x-3 text-rose-700">
               <div className="p-2.5 bg-rose-100 rounded-xl shrink-0">
                 <AlertTriangle className="w-5 h-5 text-rose-700" />
               </div>
-              <h3 className="text-base font-extrabold text-[#111311]">Deactivate Silo Storage</h3>
+              <h3 className="text-base font-semibold text-foreground">Deactivate Silo Storage</h3>
             </div>
 
             <p className="text-xs text-slate-600 leading-relaxed">
               Are you sure you want to deactivate silo{' '}
-              <strong className="text-[#111311] font-mono">{deactivatingSilo.siloCode}</strong> ({deactivatingSilo.siloName})?
+              <strong className="text-foreground tabular-nums">{deactivatingSilo.siloCode}</strong> ({deactivatingSilo.siloName})?
             </p>
 
             <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-900 text-xs space-y-1">
@@ -583,18 +564,18 @@ export default function SuperAdminSilosPage() {
             </div>
 
             {modalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{modalError}</span>
               </div>
             )}
 
-            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
               <button
                 type="button"
                 onClick={closeModals}
                 disabled={isSubmitting}
-                className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition"
+                className="min-h-[44px] px-4 py-2 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition"
               >
                 Cancel
               </button>
@@ -602,13 +583,12 @@ export default function SuperAdminSilosPage() {
                 type="button"
                 onClick={handleConfirmDeactivate}
                 disabled={isSubmitting}
-                className="min-h-[44px] px-5 py-2 rounded-xl bg-rose-600 text-white font-bold hover:bg-rose-700 transition shadow-sm disabled:opacity-50"
+                className="min-h-[44px] px-5 py-2 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 transition shadow-sm disabled:opacity-50"
               >
                 {isSubmitting ? 'Deactivating...' : 'Confirm Deactivate'}
               </button>
             </div>
-          </div>
-        </div>
+          </Modal>
       )}
     </div>
   );

@@ -571,7 +571,7 @@ export function getRoleNavSections(currentUser: User | null): RoleNavSection[] {
         id: 'security-mgmt',
         label: 'Security Manager Station',
         icon: ShieldCheck,
-        href: '/department/security-manager',
+        href: '/department/security',
       },
       {
         id: 'tv-board',

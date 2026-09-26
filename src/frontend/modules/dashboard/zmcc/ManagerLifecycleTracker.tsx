@@ -36,7 +36,7 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
     <div className="w-full overflow-x-auto pb-1" role="region" aria-label="Vehicle Lifecycle Progression">
       <div className="flex items-start min-w-[620px] justify-between relative">
         {/* Continuous background connector line */}
-        <div className="absolute top-4 left-6 right-6 h-0.5 bg-[#EAE4D5] -z-0" />
+        <div className="absolute top-4 left-6 right-6 h-0.5 bg-border z-0" />
 
         {lifecycle.stages.map((stage, idx) => {
           const Icon = STAGE_ICONS[stage.id] || Circle;
@@ -44,21 +44,21 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
           const isCurrent = stage.status === 'CURRENT';
           const isUpcoming = stage.status === 'UPCOMING';
 
-          let circleBg = 'bg-[#F1F5F9] border-slate-300 text-slate-400';
+          let circleBg = 'bg-slate-100 border-slate-300 text-slate-400';
           let labelColor = 'text-slate-500';
 
           if (isCompleted) {
-            circleBg = 'bg-[#166534] border-[#166534] text-white shadow-sm';
-            labelColor = 'text-[#166534] font-black';
+            circleBg = 'bg-green-800 border-green-800 text-white shadow-sm';
+            labelColor = 'text-green-800 font-semibold';
           } else if (isCurrent) {
-            circleBg = 'bg-[#1E3A8A] border-[#1E3A8A] text-white ring-4 ring-blue-100 shadow-md';
-            labelColor = 'text-[#1E3A8A] font-black';
+            circleBg = 'bg-primary border-primary text-white ring-4 ring-blue-100 shadow-md';
+            labelColor = 'text-primary font-semibold';
           }
 
           return (
             <div
               key={stage.id}
-              className="flex flex-col items-center text-center relative z-10 flex-1 px-1"
+              className="flex flex-col items-center text-center relative z-raised flex-1 px-1"
             >
               {/* Step Circle Indicator */}
               <div
@@ -81,7 +81,7 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
 
               {/* Status Badge / Detail */}
               {isCurrent && (
-                <span className="mt-1 px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-[#EFF6FF] text-[#1E40AF] border border-[#BFDBFE]">
+                <span className="mt-1 px-1.5 py-0.2 rounded text-[10px] font-semibold uppercase bg-blue-50 text-primary-hover border border-blue-200">
                   Current
                 </span>
               )}
@@ -89,13 +89,13 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
               {/* Specific Stage Contexts */}
               {stage.id === 'PLANT_QA' && stage.detailText && (
                 <span
-                  className={`mt-1 text-[9.5px] font-mono font-extrabold px-1.5 py-0.5 rounded ${
+                  className={`mt-1 text-[9.5px] tabular-nums font-semibold px-1.5 py-0.5 rounded ${
                     lifecycle.portionQA.badgeType === 'ALL_ACCEPTED'
-                      ? 'bg-[#F0FDF4] text-[#166534]'
+                      ? 'bg-green-50 text-green-800'
                       : lifecycle.portionQA.badgeType === 'ALL_REJECTED' || lifecycle.portionQA.badgeType === 'MIXED'
-                      ? 'bg-[#FEF2F2] text-[#991B1B]'
+                      ? 'bg-red-50 text-red-800'
                       : lifecycle.portionQA.badgeType === 'HAS_HOLD'
-                      ? 'bg-[#FFFBEB] text-[#B45309]'
+                      ? 'bg-amber-50 text-amber-700'
                       : 'bg-slate-100 text-slate-700'
                   }`}
                 >
@@ -104,13 +104,13 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
               )}
 
               {stage.metricText && (
-                <span className="mt-0.5 text-[9.5px] font-mono font-bold text-slate-700">
+                <span className="mt-0.5 text-[9.5px] tabular-nums font-semibold text-slate-700">
                   {stage.metricText}
                 </span>
               )}
 
               {stage.id === 'UNLOADING' && stage.detailText && (
-                <span className="mt-0.5 text-[9px] font-mono text-slate-600">
+                <span className="mt-0.5 text-[10px] tabular-nums text-slate-600">
                   {stage.detailText}
                 </span>
               )}
@@ -119,19 +119,19 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
               {stage.id === 'UNLOADING' ? (
                 <div className="mt-0.5 space-y-0.5">
                   {stage.eventTimestamp && (
-                    <span className="text-[8.5px] font-mono text-slate-500 block leading-tight">
+                    <span className="text-[8.5px] tabular-nums text-slate-500 block leading-tight">
                       Started: {stage.eventTimestamp}
                     </span>
                   )}
                   {stage.eventTimestampEnd && (
-                    <span className="text-[8.5px] font-mono text-slate-500 block leading-tight">
+                    <span className="text-[8.5px] tabular-nums text-slate-500 block leading-tight">
                       Completed: {stage.eventTimestampEnd}
                     </span>
                   )}
                 </div>
               ) : (
                 stage.eventTimestamp && (
-                  <span className="mt-0.5 text-[8.5px] font-mono text-slate-500 block leading-tight">
+                  <span className="mt-0.5 text-[8.5px] tabular-nums text-slate-500 block leading-tight">
                     {stage.eventTimestamp}
                   </span>
                 )

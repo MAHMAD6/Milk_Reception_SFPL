@@ -51,13 +51,13 @@ export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
   return (
     <div className="space-y-6">
       {/* Overview & Pricing Context Banner */}
-      <div className="bg-white border border-[#EAE4D5] rounded-xl p-4 shadow-sm">
+      <div className="bg-white border border-border rounded-xl p-4 shadow-sm">
         <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-[#1E3A8A] shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-primary shrink-0">
             <Layers className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-xs font-bold text-[#111311] uppercase tracking-wider">
+            <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
               4-Tier Physical Supply Chain Loss Diagnostics
             </h2>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
@@ -73,30 +73,30 @@ export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
           <div
             key={t.tier}
             className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col justify-between ${
-              idx === 3 ? 'border-[#1E3A8A]/40 bg-slate-50/50' : 'border-[#EAE4D5]'
+              idx === 3 ? 'border-primary/40 bg-slate-50/50' : 'border-border'
             }`}
           >
             <div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">{t.tier}</span>
-                <span className="text-xs font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
+                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t.tier}</span>
+                <span className="text-xs tabular-nums font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
                   {t.lossPercent}% variance
                 </span>
               </div>
-              <h3 className="text-sm font-bold text-[#111311] mt-2">{t.name}</h3>
+              <h3 className="text-sm font-semibold text-foreground mt-2">{t.name}</h3>
               <div className="mt-1 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
                 <span>{t.scope}</span>
               </div>
 
-              <div className="mt-4 p-3 rounded-lg bg-white border border-[#EAE4D5] flex items-center justify-between">
+              <div className="mt-4 p-3 rounded-lg bg-white border border-border flex items-center justify-between">
                 <span className="text-xs text-slate-600 font-medium">Shrinkage Volume</span>
-                <span className="text-base font-mono font-bold text-[#111311]">
+                <span className="text-base tabular-nums font-semibold text-foreground">
                   {t.lossLiters.toLocaleString()} L
                 </span>
               </div>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-[#EAE4D5] text-xs text-slate-600 leading-relaxed">
+            <div className="mt-4 pt-3 border-t border-border text-xs text-slate-600 leading-relaxed">
               {t.details}
             </div>
           </div>

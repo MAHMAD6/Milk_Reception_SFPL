@@ -13,6 +13,7 @@ import {
   Route,
   CheckCircle2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { SupplyChainLossSummary } from '@/backend/services/lossCalculationService';
 
 export interface SupplyChainLossCardProps {
@@ -89,7 +90,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
       link.remove();
       window.URL.revokeObjectURL(downloadUrl);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Failed to download report.');
+      toast.error('Export failed', { description: err instanceof Error ? err.message : 'Failed to download report.' });
     } finally {
       setIsExporting(false);
     }
@@ -104,7 +105,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
             <Layers className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Supply Chain Loss Hierarchy</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Supply Chain Loss Hierarchy</h3>
             <p className="text-xs text-slate-500">
               {summary ? `${summary.startDate} to ${summary.endDate}` : 'End-to-end 3-tier loss metrics'}
             </p>
@@ -113,7 +114,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
 
         <div className="flex items-center gap-2">
           {/* Period Selector Tabs */}
-          <div className="flex items-center p-1 bg-slate-100 rounded-lg border border-slate-200 text-xs font-bold">
+          <div className="flex items-center p-1 bg-slate-100 rounded-lg border border-slate-200 text-xs font-semibold">
             <button
               type="button"
               onClick={() => setPeriod('today')}
@@ -160,7 +161,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
               type="button"
               onClick={handleExportExcel}
               disabled={isExporting || isLoading}
-              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition-colors disabled:opacity-50"
+              className="flex items-center space-x-1 px-3 py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition-colors disabled:opacity-50"
             >
               <Download className={`w-3.5 h-3.5 ${isExporting ? 'animate-pulse' : ''}`} />
               <span>{isExporting ? 'Exporting...' : 'Export Excel'}</span>
@@ -193,17 +194,17 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
           <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/60">
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-700">
+                <div className="flex items-center space-x-1.5 text-xs font-semibold text-slate-700">
                   <Route className="w-3.5 h-3.5 text-blue-700" />
                   <span>Tier 1: MOT Route Loss</span>
                 </div>
                 {summary.tier1RouteLoss.lossLiters > 0 ? (
-                  <span className="flex items-center text-xs font-bold text-amber-700">
+                  <span className="flex items-center text-xs font-semibold text-amber-700">
                     <TrendingDown className="w-3 h-3 mr-0.5" />
                     {summary.tier1RouteLoss.lossPercent.toFixed(2)}%
                   </span>
                 ) : (
-                  <span className="flex items-center text-xs font-bold text-emerald-700">
+                  <span className="flex items-center text-xs font-semibold text-emerald-700">
                     <CheckCircle2 className="w-3 h-3 mr-0.5" />
                     Balanced
                   </span>
@@ -213,13 +214,13 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
               <div className="space-y-1">
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-slate-500">Loss Volume:</span>
-                  <span className="text-base font-black text-slate-900">
+                  <span className="text-base font-semibold text-slate-900">
                     {summary.tier1RouteLoss.lossLiters.toLocaleString()} L
                   </span>
                 </div>
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-slate-500">Loss @13% TS:</span>
-                  <span className="text-xs font-bold text-slate-700">
+                  <span className="text-xs font-semibold text-slate-700">
                     {summary.tier1RouteLoss.at13tsLossLiters.toLocaleString()} L
                   </span>
                 </div>
@@ -236,17 +237,17 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
           <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/60">
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-700">
+                <div className="flex items-center space-x-1.5 text-xs font-semibold text-slate-700">
                   <Building2 className="w-3.5 h-3.5 text-purple-700" />
                   <span>Tier 2: ZMCC Process Loss</span>
                 </div>
                 {summary.tier2ZmccLoss.lossLiters > 0 ? (
-                  <span className="flex items-center text-xs font-bold text-amber-700">
+                  <span className="flex items-center text-xs font-semibold text-amber-700">
                     <TrendingDown className="w-3 h-3 mr-0.5" />
                     {summary.tier2ZmccLoss.lossPercent.toFixed(2)}%
                   </span>
                 ) : (
-                  <span className="flex items-center text-xs font-bold text-emerald-700">
+                  <span className="flex items-center text-xs font-semibold text-emerald-700">
                     <CheckCircle2 className="w-3 h-3 mr-0.5" />
                     Balanced
                   </span>
@@ -256,13 +257,13 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
               <div className="space-y-1">
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-slate-500">Loss Volume:</span>
-                  <span className="text-base font-black text-slate-900">
+                  <span className="text-base font-semibold text-slate-900">
                     {summary.tier2ZmccLoss.lossLiters.toLocaleString()} L
                   </span>
                 </div>
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-slate-500">Loss @13% TS:</span>
-                  <span className="text-xs font-bold text-slate-700">
+                  <span className="text-xs font-semibold text-slate-700">
                     {summary.tier2ZmccLoss.at13tsLossLiters.toLocaleString()} L
                   </span>
                 </div>
@@ -279,22 +280,22 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
           <div className="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/60">
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-slate-700">
+                <div className="flex items-center space-x-1.5 text-xs font-semibold text-slate-700">
                   <Truck className="w-3.5 h-3.5 text-emerald-700" />
                   <span>Tier 3: Road Transit Loss</span>
                 </div>
                 {summary.tier3TransitLoss.isHighLoss ? (
-                  <span className="flex items-center px-1.5 py-0.5 rounded bg-red-100 text-red-800 text-xs font-bold">
+                  <span className="flex items-center px-1.5 py-0.5 rounded bg-red-100 text-red-800 text-xs font-semibold">
                     <AlertTriangle className="w-3 h-3 mr-0.5" />
                     &gt; 1.0% Loss
                   </span>
                 ) : summary.tier3TransitLoss.lossLiters > 0 ? (
-                  <span className="flex items-center text-xs font-bold text-slate-700">
+                  <span className="flex items-center text-xs font-semibold text-slate-700">
                     <TrendingDown className="w-3 h-3 mr-0.5" />
                     {summary.tier3TransitLoss.lossPercent.toFixed(2)}%
                   </span>
                 ) : (
-                  <span className="flex items-center text-xs font-bold text-emerald-700">
+                  <span className="flex items-center text-xs font-semibold text-emerald-700">
                     <CheckCircle2 className="w-3 h-3 mr-0.5" />
                     Normal
                   </span>
@@ -305,7 +306,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-slate-500">Loss Volume:</span>
                   <span
-                    className={`text-base font-black ${
+                    className={`text-base font-semibold ${
                       summary.tier3TransitLoss.isHighLoss ? 'text-red-700' : 'text-slate-900'
                     }`}
                   >
@@ -314,7 +315,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
                 </div>
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-slate-500">Loss @13% TS:</span>
-                  <span className="text-xs font-bold text-slate-700">
+                  <span className="text-xs font-semibold text-slate-700">
                     {summary.tier3TransitLoss.at13tsLossLiters.toLocaleString()} L
                   </span>
                 </div>
@@ -331,11 +332,11 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
           <div className="p-3.5 rounded-xl border border-blue-200 bg-blue-50/40 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between pb-2 mb-2 border-b border-blue-200/60">
-                <div className="flex items-center space-x-1.5 text-xs font-bold text-blue-900">
+                <div className="flex items-center space-x-1.5 text-xs font-semibold text-blue-900">
                   <Layers className="w-3.5 h-3.5 text-blue-800" />
                   <span>Total MPD Supply Chain Loss</span>
                 </div>
-                <span className="flex items-center text-xs font-black text-blue-950">
+                <span className="flex items-center text-xs font-semibold text-blue-950">
                   {summary.tier4TotalLoss.lossPercent.toFixed(2)}%
                 </span>
               </div>
@@ -343,13 +344,13 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
               <div className="space-y-1">
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-blue-800">Total Loss:</span>
-                  <span className="text-base font-black text-blue-950">
+                  <span className="text-base font-semibold text-blue-950">
                     {summary.tier4TotalLoss.lossLiters.toLocaleString()} L
                   </span>
                 </div>
                 <div className="flex items-baseline justify-between">
                   <span className="text-xs text-blue-800">Total @13% TS:</span>
-                  <span className="text-xs font-bold text-blue-900">
+                  <span className="text-xs font-semibold text-blue-900">
                     {summary.tier4TotalLoss.at13tsLossLiters.toLocaleString()} L
                   </span>
                 </div>

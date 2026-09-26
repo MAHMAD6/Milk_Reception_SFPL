@@ -104,14 +104,14 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
     <div className="space-y-4">
       {/* Global Source Selector if user is NOT source-bound (e.g. Admin) */}
       {!isSourceBound && availableSources.length > 0 && (
-        <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-300/80 text-xs space-y-1.5 shadow-sm">
-          <label className="block font-bold text-amber-950">
+        <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-300/80 text-xs space-y-1.5 shadow-sm">
+          <label className="block font-semibold text-amber-950">
             Select Operating Procurement Source (Admin Override):
           </label>
           <select
             value={selectedSourceId}
             onChange={(e) => onSelectSourceId(e.target.value)}
-            className="w-full h-11 px-3.5 font-bold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
+            className="w-full h-11 px-3.5 font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-hover"
           >
             <option value="">-- Select Procurement Source --</option>
             {availableSources.map((s) => (
@@ -125,23 +125,23 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
 
       {/* Notice when unbound admin has not yet selected a source */}
       {!isSourceBound && !selectedSourceId && (
-        <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold">
+        <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-semibold">
           Please select an operating procurement source from the dropdown above to initialize the dispatch draft.
         </div>
       )}
 
       {/* Vehicle Registration & Timestamp Card */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#C4B9A3] shadow-sm space-y-4">
+      <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-4">
         <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
-          <Truck className="w-4 h-4 text-[#1E40AF]" />
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-[#111311]">
+          <Truck className="w-4 h-4 text-primary-hover" />
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Vehicle & Dispatch Time
           </h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
           <div className="space-y-1">
-            <label htmlFor="vehicle-number-input" className="block text-xs font-bold text-[#111311]">
+            <label htmlFor="vehicle-number-input" className="block text-xs font-semibold text-foreground">
               Vehicle No. *
             </label>
             <input
@@ -150,20 +150,20 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               value={vehicleNumber}
               onChange={(e) => onVehicleNumberChange(e.target.value)}
               placeholder="e.g. KBL-8492"
-              className={`w-full h-11 px-3.5 text-sm font-mono font-bold rounded-xl border bg-white text-[#111311] focus:ring-2 focus:ring-[#1E40AF] outline-none transition ${
-                vehicleNumberError ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500' : 'border-[#C4B9A3]'
+              className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+                vehicleNumberError ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500' : 'border-border-strong'
               }`}
               required
             />
             {vehicleNumberError && (
-              <p className="text-xs font-bold text-rose-600 mt-1" id="vehicle-number-error">
+              <p className="text-xs font-semibold text-rose-600 mt-1" id="vehicle-number-error">
                 {vehicleNumberError}
               </p>
             )}
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="dispatch-note-input" className="block text-xs font-bold text-[#111311]">
+            <label htmlFor="dispatch-note-input" className="block text-xs font-semibold text-foreground">
               Raw Milk Dispatch Note No.
             </label>
             <input
@@ -174,14 +174,14 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               value={rawMilkDispatchNoteNumber || ''}
               onChange={(e) => onRawMilkDispatchNoteNumberChange?.(e.target.value.replace(/[^0-9]/g, ''))}
               placeholder="e.g. 008124"
-              className="w-full h-11 px-3.5 text-xs font-mono font-bold rounded-xl border border-[#C4B9A3] bg-white text-[#111311] focus:ring-2 focus:ring-[#1E40AF] outline-none transition"
+              className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
             />
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="dispatch-time-input" className="block text-xs font-bold text-[#111311] flex items-center justify-between">
+            <label htmlFor="dispatch-time-input" className="block text-xs font-semibold text-foreground flex items-center justify-between">
               <span>Dispatch Time *</span>
-              <Clock className="w-3.5 h-3.5 text-[#1E40AF]" />
+              <Clock className="w-3.5 h-3.5 text-primary-hover" />
             </label>
             <input
               id="dispatch-time-input"
@@ -189,7 +189,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               value={dispatchOpDatetime}
               max={maxDatetime}
               onChange={(e) => onDispatchOpDatetimeChange(e.target.value)}
-              className="w-full h-11 px-3.5 text-xs font-mono font-bold rounded-xl border border-[#C4B9A3] bg-white text-[#111311] focus:ring-2 focus:ring-[#1E40AF] outline-none transition"
+              className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
               required
             />
           </div>
@@ -197,22 +197,22 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
       </div>
 
       {/* Whole-Vehicle Dispatch Quantity Section */}
-      <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#C4B9A3] shadow-sm space-y-3.5">
+      <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-2 gap-1">
-          <label className="text-xs font-extrabold uppercase tracking-wider text-[#111311]">
+          <label className="text-xs font-semibold uppercase tracking-wider text-foreground">
             {sourceType === 'ZMCC' ? 'Measured Tank / Vehicle Issue' : 'Measured Whole-Vehicle Dispatch Quantity'} *
           </label>
         </div>
 
         {!isPolicyReady ? (
-          <div className="p-4 text-center rounded-xl bg-slate-50 border border-dashed border-[#C4B9A3] text-xs font-semibold text-slate-500">
+          <div className="p-4 text-center rounded-xl bg-slate-50 border border-dashed border-border-strong text-xs font-semibold text-slate-500">
             Loading frozen quantity policy snapshot...
           </div>
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1">
-                <label htmlFor="vehicle-quantity-input" className="block text-xs font-bold text-[#111311]">
+                <label htmlFor="vehicle-quantity-input" className="block text-xs font-semibold text-foreground">
                   Value *
                 </label>
                 <input
@@ -223,22 +223,22 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                   value={vehicleQuantity.value}
                   onChange={(e) => onVehicleQuantityValueChange(e.target.value)}
                   placeholder="e.g. 19500"
-                  className={`w-full h-11 px-3.5 text-sm font-mono font-bold rounded-xl border bg-white text-[#111311] focus:ring-2 focus:ring-[#1E40AF] outline-none transition ${
-                    vehicleQuantityError ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500' : 'border-[#C4B9A3]'
+                  className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+                    vehicleQuantityError ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500' : 'border-border-strong'
                   }`}
                   required
                 />
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="vehicle-unit-select" className="block text-xs font-bold text-[#111311]">
+                <label htmlFor="vehicle-unit-select" className="block text-xs font-semibold text-foreground">
                   Unit *
                 </label>
                 <select
                   id="vehicle-unit-select"
                   value={vehicleQuantity.unit}
                   onChange={(e) => onVehicleUnitChange(e.target.value as QuantityUnitType)}
-                  className="w-full h-11 px-3 text-xs font-mono font-black rounded-xl border border-[#C4B9A3] bg-white text-[#111311] focus:ring-2 focus:ring-[#1E40AF] outline-none transition"
+                  className="w-full h-11 px-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
                 >
                   {vehicleAllowedUnits.map((u) => (
                     <option key={u} value={u}>
@@ -249,14 +249,14 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label htmlFor="vehicle-basis-select" className="block text-xs font-bold text-[#111311]">
+                <label htmlFor="vehicle-basis-select" className="block text-xs font-semibold text-foreground">
                   Basis *
                 </label>
-                <div className="w-full h-11 px-3 flex items-center justify-between rounded-xl border border-emerald-300 bg-emerald-50/60 text-[#111311]">
-                  <span className="text-xs font-mono font-black text-emerald-900 tracking-wider">
+                <div className="w-full h-11 px-3 flex items-center justify-between rounded-xl border border-emerald-300 bg-emerald-50/60 text-foreground">
+                  <span className="text-xs tabular-nums font-semibold text-emerald-900 tracking-wider">
                     {vehicleQuantity.basis || 'MEASURED'}
                   </span>
-                  <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800 bg-emerald-200/70 px-2 py-0.5 rounded-md">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-800 bg-emerald-200/70 px-2 py-0.5 rounded-md">
                     Authoritative
                   </span>
                 </div>
@@ -265,23 +265,23 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
             </div>
 
             {/* Whole-Vehicle / Composite Quality Section */}
-            <div className="p-4 rounded-2xl bg-amber-50/60 border border-amber-200/90 space-y-3 shadow-xs">
+            <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200/90 space-y-3 shadow-xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-amber-200/70 pb-2">
                 <div className="flex items-center space-x-1.5">
                   <Activity className="w-4 h-4 text-amber-900" />
-                  <span className="text-xs font-black uppercase tracking-wider text-amber-950">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-amber-950">
                     Whole-Vehicle Quality {sourceType === 'ZMCC' ? '(Required)' : '(Optional)'}
                   </span>
                 </div>
                 {isVehicleQualityAuto ? (
-                  <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200">
+                  <span className="text-xs font-semibold text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200">
                     Auto-calculated from Portions
                   </span>
                 ) : onResetVehicleQualityAuto ? (
                   <button
                     type="button"
                     onClick={onResetVehicleQualityAuto}
-                    className="text-xs font-bold text-[#1E40AF] hover:underline"
+                    className="text-xs font-semibold text-primary-hover hover:underline"
                   >
                     Reset to Auto-Calculate
                   </button>
@@ -290,7 +290,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label htmlFor="vehicle-lr-input" className="block text-xs font-bold text-amber-950">
+                  <label htmlFor="vehicle-lr-input" className="block text-xs font-semibold text-amber-950">
                     Vehicle Composite LR {sourceType === 'ZMCC' ? '*' : (vehicleQuantity.unit === 'KG' ? '*' : '(Optional)')}
                   </label>
                   <input
@@ -302,12 +302,12 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                     value={vehicleLr || ''}
                     onChange={(e) => onVehicleLrChange && onVehicleLrChange(e.target.value)}
                     placeholder="e.g. 28.00"
-                    className="w-full h-11 px-3.5 text-sm font-mono font-bold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
+                    className="w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-hover"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label htmlFor="vehicle-fat-input" className="block text-xs font-bold text-amber-950">
+                  <label htmlFor="vehicle-fat-input" className="block text-xs font-semibold text-amber-950">
                     Vehicle Composite Fat % {sourceType === 'ZMCC' ? '*' : '(Optional)'}
                   </label>
                   <input
@@ -319,7 +319,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                     value={vehicleFat || ''}
                     onChange={(e) => onVehicleFatChange && onVehicleFatChange(e.target.value)}
                     placeholder="e.g. 3.80"
-                    className="w-full h-11 px-3.5 text-sm font-mono font-bold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1E40AF]"
+                    className="w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-hover"
                   />
                 </div>
               </div>
@@ -330,12 +330,12 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div className="p-3 rounded-xl bg-white border border-blue-200 shadow-xs space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-slate-600 font-sans">Gross Liters</span>
-                        <span className="text-xs font-bold text-slate-500 font-mono">
+                        <span className="text-xs font-semibold text-slate-600 font-sans">Gross Liters</span>
+                        <span className="text-xs font-semibold text-slate-500 tabular-nums">
                           Density: {previewDensity !== null ? previewDensity.toFixed(4) : '—'}
                         </span>
                       </div>
-                      <span className="text-base font-black text-blue-950 font-mono block">
+                      <span className="text-base font-semibold text-blue-950 tabular-nums block">
                         {previewGrossLiters !== null
                           ? `${previewGrossLiters.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`
                           : '—'}
@@ -344,12 +344,12 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
 
                     <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 shadow-xs space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold text-emerald-900 font-sans">Liters @ 13% TS</span>
-                        <span className="text-xs font-bold text-emerald-800 font-mono">
+                        <span className="text-xs font-semibold text-emerald-900 font-sans">Liters @ 13% TS</span>
+                        <span className="text-xs font-semibold text-emerald-800 tabular-nums">
                           SNF: {previewSnf !== null ? `${previewSnf.toFixed(2)}%` : '—'} • TS: {previewTs !== null ? `${previewTs.toFixed(2)}%` : '—'}
                         </span>
                       </div>
-                      <span className="text-base font-black text-emerald-950 font-mono block">
+                      <span className="text-base font-semibold text-emerald-950 tabular-nums block">
                         {previewAt13ts !== null
                           ? `${previewAt13ts.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} L`
                           : '—'}
@@ -361,7 +361,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
             </div>
 
             {vehicleQuantityError && (
-              <p className="text-xs font-bold text-rose-600 mt-1" id="vehicle-quantity-error">
+              <p className="text-xs font-semibold text-rose-600 mt-1" id="vehicle-quantity-error">
                 {vehicleQuantityError}
               </p>
             )}

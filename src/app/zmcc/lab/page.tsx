@@ -6,6 +6,8 @@ import { User } from '@core/types';
 import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { ZmccLabWorkspace } from '@/frontend/modules/zmcc/lab/ZmccLabWorkspace';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 function ZmccLabContent() {
   const router = useRouter();
@@ -74,9 +76,7 @@ function ZmccLabContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">
-        Loading ZMCC Laboratory Station...
-      </div>
+      <PageLoader label="Loading ZMCC Laboratory Station…" className="min-h-screen" />
     );
   }
 
@@ -85,7 +85,7 @@ function ZmccLabContent() {
   }
 
   return (
-    <div className="w-full max-w-full flex flex-col h-screen bg-[#FDFBF9] text-[#111311] overflow-hidden font-sans">
+    <div className="w-full max-w-full flex flex-col h-screen bg-background text-foreground overflow-hidden">
       {/* Header */}
       <Header
         currentUser={currentUser}
@@ -107,7 +107,9 @@ function ZmccLabContent() {
       {/* Main Full-Width Responsive Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-full space-y-4">
+          <PageTransition>
           <ZmccLabWorkspace currentUser={currentUser} />
+          </PageTransition>
         </main>
       </div>
     </div>
@@ -116,7 +118,7 @@ function ZmccLabContent() {
 
 export default function ZmccLabPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">Loading ZMCC Laboratory Station...</div>}>
+    <Suspense fallback={<PageLoader label="Loading ZMCC Laboratory Station…" className="min-h-screen" />}>
       <ZmccLabContent />
     </Suspense>
   );

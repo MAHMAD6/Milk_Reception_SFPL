@@ -8,6 +8,8 @@ import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNa
 import { ZmccMasterDataWorkspace, MasterDataTab } from '@/frontend/modules/zmcc/ZmccMasterDataWorkspace';
 import { MotOperationsWorkspace, MotWorkspaceTab } from '@/frontend/modules/mot/MotOperationsWorkspace';
 import { ZmccArrivalsWorkspace, MainTab as ArrivalsTab } from '@/frontend/modules/zmcc/arrivals/ZmccArrivalsWorkspace';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 function PheContent() {
   const router = useRouter();
@@ -116,9 +118,7 @@ function PheContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">
-        Loading PHE Station...
-      </div>
+      <PageLoader label="Loading PHE Station…" className="min-h-screen" />
     );
   }
 
@@ -127,7 +127,7 @@ function PheContent() {
   }
 
   return (
-    <div className="w-full max-w-full flex flex-col h-screen bg-[#FDFBF9] text-[#111311] overflow-hidden font-sans">
+    <div className="w-full max-w-full flex flex-col h-screen bg-background text-foreground overflow-hidden">
       {/* Header with Accessible Hamburger Trigger */}
       <Header
         currentUser={currentUser}
@@ -150,6 +150,7 @@ function PheContent() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Center Content Pane with Full Canvas Width */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 w-full max-w-full space-y-4">
+          <PageTransition>
           {section === 'arrivals' && (
             <ZmccArrivalsWorkspace
               currentUser={currentUser}
@@ -199,6 +200,7 @@ function PheContent() {
               }}
             />
           )}
+          </PageTransition>
         </main>
       </div>
     </div>
@@ -207,7 +209,7 @@ function PheContent() {
 
 export default function PhePage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">Loading PHE Station...</div>}>
+    <Suspense fallback={<PageLoader label="Loading PHE Station…" className="min-h-screen" />}>
       <PheContent />
     </Suspense>
   );

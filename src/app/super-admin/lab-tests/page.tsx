@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Edit2, ShieldAlert, CheckCircle2, Lock, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
 import { mapScopeCheckboxes } from '@/lib/validations/labTest';
+import { Modal } from '@/components/ui/modal';
 
 interface LabTestResultOption {
   value: string;
@@ -295,25 +296,25 @@ export default function SuperAdminLabTestsPage() {
   return (
     <div className="space-y-4 w-full max-w-full overflow-x-hidden">
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
           <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center space-x-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* LAB TESTS TABLE */}
-      <div className="bg-white rounded-xl border border-[#EAE4D5]/80 shadow-sm overflow-hidden w-full max-w-full">
-        <div className="p-3 sm:px-4 sm:py-3 border-b border-[#EAE4D5] flex items-center justify-between">
+      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
+        <div className="p-3 sm:px-4 sm:py-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h2 className="text-sm font-bold text-[#111311]">Lab Tests</h2>
-            <span className="text-xs font-mono px-2 py-0.5 bg-[#FDFBF9] border border-[#EAE4D5] text-slate-600 rounded-full">
+            <h2 className="text-sm font-semibold text-foreground">Lab Tests</h2>
+            <span className="text-xs tabular-nums px-2 py-0.5 bg-subtle border border-border text-slate-600 rounded-full">
               {labTests.length}
             </span>
           </div>
@@ -325,31 +326,32 @@ export default function SuperAdminLabTestsPage() {
             }}
             aria-label="Add lab test"
             title="Add lab test"
-            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#1E3A8A] text-white hover:bg-blue-900 transition shadow-xs"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4" />
+            <span>Add lab test</span>
           </button>
         </div>
 
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-xs min-w-[700px]">
-            <thead className="bg-[#FDFBF9] text-slate-600 border-b border-[#EAE4D5]">
+            <thead className="bg-subtle text-slate-600 border-b border-border">
               <tr>
-                <th className="p-3 font-bold w-12 text-center">#</th>
-                <th className="p-3 font-bold">Test Code</th>
-                <th className="p-3 font-bold">Test Name</th>
-                <th className="p-3 font-bold">Result Type & Options</th>
-                <th className="p-3 font-bold">Unit</th>
-                <th className="p-3 font-bold">Scope</th>
-                <th className="p-3 font-bold">Historical Results</th>
-                <th className="p-3 font-bold">Status</th>
-                <th className="p-3 font-bold text-right">Actions</th>
+                <th className="p-3 font-semibold w-12 text-center">#</th>
+                <th className="p-3 font-semibold">Test Code</th>
+                <th className="p-3 font-semibold">Test Name</th>
+                <th className="p-3 font-semibold">Result Type & Options</th>
+                <th className="p-3 font-semibold">Unit</th>
+                <th className="p-3 font-semibold">Scope</th>
+                <th className="p-3 font-semibold">Historical Results</th>
+                <th className="p-3 font-semibold">Status</th>
+                <th className="p-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE4D5]/60 font-medium">
+            <tbody className="divide-y divide-border/60 font-medium">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="p-6 text-center text-slate-400 font-mono">
+                  <td colSpan={9} className="p-6 text-center text-slate-400 tabular-nums">
                     Loading laboratory test catalog...
                   </td>
                 </tr>
@@ -362,13 +364,13 @@ export default function SuperAdminLabTestsPage() {
               ) : (
                 labTests.map((t) => (
                   <tr key={t.id} className="hover:bg-slate-50">
-                    <td className="p-3 text-center font-mono font-bold text-slate-400">{t.displayOrder}</td>
-                    <td className="p-3 font-mono font-bold text-[#111311]">{t.testCode}</td>
-                    <td className="p-3 font-bold text-slate-800">{t.testName}</td>
+                    <td className="p-3 text-center tabular-nums font-semibold text-slate-400">{t.displayOrder}</td>
+                    <td className="p-3 tabular-nums font-semibold text-foreground">{t.testCode}</td>
+                    <td className="p-3 font-semibold text-slate-800">{t.testName}</td>
                     <td className="p-3">
                       <div className="space-y-1">
                         <span
-                          className={`px-2 py-0.5 rounded font-mono text-xs font-bold flex items-center w-fit space-x-1 ${
+                          className={`px-2 py-0.5 rounded tabular-nums text-xs font-semibold flex items-center w-fit space-x-1 ${
                             t.resultType === 'NUMERIC'
                               ? 'bg-blue-100 text-blue-900'
                               : t.resultType === 'POSITIVE_NEGATIVE'
@@ -393,7 +395,7 @@ export default function SuperAdminLabTestsPage() {
                             {t.resultOptions.map((opt) => (
                               <span
                                 key={opt.value}
-                                className={`px-1.5 py-0.5 rounded text-xs font-mono font-bold border ${
+                                className={`px-1.5 py-0.5 rounded text-xs tabular-nums font-semibold border ${
                                   opt.isPassing === true
                                     ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
                                     : opt.isPassing === false
@@ -409,34 +411,34 @@ export default function SuperAdminLabTestsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="p-3 font-mono text-slate-600">{t.unit || '-'}</td>
+                    <td className="p-3 tabular-nums text-slate-600">{t.unit || '-'}</td>
                     <td className="p-3">
                       <div className="flex flex-wrap gap-1">
                         {(t.testScope === 'DISPATCH' || t.testScope === 'BOTH' || t.testScope === 'ALL') && (
-                          <span className="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-xs font-bold font-mono">
+                          <span className="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-xs font-semibold tabular-nums">
                             Dispatch
                           </span>
                         )}
                         {(t.testScope === 'PLANT' || t.testScope === 'BOTH' || t.testScope === 'ALL') && (
-                          <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-bold font-mono">
+                          <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-semibold tabular-nums">
                             Plant QA
                           </span>
                         )}
                         {(t.testScope === 'ZMCC' || t.testScope === 'ALL') && (
-                          <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-xs font-bold font-mono">
+                          <span className="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-xs font-semibold tabular-nums">
                             ZMCC Lab
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="p-3 font-mono font-bold text-slate-700">{t.historicalResultsCount} records</td>
+                    <td className="p-3 tabular-nums font-semibold text-slate-700">{t.historicalResultsCount} records</td>
                     <td className="p-3">
                       {t.isActive ? (
-                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-bold">
+                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-xs font-semibold">
                           Active
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-xs font-bold">
+                        <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-xs font-semibold">
                           Inactive
                         </span>
                       )}
@@ -456,7 +458,7 @@ export default function SuperAdminLabTestsPage() {
                           setEditDisplayOrder(t.displayOrder);
                           setEditOptions(t.resultOptions ? JSON.parse(JSON.stringify(t.resultOptions)) : []);
                         }}
-                        className="px-2.5 py-1.5 min-h-[44px] inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition"
+                        className="px-2.5 py-1.5 min-h-[44px] inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-semibold transition"
                       >
                         <Edit2 className="w-3.5 h-3.5 mr-1" />
                         Edit Metadata
@@ -470,7 +472,7 @@ export default function SuperAdminLabTestsPage() {
                             action: t.isActive ? 'DEACTIVATE' : 'ACTIVATE',
                           });
                         }}
-                        className={`px-2.5 py-1.5 min-h-[44px] inline-flex items-center justify-center rounded-lg text-xs font-bold transition ${
+                        className={`px-2.5 py-1.5 min-h-[44px] inline-flex items-center justify-center rounded-lg text-xs font-semibold transition ${
                           t.isActive
                             ? 'bg-rose-50 hover:bg-rose-100 text-rose-700'
                             : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
@@ -489,10 +491,9 @@ export default function SuperAdminLabTestsPage() {
 
       {/* CREATE LAB TEST MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-lg space-y-4 shadow-xl my-8">
+        <Modal onClose={closeCreateModal} title="Create laboratory test" className="p-6 max-w-lg space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-[#111311]">Create New Laboratory Test</h3>
+              <h3 className="text-base font-semibold text-foreground">Create New Laboratory Test</h3>
               <button
                 type="button"
                 onClick={closeCreateModal}
@@ -505,7 +506,7 @@ export default function SuperAdminLabTestsPage() {
             </div>
 
             {createModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{createModalError}</span>
               </div>
@@ -513,20 +514,20 @@ export default function SuperAdminLabTestsPage() {
 
             <form onSubmit={handleCreateTest} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Test Name *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Test Name *</label>
                 <input
                   type="text"
                   required
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
                   placeholder="e.g. Alcohol Stability Test"
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Result Type *</label>
+                  <label className="font-semibold text-slate-700 block mb-1">Result Type *</label>
                   <select
                     value={createResultType}
                     onChange={(e) => {
@@ -539,7 +540,7 @@ export default function SuperAdminLabTestsPage() {
                         ]);
                       }
                     }}
-                    className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   >
                     <option value="QUALITATIVE">QUALITATIVE (Configurable Choices)</option>
                     <option value="NUMERIC">NUMERIC (Decimal / Float)</option>
@@ -551,12 +552,12 @@ export default function SuperAdminLabTestsPage() {
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Unit</label>
+                  <label className="font-semibold text-slate-700 block mb-1">Unit</label>
                   <input
                     type="text"
                     value={createUnit}
                     onChange={(e) => setCreateUnit(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                     placeholder="e.g. % or °C (optional)"
                   />
                 </div>
@@ -564,14 +565,14 @@ export default function SuperAdminLabTestsPage() {
 
               <div className="grid grid-cols-2 gap-3 items-center">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Scope *</label>
+                  <label className="font-semibold text-slate-700 block mb-1">Scope *</label>
                   <div className="flex items-center gap-4 pt-1">
                     <label className="flex items-center space-x-2 cursor-pointer select-none text-xs font-medium text-slate-800 min-h-[44px]">
                       <input
                         type="checkbox"
                         checked={createScopeDispatch}
                         onChange={(e) => setCreateScopeDispatch(e.target.checked)}
-                        className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                        className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                       />
                       <span>Dispatch</span>
                     </label>
@@ -580,7 +581,7 @@ export default function SuperAdminLabTestsPage() {
                         type="checkbox"
                         checked={createScopePlantQA}
                         onChange={(e) => setCreateScopePlantQA(e.target.checked)}
-                        className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                        className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                       />
                       <span>Plant QA</span>
                     </label>
@@ -589,7 +590,7 @@ export default function SuperAdminLabTestsPage() {
                         type="checkbox"
                         checked={createScopeZmcc}
                         onChange={(e) => setCreateScopeZmcc(e.target.checked)}
-                        className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                        className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                       />
                       <span>ZMCC Lab</span>
                     </label>
@@ -598,7 +599,7 @@ export default function SuperAdminLabTestsPage() {
                         type="checkbox"
                         checked={createScopeMotShop}
                         onChange={(e) => setCreateScopeMotShop(e.target.checked)}
-                        className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                        className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                       />
                       <span>MOT Shop</span>
                     </label>
@@ -606,13 +607,13 @@ export default function SuperAdminLabTestsPage() {
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Display Order *</label>
+                  <label className="font-semibold text-slate-700 block mb-1">Display Order *</label>
                   <input
                     type="number"
                     required
                     value={createDisplayOrder}
                     onChange={(e) => setCreateDisplayOrder(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-lg border border-[#C4B9A3] font-mono focus:outline-none focus:border-[#1E3A8A]"
+                    className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
@@ -621,7 +622,7 @@ export default function SuperAdminLabTestsPage() {
               {['QUALITATIVE', 'OK_NOT_OK', 'POSITIVE_NEGATIVE'].includes(createResultType) && (
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="font-bold text-slate-800 text-xs">
+                    <label className="font-semibold text-slate-800 text-xs">
                       Qualitative Result Options (Min. 2 required)
                     </label>
                     <button
@@ -636,7 +637,7 @@ export default function SuperAdminLabTestsPage() {
                           },
                         ]);
                       }}
-                      className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center space-x-1 p-1 min-h-[44px]"
+                      className="text-xs font-semibold text-blue-700 hover:text-blue-900 flex items-center space-x-1 p-1 min-h-[44px]"
                     >
                       <Plus className="w-3.5 h-3.5 mr-0.5" />
                       <span>Add Choice</span>
@@ -656,7 +657,7 @@ export default function SuperAdminLabTestsPage() {
                             updated[idx].value = e.target.value;
                             setCreateOptions(updated);
                           }}
-                          className="w-1/3 p-1.5 text-xs font-mono rounded border border-slate-300"
+                          className="w-1/3 p-1.5 text-xs tabular-nums rounded border border-slate-300"
                         />
                         <input
                           type="text"
@@ -678,7 +679,7 @@ export default function SuperAdminLabTestsPage() {
                             updated[idx].isPassing = val === 'PASS' ? true : val === 'FAIL' ? false : null;
                             setCreateOptions(updated);
                           }}
-                          className="w-1/4 p-1.5 text-xs font-bold rounded border border-slate-300"
+                          className="w-1/4 p-1.5 text-xs font-semibold rounded border border-slate-300"
                         >
                           <option value="PASS">Pass</option>
                           <option value="FAIL">Fail</option>
@@ -700,34 +701,32 @@ export default function SuperAdminLabTestsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={closeCreateModal}
                   disabled={isSubmittingCreate}
-                  className="px-4 py-2 min-h-[44px] rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition disabled:opacity-50"
+                  className="px-4 py-2 min-h-[44px] rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingCreate}
-                  className="px-5 py-2 min-h-[44px] rounded-xl bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition shadow-sm disabled:opacity-50"
+                  className="px-5 py-2 min-h-[44px] rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
                 >
                   {isSubmittingCreate ? 'Creating...' : 'Create Lab Test'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* EDIT LAB TEST METADATA MODAL */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-lg space-y-4 shadow-xl my-8">
+        <Modal onClose={closeEditModal} title="Edit test metadata" className="p-6 max-w-lg space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-extrabold text-[#111311]">
+              <h3 className="text-base font-semibold text-foreground">
                 Edit Test Metadata ({showEditModal.testCode})
               </h3>
               <button
@@ -743,7 +742,7 @@ export default function SuperAdminLabTestsPage() {
 
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 text-xs font-medium space-y-1">
               <div>
-                Result Type: <strong className="font-mono">{showEditModal.resultType}</strong> (Protected)
+                Result Type: <strong className="tabular-nums">{showEditModal.resultType}</strong> (Protected)
               </div>
               <div>
                 Historical Records: <strong>{showEditModal.historicalResultsCount}</strong>
@@ -751,7 +750,7 @@ export default function SuperAdminLabTestsPage() {
             </div>
 
             {editModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{editModalError}</span>
               </div>
@@ -759,49 +758,49 @@ export default function SuperAdminLabTestsPage() {
 
             <form onSubmit={handleUpdateTest} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Test Name *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Test Name *</label>
                 <input
                   type="text"
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Unit</label>
+                  <label className="font-semibold text-slate-700 block mb-1">Unit</label>
                   <input
                     type="text"
                     value={editUnit}
                     onChange={(e) => setEditUnit(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                     placeholder="e.g. °C or % or leave blank"
                   />
                 </div>
 
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Display Order *</label>
+                  <label className="font-semibold text-slate-700 block mb-1">Display Order *</label>
                   <input
                     type="number"
                     required
                     value={editDisplayOrder}
                     onChange={(e) => setEditDisplayOrder(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-lg border border-[#C4B9A3] font-mono focus:outline-none focus:border-[#1E3A8A]"
+                    className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Scope *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Scope *</label>
                 <div className="flex items-center gap-4 pt-1">
                   <label className="flex items-center space-x-2 cursor-pointer select-none text-xs font-medium text-slate-800 min-h-[44px]">
                     <input
                       type="checkbox"
                       checked={editScopeDispatch}
                       onChange={(e) => setEditScopeDispatch(e.target.checked)}
-                      className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                      className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                     />
                     <span>Dispatch</span>
                   </label>
@@ -810,7 +809,7 @@ export default function SuperAdminLabTestsPage() {
                       type="checkbox"
                       checked={editScopePlantQA}
                       onChange={(e) => setEditScopePlantQA(e.target.checked)}
-                      className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                      className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                     />
                     <span>Plant QA</span>
                   </label>
@@ -819,7 +818,7 @@ export default function SuperAdminLabTestsPage() {
                       type="checkbox"
                       checked={editScopeZmcc}
                       onChange={(e) => setEditScopeZmcc(e.target.checked)}
-                      className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                      className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                     />
                     <span>ZMCC Lab</span>
                   </label>
@@ -828,7 +827,7 @@ export default function SuperAdminLabTestsPage() {
                       type="checkbox"
                       checked={editScopeMotShop}
                       onChange={(e) => setEditScopeMotShop(e.target.checked)}
-                      className="w-4 h-4 text-[#1E3A8A] rounded border-slate-300 focus:ring-[#1E3A8A]"
+                      className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
                     />
                     <span>MOT Shop</span>
                   </label>
@@ -839,7 +838,7 @@ export default function SuperAdminLabTestsPage() {
               {['QUALITATIVE', 'OK_NOT_OK', 'POSITIVE_NEGATIVE'].includes(showEditModal.resultType) && (
                 <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="font-bold text-slate-800 text-xs">Qualitative Result Options</label>
+                    <label className="font-semibold text-slate-800 text-xs">Qualitative Result Options</label>
                     <button
                       type="button"
                       onClick={() => {
@@ -852,7 +851,7 @@ export default function SuperAdminLabTestsPage() {
                           },
                         ]);
                       }}
-                      className="text-xs font-bold text-blue-700 hover:text-blue-900 flex items-center space-x-1 p-1 min-h-[44px]"
+                      className="text-xs font-semibold text-blue-700 hover:text-blue-900 flex items-center space-x-1 p-1 min-h-[44px]"
                     >
                       <Plus className="w-3.5 h-3.5 mr-0.5" />
                       <span>Add Choice</span>
@@ -872,7 +871,7 @@ export default function SuperAdminLabTestsPage() {
                             updated[idx].value = e.target.value;
                             setEditOptions(updated);
                           }}
-                          className="w-1/3 p-1.5 text-xs font-mono rounded border border-slate-300"
+                          className="w-1/3 p-1.5 text-xs tabular-nums rounded border border-slate-300"
                         />
                         <input
                           type="text"
@@ -894,7 +893,7 @@ export default function SuperAdminLabTestsPage() {
                             updated[idx].isPassing = val === 'PASS' ? true : val === 'FAIL' ? false : null;
                             setEditOptions(updated);
                           }}
-                          className="w-1/4 p-1.5 text-xs font-bold rounded border border-slate-300"
+                          className="w-1/4 p-1.5 text-xs font-semibold rounded border border-slate-300"
                         >
                           <option value="PASS">Pass</option>
                           <option value="FAIL">Fail</option>
@@ -916,32 +915,30 @@ export default function SuperAdminLabTestsPage() {
                 </div>
               )}
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={closeEditModal}
                   disabled={isSubmittingEdit}
-                  className="px-4 py-2 min-h-[44px] rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition disabled:opacity-50"
+                  className="px-4 py-2 min-h-[44px] rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingEdit}
-                  className="px-5 py-2 min-h-[44px] rounded-xl bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition shadow-sm disabled:opacity-50"
+                  className="px-5 py-2 min-h-[44px] rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
                 >
                   {isSubmittingEdit ? 'Updating...' : 'Update Metadata'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* ACTIVATION / DEACTIVATION CONFIRMATION MODAL */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-md space-y-4 shadow-xl">
+        <Modal onClose={closeConfirmModal} title="Confirm test status change" className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <AlertTriangle
@@ -949,7 +946,7 @@ export default function SuperAdminLabTestsPage() {
                     showConfirmModal.action === 'DEACTIVATE' ? 'text-amber-600' : 'text-emerald-600'
                   }`}
                 />
-                <h3 className="text-base font-extrabold text-[#111311]">
+                <h3 className="text-base font-semibold text-foreground">
                   {showConfirmModal.action === 'DEACTIVATE' ? 'Deactivate Lab Test' : 'Activate Lab Test'}
                 </h3>
               </div>
@@ -967,7 +964,7 @@ export default function SuperAdminLabTestsPage() {
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1 text-xs">
               <div>
                 <span className="text-slate-500 font-medium">Test Code:</span>{' '}
-                <strong className="font-mono text-slate-900">{showConfirmModal.test.testCode}</strong>
+                <strong className="tabular-nums text-slate-900">{showConfirmModal.test.testCode}</strong>
               </div>
               <div>
                 <span className="text-slate-500 font-medium">Test Name:</span>{' '}
@@ -990,18 +987,18 @@ export default function SuperAdminLabTestsPage() {
             </div>
 
             {confirmModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{confirmModalError}</span>
               </div>
             )}
 
-            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
               <button
                 type="button"
                 onClick={closeConfirmModal}
                 disabled={isSubmittingToggle}
-                className="px-4 py-2 min-h-[44px] rounded-xl border border-slate-300 text-slate-700 font-bold hover:bg-slate-50 transition disabled:opacity-50"
+                className="px-4 py-2 min-h-[44px] rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition disabled:opacity-50"
               >
                 Cancel
               </button>
@@ -1009,7 +1006,7 @@ export default function SuperAdminLabTestsPage() {
                 type="button"
                 onClick={handleConfirmToggleActive}
                 disabled={isSubmittingToggle}
-                className={`px-5 py-2 min-h-[44px] rounded-xl font-bold text-white transition shadow-sm disabled:opacity-50 ${
+                className={`px-5 py-2 min-h-[44px] rounded-xl font-semibold text-white transition shadow-sm disabled:opacity-50 ${
                   showConfirmModal.action === 'DEACTIVATE'
                     ? 'bg-rose-600 hover:bg-rose-700'
                     : 'bg-emerald-600 hover:bg-emerald-700'
@@ -1022,8 +1019,7 @@ export default function SuperAdminLabTestsPage() {
                   : 'Confirm Activation'}
               </button>
             </div>
-          </div>
-        </div>
+          </Modal>
       )}
     </div>
   );

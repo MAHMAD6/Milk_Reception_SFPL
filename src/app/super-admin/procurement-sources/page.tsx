@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X } from 'lucide-react';
+import { Modal } from '@/components/ui/modal';
 
 interface Source {
   id: string;
@@ -239,25 +240,25 @@ export default function SuperAdminProcurementSourcesPage() {
   return (
     <div className="space-y-4 w-full max-w-full overflow-x-hidden">
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
           <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {successMsg && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center space-x-2">
+        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-semibold flex items-center space-x-2">
           <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {/* SOURCES TABLE */}
-      <div className="bg-white rounded-xl border border-[#EAE4D5]/80 shadow-sm overflow-hidden w-full max-w-full">
-        <div className="p-3 sm:px-4 sm:py-3 border-b border-[#EAE4D5] flex items-center justify-between">
+      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
+        <div className="p-3 sm:px-4 sm:py-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <h2 className="text-sm font-bold text-[#111311]">Procurement Sources</h2>
-            <span className="text-[11px] font-mono px-2 py-0.5 bg-[#FDFBF9] border border-[#EAE4D5] text-slate-600 rounded-full">
+            <h2 className="text-sm font-semibold text-foreground">Procurement Sources</h2>
+            <span className="text-[11px] tabular-nums px-2 py-0.5 bg-subtle border border-border text-slate-600 rounded-full">
               {sources.length}
             </span>
           </div>
@@ -269,27 +270,28 @@ export default function SuperAdminProcurementSourcesPage() {
             }}
             aria-label="Add procurement source"
             title="Add procurement source"
-            className="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-xl bg-[#1E3A8A] text-white hover:bg-blue-900 transition shadow-xs focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4" />
+            <span>Add source</span>
           </button>
         </div>
 
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-xs min-w-[600px]">
-            <thead className="bg-[#FDFBF9] text-slate-600 border-b border-[#EAE4D5]">
+            <thead className="bg-subtle text-slate-600 border-b border-border">
               <tr>
-                <th className="p-3 font-bold">Code</th>
-                <th className="p-3 font-bold">Name</th>
-                <th className="p-3 font-bold">Source Type</th>
-                <th className="p-3 font-bold">Status</th>
-                <th className="p-3 font-bold text-right">Actions</th>
+                <th className="p-3 font-semibold">Code</th>
+                <th className="p-3 font-semibold">Name</th>
+                <th className="p-3 font-semibold">Source Type</th>
+                <th className="p-3 font-semibold">Status</th>
+                <th className="p-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE4D5]/60 font-medium">
+            <tbody className="divide-y divide-border/60 font-medium">
               {loading ? (
                 <tr>
-                  <td colSpan={5} className="p-6 text-center text-slate-400 font-mono">
+                  <td colSpan={5} className="p-6 text-center text-slate-400 tabular-nums">
                     Loading procurement sources...
                   </td>
                 </tr>
@@ -302,11 +304,11 @@ export default function SuperAdminProcurementSourcesPage() {
               ) : (
                 sources.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-50 transition">
-                    <td className="p-3 font-mono font-bold text-[#111311]">{s.code}</td>
-                    <td className="p-3 font-bold text-slate-800">{s.name}</td>
+                    <td className="p-3 tabular-nums font-semibold text-foreground">{s.code}</td>
+                    <td className="p-3 font-semibold text-slate-800">{s.name}</td>
                     <td className="p-3">
                       <span
-                        className={`px-2 py-0.5 rounded font-mono text-[10px] font-bold ${
+                        className={`px-2 py-0.5 rounded tabular-nums text-[10px] font-semibold ${
                           s.sourceType === 'ZMCC' ? 'bg-blue-100 text-blue-900' : 'bg-purple-100 text-purple-900'
                         }`}
                       >
@@ -315,11 +317,11 @@ export default function SuperAdminProcurementSourcesPage() {
                     </td>
                     <td className="p-3">
                       {s.isActive ? (
-                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-semibold">
                           Active
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-bold">
+                        <span className="px-2 py-0.5 rounded bg-rose-100 text-rose-800 text-[10px] font-semibold">
                           Inactive
                         </span>
                       )}
@@ -339,7 +341,7 @@ export default function SuperAdminProcurementSourcesPage() {
                           type="button"
                           onClick={() => openConfirmModal(s)}
                           aria-label={`${s.isActive ? 'Deactivate' : 'Activate'} ${s.name}`}
-                          className={`px-2.5 py-1.5 min-h-[44px] rounded-lg text-[11px] font-bold transition flex items-center justify-center ${
+                          className={`px-2.5 py-1.5 min-h-[44px] rounded-lg text-[11px] font-semibold transition flex items-center justify-center ${
                             s.isActive
                               ? 'bg-rose-50 hover:bg-rose-100 text-rose-700'
                               : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700'
@@ -359,16 +361,9 @@ export default function SuperAdminProcurementSourcesPage() {
 
       {/* CREATE SOURCE MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div
-            className="fixed inset-0"
-            onClick={() => {
-              if (!isSubmittingCreate) closeCreateModal();
-            }}
-          />
-          <div className="relative bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-md space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-[#EAE4D5]">
-              <h3 className="text-base font-extrabold text-[#111311]">Add Procurement Source</h3>
+        <Modal onClose={closeCreateModal} title="Add procurement source" preventClose={isSubmittingCreate} className="p-6 max-w-md space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <h3 className="text-base font-semibold text-foreground">Add Procurement Source</h3>
               <button
                 type="button"
                 onClick={closeCreateModal}
@@ -381,7 +376,7 @@ export default function SuperAdminProcurementSourcesPage() {
             </div>
 
             {createModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{createModalError}</span>
               </div>
@@ -389,39 +384,39 @@ export default function SuperAdminProcurementSourcesPage() {
 
             <form onSubmit={handleCreateSource} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Source Code *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Source Code *</label>
                 <input
                   type="text"
                   required
                   value={createCode}
                   onChange={(e) => setCreateCode(e.target.value)}
                   disabled={isSubmittingCreate}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] uppercase font-mono focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong uppercase tabular-nums focus:outline-none focus:border-primary"
                   placeholder="e.g. ZMCC-FAISALABAD"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">Code is immutable once created.</p>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Source Name *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Source Name *</label>
                 <input
                   type="text"
                   required
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
                   disabled={isSubmittingCreate}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="e.g. Faisalabad ZMCC Center"
                 />
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Source Type *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Source Type *</label>
                 <select
                   value={createSourceType}
                   onChange={(e) => setCreateSourceType(e.target.value)}
                   disabled={isSubmittingCreate}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                 >
                   <option value="ZMCC">ZMCC (Direct Procurement Center)</option>
                   <option value="CONTRACTOR">CONTRACTOR (Third-Party Supplier)</option>
@@ -429,40 +424,32 @@ export default function SuperAdminProcurementSourcesPage() {
                 <p className="text-[10px] text-slate-400 mt-1">Source type is immutable once created.</p>
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={closeCreateModal}
                   disabled={isSubmittingCreate}
-                  className="px-3 py-2 min-h-[44px] rounded-lg border border-slate-300 text-slate-600 font-bold hover:bg-slate-50 transition"
+                  className="px-3 py-2 min-h-[44px] rounded-lg border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingCreate}
-                  className="px-4 py-2 min-h-[44px] rounded-lg bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition disabled:opacity-50"
+                  className="px-4 py-2 min-h-[44px] rounded-lg bg-primary text-white font-semibold hover:bg-primary-hover transition disabled:opacity-50"
                 >
                   {isSubmittingCreate ? 'Saving...' : 'Save Source'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* EDIT SOURCE MODAL */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div
-            className="fixed inset-0"
-            onClick={() => {
-              if (!isSubmittingEdit) closeEditModal();
-            }}
-          />
-          <div className="relative bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-md space-y-4 shadow-xl">
-            <div className="flex items-center justify-between pb-3 border-b border-[#EAE4D5]">
-              <h3 className="text-base font-extrabold text-[#111311]">Edit Procurement Source</h3>
+        <Modal onClose={closeEditModal} title="Edit procurement source" preventClose={isSubmittingEdit} className="p-6 max-w-md space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border">
+              <h3 className="text-base font-semibold text-foreground">Edit Procurement Source</h3>
               <button
                 type="button"
                 onClick={closeEditModal}
@@ -475,7 +462,7 @@ export default function SuperAdminProcurementSourcesPage() {
             </div>
 
             {editModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{editModalError}</span>
               </div>
@@ -483,72 +470,64 @@ export default function SuperAdminProcurementSourcesPage() {
 
             <form onSubmit={handleEditSource} className="space-y-3 text-xs">
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Source Code</label>
+                <label className="font-semibold text-slate-700 block mb-1">Source Code</label>
                 <input
                   type="text"
                   disabled
                   value={showEditModal.code}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-100 font-mono text-slate-500 cursor-not-allowed"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-100 tabular-nums text-slate-500 cursor-not-allowed"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">Source code is immutable and cannot be modified.</p>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Source Type</label>
+                <label className="font-semibold text-slate-700 block mb-1">Source Type</label>
                 <input
                   type="text"
                   disabled
                   value={showEditModal.sourceType}
-                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-100 font-mono text-slate-500 cursor-not-allowed"
+                  className="w-full p-2.5 rounded-lg border border-slate-200 bg-slate-100 tabular-nums text-slate-500 cursor-not-allowed"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">Source type is immutable and cannot be modified.</p>
               </div>
 
               <div>
-                <label className="font-bold text-slate-700 block mb-1">Source Name *</label>
+                <label className="font-semibold text-slate-700 block mb-1">Source Name *</label>
                 <input
                   type="text"
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   disabled={isSubmittingEdit}
-                  className="w-full p-2.5 rounded-lg border border-[#C4B9A3] focus:outline-none focus:border-[#1E3A8A]"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
                   placeholder="e.g. Faisalabad ZMCC Center"
                 />
               </div>
 
-              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
                 <button
                   type="button"
                   onClick={closeEditModal}
                   disabled={isSubmittingEdit}
-                  className="px-3 py-2 min-h-[44px] rounded-lg border border-slate-300 text-slate-600 font-bold hover:bg-slate-50 transition"
+                  className="px-3 py-2 min-h-[44px] rounded-lg border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingEdit}
-                  className="px-4 py-2 min-h-[44px] rounded-lg bg-[#1E3A8A] text-white font-bold hover:bg-blue-900 transition disabled:opacity-50"
+                  className="px-4 py-2 min-h-[44px] rounded-lg bg-primary text-white font-semibold hover:bg-primary-hover transition disabled:opacity-50"
                 >
                   {isSubmittingEdit ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
 
       {/* CONFIRM TOGGLE STATUS MODAL */}
       {showConfirmModal && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-150">
-          <div
-            className="fixed inset-0"
-            onClick={() => {
-              if (!isSubmittingConfirm) closeConfirmModal();
-            }}
-          />
-          <div className="relative bg-white rounded-2xl border border-[#EAE4D5] p-6 w-full max-w-md space-y-4 shadow-xl">
+        <Modal onClose={closeConfirmModal} title="Confirm source status change" preventClose={isSubmittingConfirm} closeOnOutsideClick className="p-6 max-w-md space-y-4">
             <div className="flex items-center space-x-3">
               <div
                 className={`p-2 rounded-xl shrink-0 ${
@@ -558,15 +537,15 @@ export default function SuperAdminProcurementSourcesPage() {
                 <AlertTriangle className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-[#111311]">
+                <h3 className="text-base font-semibold text-foreground">
                   {showConfirmModal.targetStatus ? 'Activate' : 'Deactivate'} Source?
                 </h3>
-                <p className="text-xs text-slate-500 font-mono">{showConfirmModal.source.code}</p>
+                <p className="text-xs text-slate-500 tabular-nums">{showConfirmModal.source.code}</p>
               </div>
             </div>
 
             {confirmModalError && (
-              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold flex items-center space-x-2">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
                 <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>{confirmModalError}</span>
               </div>
@@ -575,11 +554,11 @@ export default function SuperAdminProcurementSourcesPage() {
             <div className="text-xs text-slate-600 space-y-2">
               <p>
                 Are you sure you want to {showConfirmModal.targetStatus ? 'activate' : 'deactivate'}{' '}
-                <strong className="text-slate-800 font-bold">{showConfirmModal.source.name}</strong>?
+                <strong className="text-slate-800 font-semibold">{showConfirmModal.source.name}</strong>?
               </p>
               {!showConfirmModal.targetStatus ? (
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-amber-900 text-[11px] space-y-1 font-medium">
-                  <p className="font-bold">Deactivation Effects & Guards:</p>
+                  <p className="font-semibold">Deactivation Effects & Guards:</p>
                   <ul className="list-disc list-inside space-y-0.5 text-amber-800">
                     <li>Will be excluded from active operational dispatch selectors.</li>
                     <li>Cannot be deactivated if active users are currently assigned.</li>
@@ -589,7 +568,7 @@ export default function SuperAdminProcurementSourcesPage() {
                 </div>
               ) : (
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-emerald-900 text-[11px] space-y-1 font-medium">
-                  <p className="font-bold">Activation Effects:</p>
+                  <p className="font-semibold">Activation Effects:</p>
                   <p className="text-emerald-800">
                     Will restore availability in operational selectors and allow user assignments.
                   </p>
@@ -597,12 +576,12 @@ export default function SuperAdminProcurementSourcesPage() {
               )}
             </div>
 
-            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#EAE4D5]">
+            <div className="flex items-center justify-end space-x-2 pt-3 border-t border-border">
               <button
                 type="button"
                 onClick={closeConfirmModal}
                 disabled={isSubmittingConfirm}
-                className="px-3 py-2 min-h-[44px] rounded-lg border border-slate-300 text-slate-600 font-bold hover:bg-slate-50 transition"
+                className="px-3 py-2 min-h-[44px] rounded-lg border border-slate-300 text-slate-600 font-semibold hover:bg-slate-50 transition"
               >
                 Cancel
               </button>
@@ -610,7 +589,7 @@ export default function SuperAdminProcurementSourcesPage() {
                 type="button"
                 onClick={handleConfirmToggle}
                 disabled={isSubmittingConfirm}
-                className={`px-4 py-2 min-h-[44px] rounded-lg font-bold text-white transition disabled:opacity-50 ${
+                className={`px-4 py-2 min-h-[44px] rounded-lg font-semibold text-white transition disabled:opacity-50 ${
                   showConfirmModal.targetStatus
                     ? 'bg-emerald-600 hover:bg-emerald-700'
                     : 'bg-rose-600 hover:bg-rose-700'
@@ -623,8 +602,7 @@ export default function SuperAdminProcurementSourcesPage() {
                   : 'Deactivate Source'}
               </button>
             </div>
-          </div>
-        </div>
+          </Modal>
       )}
     </div>
   );

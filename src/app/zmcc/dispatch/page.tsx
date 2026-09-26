@@ -7,6 +7,8 @@ import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { MPDFieldWorkspace } from '@modules/dashboard/MPDFieldWorkspace';
 import { RefreshCw } from 'lucide-react';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 function ZmccDispatchContent() {
   const router = useRouter();
@@ -74,10 +76,7 @@ function ZmccDispatchContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">
-        <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-700" />
-        Loading ZMCC Dispatch Station...
-      </div>
+      <PageLoader label="Loading ZMCC Dispatch Station…" className="min-h-screen" />
     );
   }
 
@@ -90,7 +89,7 @@ function ZmccDispatchContent() {
     'Assigned ZMCC Source';
 
   return (
-    <div className="w-full max-w-full flex flex-col h-screen bg-[#FDFBF9] text-[#111311] overflow-hidden font-sans">
+    <div className="w-full max-w-full flex flex-col h-screen bg-background text-foreground overflow-hidden">
       <Header
         currentUser={currentUser}
         sourceName={assignedSourceName}
@@ -113,9 +112,11 @@ function ZmccDispatchContent() {
       {/* Main Responsive Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 w-full max-w-full space-y-4">
-          <Suspense fallback={<div className="p-8 text-center text-xs font-bold text-slate-500">Loading dispatch workspace...</div>}>
+          <PageTransition>
+          <Suspense fallback={<PageLoader label="Loading dispatch workspace…" />}>
             <MPDFieldWorkspace currentUser={currentUser} />
           </Suspense>
+          </PageTransition>
         </main>
       </div>
     </div>
@@ -124,7 +125,7 @@ function ZmccDispatchContent() {
 
 export default function ZmccDispatchPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">Loading ZMCC Dispatch Station...</div>}>
+    <Suspense fallback={<PageLoader label="Loading ZMCC Dispatch Station…" className="min-h-screen" />}>
       <ZmccDispatchContent />
     </Suspense>
   );

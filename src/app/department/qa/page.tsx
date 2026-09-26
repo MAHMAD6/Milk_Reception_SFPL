@@ -6,6 +6,8 @@ import { QALaboratoryWorkspace, QATab } from '@modules/dashboard/QALaboratoryWor
 import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { User } from '@core/types';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 function QADepartmentContent() {
   const router = useRouter();
@@ -46,14 +48,12 @@ function QADepartmentContent() {
 
   if (loading) {
     return (
-      <div className="p-8 text-center text-xs font-bold text-slate-500">
-        Loading QA Laboratory...
-      </div>
+      <PageLoader label="Loading QA Laboratory…" className="min-h-screen" />
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#111311] flex flex-col font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={user}
         title="QA Laboratory"
@@ -71,6 +71,7 @@ function QADepartmentContent() {
       />
 
       <main className="flex-1 p-4 sm:p-6 overflow-y-auto w-full max-w-full">
+        <PageTransition>
         <QALaboratoryWorkspace
           currentUser={user}
           activeTab={resolvedTab}
@@ -78,6 +79,7 @@ function QADepartmentContent() {
             router.push(`/department/qa?tab=${tab}`);
           }}
         />
+        </PageTransition>
       </main>
     </div>
   );
@@ -87,9 +89,7 @@ export default function QADepartmentPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FDFBF9] text-xs font-bold text-slate-400">
-          Loading QA Laboratory...
-        </div>
+        <PageLoader label="Loading QA Laboratory…" className="min-h-screen" />
       }
     >
       <QADepartmentContent />

@@ -6,6 +6,8 @@ import { User } from '@core/types';
 import { SuperAdminSidebar } from '@/frontend/modules/super-admin/SuperAdminSidebar';
 import { SuperAdminHeader } from '@/frontend/modules/super-admin/SuperAdminHeader';
 import { resolveRoleHome } from '@/lib/role-routing';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -55,9 +57,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#FDFBF9] text-[#111311] font-mono text-xs font-bold">
-        Verifying Authorization...
-      </div>
+      <PageLoader label="Verifying access…" className="min-h-screen" />
     );
   }
 
@@ -66,7 +66,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <div className="w-full max-w-full flex flex-col h-screen bg-[#FDFBF9] text-[#111311] overflow-hidden font-sans">
+    <div className="flex min-h-screen w-full max-w-full flex-col bg-background text-foreground">
       <SuperAdminHeader
         currentUser={currentUser}
         isOpen={isDrawerOpen}
@@ -79,7 +79,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         onClose={() => setIsDrawerOpen(false)}
         triggerRef={hamburgerButtonRef}
       />
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 w-full max-w-full">{children}</main>
+      <main className="w-full max-w-full flex-1 p-4 sm:p-6 lg:p-8">
+        <PageTransition>{children}</PageTransition>
+      </main>
     </div>
   );
 }

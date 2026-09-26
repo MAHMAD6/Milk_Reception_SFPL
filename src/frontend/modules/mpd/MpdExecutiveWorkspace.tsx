@@ -12,6 +12,7 @@ import {
   Clock,
   Calendar,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import type { MpdTabId, MpdExecutiveTelemetryData } from './types';
 import { MpdExecutiveKpiRibbon } from './components/MpdExecutiveKpiRibbon';
 import { MpdFleetRadarScreen } from './screens/MpdFleetRadarScreen';
@@ -86,11 +87,12 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
             ),
           });
         }
+        toast.success('Audit decision recorded');
       } else {
-        alert(json.error || 'Failed to submit audit decision.');
+        toast.error(json.error || 'Failed to submit audit decision.');
       }
     } catch (err: any) {
-      alert(err.message || 'Network error during audit.');
+      toast.error(err.message || 'Network error during audit.');
     }
   };
 
@@ -133,10 +135,10 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Executive Command Center Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-[#EAE4D5] shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-xl border border-border shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#1E3A8A] bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
               Milk Procurement Division
             </span>
             <span className="text-xs text-slate-400">•</span>
@@ -145,7 +147,7 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
               {telemetry?.calendarDate || new Date().toISOString().split('T')[0]}
             </span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black text-[#111311] tracking-tight mt-1">
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight mt-1">
             Executive Command Center
           </h1>
           <p className="text-xs text-slate-600 mt-0.5">
@@ -156,7 +158,7 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
             <div className="text-xs text-slate-500 font-medium">Last Telemetry Sync</div>
-            <div className="text-xs font-mono font-bold text-slate-700 flex items-center gap-1 justify-end">
+            <div className="text-xs tabular-nums font-semibold text-slate-700 flex items-center gap-1 justify-end">
               <Clock className="w-3 h-3 text-slate-400" />
               {lastRefreshedAt.toLocaleTimeString()}
             </div>
@@ -165,7 +167,7 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
             onClick={() => fetchTelemetry(true)}
             disabled={isRefreshing}
             aria-label="Refresh telemetry data"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white transition-all shadow-sm disabled:opacity-60 min-h-[44px]"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-white transition-all shadow-sm disabled:opacity-60 min-h-[44px]"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             <span>{isRefreshing ? 'Syncing...' : 'Refresh'}</span>
@@ -177,7 +179,7 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
       {telemetry && <MpdExecutiveKpiRibbon summary={telemetry.summary} isLoading={loading} />}
 
       {/* Segmented Sub-Screen Tabs Bar */}
-      <div className="bg-white border border-[#EAE4D5] rounded-2xl p-1.5 shadow-sm overflow-x-auto">
+      <div className="bg-white border border-border rounded-xl p-1.5 shadow-sm overflow-x-auto">
         <div className="flex items-center gap-1 min-w-max">
           {tabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -185,17 +187,17 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all min-h-[40px] ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all min-h-[40px] ${
                   isActive
-                    ? 'bg-[#1E3A8A] text-white shadow-sm'
-                    : 'text-slate-600 hover:text-[#111311] hover:bg-slate-50'
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'text-slate-600 hover:text-foreground hover:bg-slate-50'
                 }`}
               >
                 {tab.icon}
                 <span>{tab.label}</span>
                 {typeof tab.count === 'number' && (
                   <span
-                    className={`font-mono text-xs px-1.5 py-0.5 rounded-full ${
+                    className={`tabular-nums text-xs px-1.5 py-0.5 rounded-full ${
                       isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
                     }`}
                   >
@@ -246,7 +248,7 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
             {activeTab === 'POLICIES' && <MpdPolicyScreen currentUser={currentUser} />}
           </>
         ) : (
-          <div className="bg-white border border-[#EAE4D5] rounded-2xl p-12 text-center text-slate-500 text-xs">
+          <div className="bg-white border border-border rounded-xl p-12 text-center text-slate-500 text-xs">
             Loading MPD Executive Telemetry...
           </div>
         )}

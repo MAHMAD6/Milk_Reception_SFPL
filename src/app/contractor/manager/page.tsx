@@ -7,6 +7,8 @@ import { PlantContractorTab } from '@modules/dashboard/contractor/contractorMana
 import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { User } from '@core/types';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 function PlantContractorManagerContent() {
   const router = useRouter();
@@ -63,14 +65,12 @@ function PlantContractorManagerContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">
-        Loading Plant Contractor Manager Station...
-      </div>
+      <PageLoader label="Loading Plant Contractor Manager Station…" className="min-h-screen" />
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#111311] flex flex-col font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={user}
         title="Plant Contractor"
@@ -88,6 +88,7 @@ function PlantContractorManagerContent() {
       />
 
       <main className="flex-1 overflow-y-auto w-full max-w-full flex flex-col">
+        <PageTransition>
         <PlantContractorManagerWorkspace
           currentUser={user}
           activeTab={resolvedTab}
@@ -95,6 +96,7 @@ function PlantContractorManagerContent() {
             router.push(`/contractor/manager?tab=${tab}`);
           }}
         />
+        </PageTransition>
       </main>
     </div>
   );
@@ -104,9 +106,7 @@ export default function PlantContractorManagerPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FDFBF9] text-xs font-bold text-slate-400">
-          Loading Plant Contractor Manager Station...
-        </div>
+        <PageLoader label="Loading Plant Contractor Manager Station…" className="min-h-screen" />
       }
     >
       <PlantContractorManagerContent />

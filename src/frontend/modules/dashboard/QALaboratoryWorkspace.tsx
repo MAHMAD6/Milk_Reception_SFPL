@@ -569,31 +569,31 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 text-[#111311]">
+    <div className="w-full max-w-7xl mx-auto space-y-6 text-foreground">
       {/* QA Header & Queue Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#C4B9A3]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-strong">
         <div>
-          <h2 className="text-xl font-black tracking-tight text-[#111311] flex items-center gap-2">
-            <FlaskConical className="w-6 h-6 text-[#1E3A8A]" />
+          <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
+            <FlaskConical className="w-6 h-6 text-primary" />
             QA Laboratory Workstation
           </h2>
-          <p className="text-xs text-[#334155] font-semibold mt-0.5">
-            Chemist: <strong className="text-[#111311]">{currentUser?.name || 'QA Chemist'}</strong> | Dedicated QA Testing & Session Controller
+          <p className="text-xs text-slate-700 font-semibold mt-0.5">
+            Chemist: <strong className="text-foreground">{currentUser?.name || 'QA Chemist'}</strong> | Dedicated QA Testing & Session Controller
           </p>
         </div>
 
-        <div className="flex items-center space-x-2 bg-[#EFE9D9] p-1.5 rounded-2xl border border-[#C4B9A3] overflow-x-auto max-w-full">
+        <div className="flex items-center space-x-2 bg-muted p-1.5 rounded-xl border border-border-strong overflow-x-auto max-w-full">
           <button
             type="button"
             onClick={() => { setActiveTab('WAITING'); fetchQueues(); }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'WAITING' ? 'bg-[#1E3A8A] text-white shadow-sm' : 'text-[#334155] hover:bg-amber-100/50'
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
+              activeTab === 'WAITING' ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-amber-100/50'
             }`}
           >
             <Clock className="w-4 h-4" />
             <span>Waiting for Testing</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
-              activeTab === 'WAITING' ? 'bg-white/20 text-white' : 'bg-[#F4EFE3] text-slate-700'
+            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
+              activeTab === 'WAITING' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
             }`}>
               {waitingVisits.length}
             </span>
@@ -602,14 +602,14 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
           <button
             type="button"
             onClick={() => { setActiveTab('IN_TESTING'); fetchQueues(); }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'IN_TESTING' ? 'bg-[#1E3A8A] text-white shadow-sm' : 'text-[#334155] hover:bg-amber-100/50'
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
+              activeTab === 'IN_TESTING' ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-amber-100/50'
             }`}
           >
             <FlaskConical className="w-4 h-4" />
             <span>In Testing</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
-              activeTab === 'IN_TESTING' ? 'bg-white/20 text-white' : 'bg-[#F4EFE3] text-slate-700'
+            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
+              activeTab === 'IN_TESTING' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
             }`}>
               {inTestingVisits.length}
             </span>
@@ -618,21 +618,21 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
           <button
             type="button"
             onClick={() => { setActiveTab('ON_HOLD'); fetchQueues(); }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'ON_HOLD' ? 'bg-[#1E3A8A] text-white shadow-sm' : 'text-[#334155] hover:bg-amber-100/50'
+            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
+              activeTab === 'ON_HOLD' ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-amber-100/50'
             }`}
           >
             <PauseCircle className="w-4 h-4" />
             <span>On Hold</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono ${
-              activeTab === 'ON_HOLD' ? 'bg-white/20 text-white' : 'bg-[#F4EFE3] text-slate-700'
+            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
+              activeTab === 'ON_HOLD' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
             }`}>
               {onHoldVisits.length}
             </span>
           </button>
         </div>
 
-        <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white rounded-xl border border-[#C4B9A3] shrink-0">
+        <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white rounded-xl border border-border-strong shrink-0">
           <FlaskConical className="w-4 h-4 text-slate-600" />
           <span>Active QA</span>
         </div>

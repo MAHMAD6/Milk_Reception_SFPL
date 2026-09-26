@@ -9,6 +9,8 @@ import { User } from '@core/types';
 import { can } from '@/backend/modules/access-control/policy';
 import { createAccessActor } from '@/backend/modules/access-control/rolePolicies';
 import { resolveRoleHome } from '@/lib/role-routing';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 const WEIGHBRIDGE_SCOPE = {
   kind: 'DEPARTMENT',
@@ -63,14 +65,12 @@ function WeighbridgeDepartmentContent() {
 
   if (loading || !hasAccess) {
     return (
-      <div className="p-8 text-center text-xs font-bold text-slate-500">
-        Loading Weighbridge Workstation...
-      </div>
+      <PageLoader label="Loading Weighbridge Workstation…" className="min-h-screen" />
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#111311] flex flex-col font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={user}
         title="Weighbridge"
@@ -88,6 +88,7 @@ function WeighbridgeDepartmentContent() {
       />
 
       <main className="flex-1 p-4 sm:p-6 overflow-y-auto w-full max-w-full">
+        <PageTransition>
         <WeighbridgeWorkspace
           currentUser={user}
           activeTab={resolvedTab}
@@ -95,6 +96,7 @@ function WeighbridgeDepartmentContent() {
             router.push(`/department/weighbridge?tab=${tab}`);
           }}
         />
+        </PageTransition>
       </main>
     </div>
   );
@@ -104,9 +106,7 @@ export default function WeighbridgeDepartmentPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FDFBF9] text-xs font-bold text-slate-400">
-          Loading Weighbridge Workstation...
-        </div>
+        <PageLoader label="Loading Weighbridge Workstation…" className="min-h-screen" />
       }
     >
       <WeighbridgeDepartmentContent />

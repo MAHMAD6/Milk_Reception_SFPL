@@ -6,6 +6,8 @@ import { ProductionUnloadingWorkspace, ProductionTab } from '@modules/dashboard/
 import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { User } from '@core/types';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 function ProductionDepartmentContent() {
   const router = useRouter();
@@ -57,9 +59,7 @@ function ProductionDepartmentContent() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF9] flex items-center justify-center p-8 text-center text-xs font-bold text-slate-500">
-        Loading Production Workstation...
-      </div>
+      <PageLoader label="Loading Production Workstation…" className="min-h-screen" />
     );
   }
 
@@ -68,7 +68,7 @@ function ProductionDepartmentContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#111311] flex flex-col font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={user}
         title="Production"
@@ -86,6 +86,7 @@ function ProductionDepartmentContent() {
       />
 
       <main className="flex-1 p-4 sm:p-6 overflow-y-auto w-full max-w-full">
+        <PageTransition>
         <ProductionUnloadingWorkspace
           currentUser={user}
           activeTab={resolvedTab}
@@ -93,6 +94,7 @@ function ProductionDepartmentContent() {
             router.push(`/department/production?tab=${tab}`);
           }}
         />
+        </PageTransition>
       </main>
     </div>
   );
@@ -102,9 +104,7 @@ export default function ProductionDepartmentPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-[#FDFBF9] text-xs font-bold text-slate-400">
-          Loading Production Workstation...
-        </div>
+        <PageLoader label="Loading Production Workstation…" className="min-h-screen" />
       }
     >
       <ProductionDepartmentContent />

@@ -36,7 +36,7 @@ export default function SuperAdminMotOperationsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-[#FDFBF9] text-[#111311] font-mono text-xs font-bold">
+      <div className="flex items-center justify-center h-screen bg-subtle text-foreground tabular-nums text-xs font-semibold">
         Verifying Super Admin Authorization...
       </div>
     );
@@ -47,7 +47,7 @@ export default function SuperAdminMotOperationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] p-4 sm:p-6">
+    <div className="min-h-screen bg-subtle p-4 sm:p-6">
       <MotOperationsWorkspace currentUser={currentUser} />
     </div>
   );

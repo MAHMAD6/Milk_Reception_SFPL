@@ -38,38 +38,38 @@ export function MpdReconciliationOverview() {
       ) : (
         <section className="space-y-3" aria-label="MPD reconciliation overview">
           <div>
-            <h2 className="text-lg font-black text-slate-900">MPD Reconciliation Overview</h2>
+            <h2 className="text-lg font-semibold text-slate-900">MPD Reconciliation Overview</h2>
             <p className="text-sm text-slate-500">
               Cross-source MOT-to-ZMCC result. Pending journeys are shown separately and are not counted as finalized loss.
             </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <div className="rounded-xl border bg-white p-4">
-              <p className="text-xs font-bold text-slate-500">13TS loss / gain</p>
-              <p className="mt-1 text-lg font-black">
+              <p className="text-xs font-semibold text-slate-500">13TS loss / gain</p>
+              <p className="mt-1 text-lg font-semibold">
                 {number(report.summary.at13tsLossLiters)} / {number(report.summary.at13tsGainLiters)} L
               </p>
             </div>
             <div className="rounded-xl border bg-white p-4">
-              <p className="text-xs font-bold text-slate-500">Gross loss / gain</p>
-              <p className="mt-1 text-lg font-black">
+              <p className="text-xs font-semibold text-slate-500">Gross loss / gain</p>
+              <p className="mt-1 text-lg font-semibold">
                 {number(report.summary.grossLossLiters)} / {number(report.summary.grossGainLiters)} L
               </p>
             </div>
             <div className="rounded-xl border bg-white p-4">
-              <p className="text-xs font-bold text-slate-500">Finalized journeys</p>
-              <p className="mt-1 text-lg font-black">{report.summary.finalizedJourneys}</p>
+              <p className="text-xs font-semibold text-slate-500">Finalized journeys</p>
+              <p className="mt-1 text-lg font-semibold">{report.summary.finalizedJourneys}</p>
             </div>
             <div className="rounded-xl border bg-white p-4">
-              <p className="text-xs font-bold text-slate-500">Unresolved exposure</p>
-              <p className="mt-1 text-lg font-black">
+              <p className="text-xs font-semibold text-slate-500">Unresolved exposure</p>
+              <p className="mt-1 text-lg font-semibold">
                 {report.summary.unresolvedJourneys} journeys · {number(report.summary.unresolvedOriginAt13tsLiters)} L
               </p>
             </div>
           </div>
           <div className="grid gap-3 lg:grid-cols-2">
             <div className="rounded-xl border bg-white p-4 text-sm">
-              <p className="font-black">Latest MOT-to-ZMCC journeys</p>
+              <p className="font-semibold">Latest MOT-to-ZMCC journeys</p>
               {report.items.length ? (
                 report.items.map((item) => (
                   <p key={item.journeyId} className="mt-2 text-slate-600">
@@ -81,7 +81,7 @@ export function MpdReconciliationOverview() {
               )}
             </div>
             <div className="rounded-xl border bg-white p-4 text-sm">
-              <p className="font-black">Vehicle exceptions ({vehicles.total})</p>
+              <p className="font-semibold">Vehicle exceptions ({vehicles.total})</p>
               {vehicles.items.length ? (
                 vehicles.items.map((item) => (
                   <p key={item.visitId} className="mt-2 text-slate-600">

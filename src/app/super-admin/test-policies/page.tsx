@@ -39,7 +39,7 @@ export default function SuperAdminTestPoliciesPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12 font-mono text-xs font-bold text-slate-600">
+      <div className="flex items-center justify-center p-12 tabular-nums text-xs font-semibold text-slate-600">
         Loading Test Policy Administration...
       </div>
     );

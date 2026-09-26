@@ -988,20 +988,20 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
   return (
     <form onSubmit={handleSubmitDispatch} className="space-y-6">
       {/* Top Header Card with Operating Source & Draft Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-4 sm:p-5 rounded-2xl bg-white border border-[#C4B9A3] shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 rounded-xl bg-[#1E40AF] text-white">
-            <span className="font-extrabold text-sm font-mono">MPD</span>
+          <div className="p-2.5 rounded-xl bg-primary-hover text-white">
+            <span className="font-semibold text-sm tabular-nums">MPD</span>
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <h2 className="font-black text-base text-[#111311]">Field Milk Dispatch</h2>
+              <h2 className="font-semibold text-base text-foreground">Field Milk Dispatch</h2>
               {draftVisitId ? (
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
                   Draft Restored
                 </span>
               ) : (
-                <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-blue-100 text-[#1E40AF] border border-blue-200">
+                <span className="text-xs tabular-nums font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-primary-hover border border-blue-200">
                   New Work Item
                 </span>
               )}
@@ -1017,18 +1017,18 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
             <button
               type="button"
               onClick={handleClearDraft}
-              className="h-9 px-3 rounded-xl border border-rose-300 bg-rose-50 text-rose-800 text-xs font-bold hover:bg-rose-100 transition"
+              className="h-9 px-3 rounded-xl border border-rose-300 bg-rose-50 text-rose-800 text-xs font-semibold hover:bg-rose-100 transition"
             >
               Clear Draft
             </button>
           )}
 
-          <div className="flex items-center space-x-2 bg-[#F4EFE3] px-3 py-1.5 rounded-xl border border-[#C4B9A3]">
-            <span className="text-xs uppercase font-bold text-slate-500">Source:</span>
-            <span className="text-xs font-black text-[#1E40AF] font-mono">
+          <div className="flex items-center space-x-2 bg-muted px-3 py-1.5 rounded-xl border border-border-strong">
+            <span className="text-xs uppercase font-semibold text-slate-500">Source:</span>
+            <span className="text-xs font-semibold text-primary-hover tabular-nums">
               {effectiveSource ? effectiveSource.name : (isSourceBound ? 'Loading source...' : 'None Selected')}
             </span>
-            <span className="text-xs font-black uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">
+            <span className="text-xs font-semibold uppercase px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">
               {effectiveSource?.source_type || '—'}
             </span>
           </div>
@@ -1120,14 +1120,14 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
           </div>
 
           {/* Final Dispatch Summary & Submission Footer */}
-          <div className="p-4 sm:p-5 rounded-2xl bg-white border border-[#C4B9A3] shadow-sm space-y-3.5">
-            <div className="flex items-center justify-between text-xs font-extrabold text-[#111311]">
+          <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-3.5">
+            <div className="flex items-center justify-between text-xs font-semibold text-foreground">
               <span>
-                Portions: <span className="font-mono text-[#1E40AF]">{portions.length}</span> ({savedCount} Saved)
+                Portions: <span className="tabular-nums text-primary-hover">{portions.length}</span> ({savedCount} Saved)
               </span>
               <span>
                 Vehicle Quantity:{' '}
-                <span className="font-mono text-[#1E40AF]">
+                <span className="tabular-nums text-primary-hover">
                   {vehicleQuantity.value ? `${vehicleQuantity.value} ${vehicleQuantity.unit}` : '—'}
                 </span>
               </span>
@@ -1143,7 +1143,7 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
                 !vehicleQuantity.value ||
                 Number(vehicleQuantity.value) <= 0
               }
-              className="w-full h-12 flex items-center justify-center py-3 px-4 rounded-xl bg-[#1E40AF] text-white font-extrabold text-sm shadow-md hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              className="w-full h-12 flex items-center justify-center py-3 px-4 rounded-xl bg-primary-hover text-white font-semibold text-sm shadow-md hover:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition"
             >
               {isSubmitting
                 ? 'Submitting Dispatch...'

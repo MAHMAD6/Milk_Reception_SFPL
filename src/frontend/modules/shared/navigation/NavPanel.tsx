@@ -1,0 +1,188 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { AnimatePresence, motion } from 'framer-motion';
+import { ChevronRight, Milk, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { SheetClose } from '@/components/ui/sheet';
+import type { RoleNavSection } from './roleNavConfig';
+
+export interface NavPanelProps {
+  sections: RoleNavSection[];
+  isActive: (href: string) => boolean;
+  /** Called after a link is followed (used to close the mobile sheet). */
+  onNavigate?: () => void;
+  /** Small caption rendered above the nav tree, e.g. the user's role. */
+  caption?: string;
+  footer?: React.ReactNode;
+  /** Render a close button (mobile sheet only). */
+  showClose?: boolean;
+  /** Sections expanded on first render. */
+  defaultExpanded?: string[];
+}
+
+export function formatRoleLabel(role?: string | null) {
+  if (!role) return 'Workspace';
+  return role
+    .toLowerCase()
+    .split('_')
+    .map((part) => (part === 'qa' || part === 'mpd' || part === 'zmcc' || part === 'phe' || part === 'mot' ? part.toUpperCase() : part.charAt(0).toUpperCase() + part.slice(1)))
+    .join(' ');
+}
+
+export function BrandMark({ className }: { className?: string }) {
+  return (
+    <div className={cn('flex items-center gap-2.5 min-w-0', className)}>
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <Milk className="h-4 w-4" />
+      </div>
+      <div className="min-w-0 leading-tight">
+        <span className="block truncate text-sm font-semibold text-foreground">Shakarganj</span>
+        <span className="block truncate text-xs text-muted-foreground">Milk Reception</span>
+      </div>
+    </div>
+  );
+}
+
+const itemBase =
+  'group flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
+export function NavPanel({
+  sections,
+  isActive,
+  onNavigate,
+  caption,
+  footer,
+  showClose = false,
+  defaultExpanded = [],
+}: NavPanelProps) {
+  const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
+    Object.fromEntries(defaultExpanded.map((id) => [id, true]))
+  );
+
+  return (
+    <div className="flex h-full flex-col">
+      <div className="flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
+        <BrandMark />
+        {showClose ? (
+          <SheetClose
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="Close navigation"
+          >
+            <X className="h-4 w-4" />
+          </SheetClose>
+        ) : null}
+      </div>
+
+      <nav aria-label="Primary" className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">
+        {caption ? (
+          <p className="mb-2 px-2.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+            {caption}
+          </p>
+        ) : null}
+
+        <ul className="space-y-0.5">
+          {sections.map((section) => {
+            const Icon = section.icon;
+            const children = section.children ?? [];
+
+            if (children.length === 0 && section.href) {
+              const active = isActive(section.href);
+              return (
+                <li key={section.id}>
+                  <Link
+                    href={section.href}
+                    onClick={onNavigate}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      itemBase,
+                      'h-9',
+                      active
+                        ? 'bg-primary/[0.07] font-medium text-primary'
+                        : 'text-slate-600 hover:bg-muted hover:text-foreground'
+                    )}
+                  >
+                    {Icon ? (
+                      <Icon className={cn('h-4 w-4 shrink-0', active ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground')} />
+                    ) : null}
+                    <span className="truncate">{section.label}</span>
+                  </Link>
+                </li>
+              );
+            }
+
+            const containsActive = children.some((leaf) => isActive(leaf.href));
+            const isOpen = expanded[section.id] ?? containsActive;
+            const panelId = `nav-section-${section.id}`;
+
+            return (
+              <li key={section.id}>
+                <button
+                  type="button"
+                  onClick={() => setExpanded((prev) => ({ ...prev, [section.id]: !isOpen }))}
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  className={cn(
+                    itemBase,
+                    'h-9 text-left',
+                    containsActive ? 'font-medium text-foreground' : 'text-slate-600 hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  {Icon ? (
+                    <Icon className={cn('h-4 w-4 shrink-0', containsActive ? 'text-primary' : 'text-muted-foreground')} />
+                  ) : null}
+                  <span className="flex-1 truncate">{section.label}</span>
+                  <ChevronRight
+                    className={cn('h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200', isOpen && 'rotate-90')}
+                  />
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {isOpen ? (
+                    <motion.ul
+                      id={panelId}
+                      key="panel"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.18, ease: [0.4, 0, 0.2, 1] }}
+                      className="ml-[18px] overflow-hidden border-l pl-2"
+                    >
+                      {children.map((leaf) => {
+                        const active = isActive(leaf.href);
+                        return (
+                          <li key={leaf.id} className="py-px first:pt-1 last:pb-1">
+                            <Link
+                              href={leaf.href}
+                              onClick={onNavigate}
+                              aria-current={active ? 'page' : undefined}
+                              className={cn(
+                                itemBase,
+                                'relative h-8 text-[13px]',
+                                active
+                                  ? 'bg-primary/[0.07] font-medium text-primary'
+                                  : 'text-slate-600 hover:bg-muted hover:text-foreground'
+                              )}
+                            >
+                              {active ? (
+                                <span className="absolute -left-[9px] top-1.5 bottom-1.5 w-0.5 rounded-full bg-primary" />
+                              ) : null}
+                              <span className="truncate">{leaf.label}</span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </motion.ul>
+                  ) : null}
+                </AnimatePresence>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+
+      {footer ? <div className="shrink-0 border-t px-4 py-3">{footer}</div> : null}
+    </div>
+  );
+}

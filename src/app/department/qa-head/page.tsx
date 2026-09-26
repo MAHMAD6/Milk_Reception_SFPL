@@ -5,6 +5,9 @@ import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { User } from '@core/types';
 import { ShieldCheck, Plus, Filter, CheckCircle2, AlertTriangle, XCircle, ArrowUpRight, History } from 'lucide-react';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
+import { Modal } from '@/components/ui/modal';
 
 interface LabTest {
   id: string;
@@ -161,11 +164,11 @@ export default function QAHeadDepartmentPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-xs font-bold text-slate-500">Loading QA Head Station...</div>;
+    return <PageLoader label="Loading QA Head Station…" className="min-h-screen" />;
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#111311] flex flex-col font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={user}
         title="QA Head — SOP Quality Rules"
@@ -183,11 +186,12 @@ export default function QAHeadDepartmentPage() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
+        <PageTransition>
         {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-[#EAE4D5] shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-border shadow-xs">
           <div>
-            <h1 className="text-xl font-black text-slate-900 flex items-center gap-2">
-              <ShieldCheck className="w-6 h-6 text-[#1A4D2E]" />
+            <h1 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
+              <ShieldCheck className="w-6 h-6 text-emerald-900" />
               SOP Quality Rules & Threshold Governance
             </h1>
             <p className="text-xs text-slate-600 mt-1">
@@ -199,7 +203,7 @@ export default function QAHeadDepartmentPage() {
               setFormTestingPoint(selectedPoint);
               setIsModalOpen(true);
             }}
-            className="flex items-center justify-center gap-2 bg-[#1A4D2E] text-white px-4 py-2.5 rounded-lg text-xs font-bold hover:bg-[#153e25] transition shadow-xs"
+            className="flex items-center justify-center gap-2 bg-emerald-900 text-white px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-emerald-950 transition shadow-xs"
           >
             <Plus className="w-4 h-4" />
             Create SOP Rule Version
@@ -212,9 +216,9 @@ export default function QAHeadDepartmentPage() {
             <button
               key={tp.value}
               onClick={() => setSelectedPoint(tp.value)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold whitespace-nowrap transition border ${
+              className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
                 selectedPoint === tp.value
-                  ? 'bg-[#1A4D2E] text-white border-[#1A4D2E] shadow-xs'
+                  ? 'bg-emerald-900 text-white border-emerald-900 shadow-xs'
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -224,9 +228,9 @@ export default function QAHeadDepartmentPage() {
         </div>
 
         {/* Rules Table */}
-        <div className="bg-white rounded-xl border border-[#EAE4D5] overflow-hidden shadow-xs">
-          <div className="px-6 py-4 border-b border-[#EAE4D5] flex items-center justify-between">
-            <h2 className="text-sm font-bold text-slate-800">
+        <div className="bg-white rounded-xl border border-border overflow-hidden shadow-xs">
+          <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-800">
               Active & Historic SOP Rules for {TESTING_POINTS.find((tp) => tp.value === selectedPoint)?.label}
             </h2>
             <span className="text-xs text-slate-500 font-medium">
@@ -237,13 +241,13 @@ export default function QAHeadDepartmentPage() {
           {rules.length === 0 ? (
             <div className="p-12 text-center text-slate-500 space-y-2">
               <AlertTriangle className="w-8 h-8 text-amber-500 mx-auto" />
-              <p className="text-sm font-bold text-slate-700">No SOP rules found for this testing point.</p>
+              <p className="text-sm font-semibold text-slate-700">No SOP rules found for this testing point.</p>
               <p className="text-xs text-slate-500">Click &quot;Create SOP Rule Version&quot; above to establish quality threshold criteria.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-slate-50 text-slate-600 font-bold border-b border-slate-200 uppercase tracking-wider">
+                <thead className="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 uppercase tracking-wider">
                   <tr>
                     <th className="px-6 py-3">Test</th>
                     <th className="px-4 py-3">Version</th>
@@ -259,18 +263,18 @@ export default function QAHeadDepartmentPage() {
                   {rules.map((rule) => (
                     <tr key={rule.id} className="hover:bg-slate-50/80 transition">
                       <td className="px-6 py-3">
-                        <div className="font-bold text-slate-900">{rule.testName}</div>
-                        <div className="text-[10px] text-slate-400 font-mono">{rule.testCode} ({rule.resultType})</div>
+                        <div className="font-semibold text-slate-900">{rule.testName}</div>
+                        <div className="text-[10px] text-slate-400 tabular-nums">{rule.testCode} ({rule.resultType})</div>
                       </td>
-                      <td className="px-4 py-3 font-mono font-bold text-blue-700">v{rule.version}</td>
+                      <td className="px-4 py-3 tabular-nums font-semibold text-blue-700">v{rule.version}</td>
                       <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                           rule.ruleCategory === 'RELEASE' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
                         }`}>
                           {rule.ruleCategory}
                         </span>
                       </td>
-                      <td className="px-4 py-3 font-mono">
+                      <td className="px-4 py-3 tabular-nums">
                         {rule.minValue !== null || rule.maxValue !== null ? (
                           <span>
                             {rule.minValue !== null ? rule.minValue : '—'} &nbsp;to&nbsp;{' '}
@@ -288,18 +292,18 @@ export default function QAHeadDepartmentPage() {
                         )}
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-slate-600 font-mono text-[11px]">{rule.decisionConsequence || 'OUT_OF_SPEC'}</span>
+                        <span className="text-slate-600 tabular-nums text-[11px]">{rule.decisionConsequence || 'OUT_OF_SPEC'}</span>
                       </td>
-                      <td className="px-4 py-3 text-slate-500 font-mono text-[11px]">
+                      <td className="px-4 py-3 text-slate-500 tabular-nums text-[11px]">
                         {new Date(rule.effectiveFrom).toLocaleDateString('en-PK')}
                       </td>
                       <td className="px-4 py-3">
                         {rule.isActive ? (
-                          <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[10px] font-bold">
+                          <span className="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[10px] font-semibold">
                             <CheckCircle2 className="w-3 h-3" /> Active
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 text-slate-500 bg-slate-100 px-2 py-0.5 rounded text-[10px] font-bold">
+                          <span className="inline-flex items-center gap-1 text-slate-500 bg-slate-100 px-2 py-0.5 rounded text-[10px] font-semibold">
                             <History className="w-3 h-3" /> Superseded
                           </span>
                         )}
@@ -311,20 +315,20 @@ export default function QAHeadDepartmentPage() {
             </div>
           )}
         </div>
+        </PageTransition>
       </main>
 
       {/* Modal for Creating New Rule Version */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+        <Modal onClose={() => setIsModalOpen(false)} title="Create rule version" className="max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
-              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-                <ShieldCheck className="w-5 h-5 text-[#1A4D2E]" />
+              <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 text-emerald-900" />
                 Publish New SOP Rule Version
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 text-lg font-bold"
+                className="text-slate-400 hover:text-slate-600 text-lg font-semibold"
               >
                 &times;
               </button>
@@ -339,7 +343,7 @@ export default function QAHeadDepartmentPage() {
 
             <form onSubmit={handleCreateRule} className="space-y-4 text-xs">
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Testing Point</label>
+                <label className="block font-semibold text-slate-700 mb-1">Testing Point</label>
                 <select
                   value={formTestingPoint}
                   onChange={(e) => setFormTestingPoint(e.target.value)}
@@ -354,7 +358,7 @@ export default function QAHeadDepartmentPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Lab Test</label>
+                <label className="block font-semibold text-slate-700 mb-1">Lab Test</label>
                 <select
                   value={formTestId}
                   onChange={(e) => setFormTestId(e.target.value)}
@@ -370,7 +374,7 @@ export default function QAHeadDepartmentPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Rule Category</label>
+                <label className="block font-semibold text-slate-700 mb-1">Rule Category</label>
                 <select
                   value={['MOT_SHOP', 'DISPATCH'].includes(formTestingPoint) ? 'MONITORING' : formCategory}
                   onChange={(e) => setFormCategory(e.target.value as 'RELEASE' | 'MONITORING')}
@@ -390,7 +394,7 @@ export default function QAHeadDepartmentPage() {
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Min Value (Numeric)</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Min Value (Numeric)</label>
                   <input
                     type="number"
                     step="any"
@@ -401,7 +405,7 @@ export default function QAHeadDepartmentPage() {
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-slate-700 mb-1">Max Value (Numeric)</label>
+                  <label className="block font-semibold text-slate-700 mb-1">Max Value (Numeric)</label>
                   <input
                     type="number"
                     step="any"
@@ -414,7 +418,7 @@ export default function QAHeadDepartmentPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Acceptable Option (Qualitative)</label>
+                <label className="block font-semibold text-slate-700 mb-1">Acceptable Option (Qualitative)</label>
                 <input
                   type="text"
                   value={formAcceptableOption}
@@ -425,7 +429,7 @@ export default function QAHeadDepartmentPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Warning Trigger (Optional)</label>
+                <label className="block font-semibold text-slate-700 mb-1">Warning Trigger (Optional)</label>
                 <input
                   type="text"
                   value={formWarningTrigger}
@@ -436,7 +440,7 @@ export default function QAHeadDepartmentPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">Decision Consequence</label>
+                <label className="block font-semibold text-slate-700 mb-1">Decision Consequence</label>
                 <input
                   type="text"
                   value={formDecisionConsequence}
@@ -447,7 +451,7 @@ export default function QAHeadDepartmentPage() {
               </div>
 
               <div>
-                <label className="block font-bold text-slate-700 mb-1">
+                <label className="block font-semibold text-slate-700 mb-1">
                   Governance Justification / Reason <span className="text-red-600">*</span>
                 </label>
                 <textarea
@@ -464,21 +468,20 @@ export default function QAHeadDepartmentPage() {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-slate-600 font-bold hover:bg-slate-100 rounded-lg transition"
+                  className="px-4 py-2 text-slate-600 font-semibold hover:bg-slate-100 rounded-lg transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="bg-[#1A4D2E] text-white px-5 py-2 rounded-lg font-bold hover:bg-[#153e25] transition disabled:opacity-50"
+                  className="bg-emerald-900 text-white px-5 py-2 rounded-lg font-semibold hover:bg-emerald-950 transition disabled:opacity-50"
                 >
                   {submitting ? 'Saving...' : 'Publish Version'}
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+          </Modal>
       )}
     </div>
   );

@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Bell, CheckCheck, Settings, ExternalLink, Inbox } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Bell, CheckCheck, Settings, ArrowUpRight, Inbox } from 'lucide-react';
 import { User } from '@core/types';
 import Link from 'next/link';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 export interface NotificationItem {
   id: string;
@@ -27,8 +29,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     if (!currentUser) return;
@@ -72,37 +72,6 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
       window.removeEventListener('milk-user-logged-out', handleLoggedOut);
     };
   }, [currentUser, fetchNotifications]);
-
-  // Handle click outside to close dropdown
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node) &&
-        buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        setIsOpen(false);
-        buttonRef.current?.focus();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen]);
 
   const handleMarkAllRead = async () => {
     if (unreadCount === 0 || loading) return;
@@ -160,143 +129,117 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
   }
 
   return (
-    <div className="relative inline-block text-left" ref={dropdownRef}>
-      {/* Bell Trigger Button */}
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
-        className="min-h-[44px] min-w-[44px] p-2.5 rounded-xl border border-[#EAE4D5] bg-[#FDFBF9] text-[#111311] hover:bg-[#F4F0E6] hover:border-[#C4B9A3] transition flex items-center justify-center relative focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] shadow-xs cursor-pointer"
-        aria-label="Open notifications"
-        aria-expanded={isOpen}
-        aria-haspopup="true"
-        title="Notifications"
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted data-[state=open]:text-foreground"
+        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
       >
-        <Bell className="w-4 h-4 text-[#1E3A8A]" />
+        <Bell className="h-[18px] w-[18px]" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-xs border-2 border-white leading-none animate-pulse">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-card">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
-      </button>
+      </PopoverTrigger>
 
-      {/* Popover Dropdown Panel */}
-      {isOpen && (
-        <div
-          className="absolute right-0 top-full mt-2 w-80 sm:w-96 max-h-[480px] bg-white border border-[#C4B9A3] rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden text-[#111311] animate-in fade-in slide-in-from-top-2 duration-150"
-          role="region"
-          aria-label="Notifications Dropdown"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#EAE4D5] bg-[#FDFBF9]">
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-black uppercase tracking-wider text-[#111311]">
-                Notifications
-              </span>
-              {unreadCount > 0 && (
-                <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-black border border-rose-200">
-                  {unreadCount} unread
-                </span>
-              )}
-            </div>
-
+      <PopoverContent align="end" className="flex w-[min(24rem,calc(100vw-1.5rem))] flex-col overflow-hidden p-0">
+        <div className="flex items-center justify-between border-b px-4 py-3">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-foreground">Notifications</span>
             {unreadCount > 0 && (
-              <button
-                type="button"
-                onClick={handleMarkAllRead}
-                disabled={loading}
-                className="text-xs font-bold text-[#1E3A8A] hover:underline flex items-center space-x-1 cursor-pointer disabled:opacity-50"
-              >
-                <CheckCheck className="w-3.5 h-3.5" />
-                <span>Mark all read</span>
-              </button>
+              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
+                {unreadCount} new
+              </span>
             )}
           </div>
+          {unreadCount > 0 && (
+            <button
+              type="button"
+              onClick={handleMarkAllRead}
+              disabled={loading}
+              className="inline-flex items-center gap-1 rounded text-xs font-medium text-muted-foreground transition-colors hover:text-foreground disabled:opacity-50"
+            >
+              <CheckCheck className="h-3.5 w-3.5" />
+              Mark all read
+            </button>
+          )}
+        </div>
 
-          {/* List of Notifications */}
-          <div className="overflow-y-auto flex-1 max-h-[340px] p-2 space-y-1.5 divide-y divide-[#EAE4D5]/60">
-            {notifications.length === 0 ? (
-              <div className="py-10 px-4 text-center">
-                <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-[#F4F0E6] text-slate-400 flex items-center justify-center">
-                  <Inbox className="w-5 h-5" />
-                </div>
-                <p className="text-xs font-bold text-slate-600">No active notifications</p>
-                <p className="text-[11px] text-slate-400 mt-0.5">
-                  You are fully up to date with plant events.
-                </p>
+        <div className="scrollbar-thin max-h-[360px] overflow-y-auto">
+          {notifications.length === 0 ? (
+            <div className="px-6 py-10 text-center">
+              <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <Inbox className="h-5 w-5" />
               </div>
-            ) : (
-              notifications.map((item) => {
+              <p className="text-sm font-medium text-foreground">You&apos;re all caught up</p>
+              <p className="mt-1 text-xs text-muted-foreground">New plant events will appear here.</p>
+            </div>
+          ) : (
+            <ul className="divide-y">
+              {notifications.map((item) => {
                 const isUnread = !item.readAt;
                 const isHighPriority = item.priority === 'HIGH' || item.priority === 'URGENT';
 
                 return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => handleItemClick(item)}
-                    className={`w-full text-left p-3 rounded-xl transition cursor-pointer flex flex-col space-y-1 relative pt-2.5 ${
-                      isUnread
-                        ? 'bg-blue-50/60 border border-blue-200 hover:bg-blue-50 hover:border-blue-300'
-                        : 'bg-[#FDFBF9] border border-transparent hover:bg-[#F4F0E6]'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex items-center space-x-1.5 min-w-0">
-                        {isUnread && (
-                          <span className="w-2 h-2 rounded-full bg-[#1E3A8A] shrink-0" />
-                        )}
-                        <span
-                          className={`text-xs font-black truncate ${
-                            isUnread ? 'text-[#111311]' : 'text-slate-700'
-                          }`}
-                        >
-                          {item.title}
-                        </span>
-                      </div>
-
-                      {isHighPriority && (
-                        <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-rose-100 text-rose-800 border border-rose-200 shrink-0">
-                          {item.priority}
-                        </span>
+                  <li key={item.id}>
+                    <button
+                      type="button"
+                      onClick={() => handleItemClick(item)}
+                      className={cn(
+                        'flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none',
+                        isUnread && 'bg-primary/[0.03]'
                       )}
-                    </div>
-
-                    <p className="text-xs text-slate-600 font-medium line-clamp-2 pl-3.5">
-                      {item.body}
-                    </p>
-
-                    <div className="flex items-center justify-between pl-3.5 pt-1 text-[10px] text-slate-400 font-mono">
-                      <span>
-                        {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                    >
+                      <span
+                        className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', isUnread ? 'bg-primary' : 'bg-transparent')}
+                        aria-hidden="true"
+                      />
+                      <span className="min-w-0 flex-1 space-y-1">
+                        <span className="flex items-start justify-between gap-2">
+                          <span className={cn('truncate text-sm', isUnread ? 'font-medium text-foreground' : 'text-slate-600')}>
+                            {item.title}
+                          </span>
+                          {isHighPriority && (
+                            <span className="shrink-0 rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-red-700">
+                              {item.priority}
+                            </span>
+                          )}
+                        </span>
+                        <span className="line-clamp-2 block text-xs text-muted-foreground">{item.body}</span>
+                        <span className="flex items-center justify-between text-[11px] text-muted-foreground">
+                          <span className="tabular-nums">
+                            {item.createdAt
+                              ? new Date(item.createdAt).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                              : ''}
+                          </span>
+                          {item.deepLink && (
+                            <span className="inline-flex items-center gap-0.5 font-medium text-primary">
+                              Open
+                              <ArrowUpRight className="h-3 w-3" />
+                            </span>
+                          )}
+                        </span>
                       </span>
-                      {item.deepLink && (
-                        <span className="text-[#1E3A8A] font-bold flex items-center space-x-0.5">
-                          <span>View</span>
-                          <ExternalLink className="w-2.5 h-2.5" />
-                        </span>
-                      )}
-                    </div>
-                  </button>
+                    </button>
+                  </li>
                 );
-              })
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="px-4 py-2.5 border-t border-[#EAE4D5] bg-[#FDFBF9] flex items-center justify-between text-xs">
-            <Link
-              href="/notifications/settings"
-              onClick={() => setIsOpen(false)}
-              className="text-slate-600 hover:text-[#1E3A8A] font-bold flex items-center space-x-1.5 transition"
-            >
-              <Settings className="w-3.5 h-3.5" />
-              <span>Notification Settings</span>
-            </Link>
-            <span className="text-[10px] text-slate-400 font-mono">Auto-sync: 60s</span>
-          </div>
+              })}
+            </ul>
+          )}
         </div>
-      )}
-    </div>
+
+        <div className="flex items-center justify-between border-t bg-subtle px-4 py-2.5 text-xs">
+          <Link
+            href="/notifications/settings"
+            onClick={() => setIsOpen(false)}
+            className="inline-flex items-center gap-1.5 font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            <Settings className="h-3.5 w-3.5" />
+            Settings
+          </Link>
+          <span className="text-muted-foreground">Refreshes every minute</span>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 };

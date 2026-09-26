@@ -1,7 +1,14 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Milk, ShieldCheck, ArrowRight, CheckCircle2, AlertCircle, Eye, EyeOff, LogIn } from 'lucide-react';
+import { ShieldCheck, ArrowRight, AlertCircle, Eye, EyeOff, LogIn } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Spinner } from '@/components/ui/spinner';
+import { cn } from '@/lib/utils';
+import { BrandMark } from '@/frontend/modules/shared/navigation/NavPanel';
 import { useRouter } from 'next/navigation';
 import { resolveRoleHome } from '@/lib/role-routing';
 
@@ -157,196 +164,172 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen w-full max-w-full bg-[#F4EFE3] text-[#111311] flex flex-col justify-between p-4 sm:p-6 font-sans overflow-x-hidden">
-      {/* Top Brand Bar */}
-      <header className="flex items-center justify-between max-w-6xl mx-auto w-full pb-4 border-b border-[#C4B9A3]">
-        <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-[#1E3A8A] rounded-xl shadow-sm text-white">
-            <Milk className="w-6 h-6" />
-          </div>
-          <div>
-            <h1 className="font-extrabold text-lg tracking-tight leading-none text-[#111311]">Milk Reception</h1>
-            <p className="text-xs font-bold text-[#1E40AF] uppercase tracking-widest mt-0.5">
-              SFPL Milk Reception & Processing
-            </p>
-          </div>
-        </div>
-
-        <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-white border border-[#C4B9A3] text-xs font-mono font-extrabold text-[#111311] shadow-sm">
-          <ShieldCheck className="w-4 h-4 text-[#1E40AF]" />
-          <span>Operational Security Console</span>
-        </div>
+    <div className="flex min-h-screen w-full flex-col bg-background text-foreground">
+      <header className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+        <BrandMark />
+        <span className="hidden items-center gap-1.5 text-xs text-muted-foreground sm:inline-flex">
+          <ShieldCheck className="h-3.5 w-3.5" />
+          Secure operator access
+        </span>
       </header>
 
-      {/* Main Container */}
-      <main className="max-w-6xl mx-auto w-full my-auto py-8">
-        <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
-          {/* Main Sign In Form Card */}
-          <div className="w-full max-w-[400px] mx-auto lg:mx-0 shrink-0 order-1 lg:order-2">
-            <div className="p-6 sm:p-8 rounded-2xl bg-white border border-[#C4B9A3] shadow-md space-y-6 text-[#111311]">
-              <div className="space-y-1 text-center sm:text-left">
-                <h2 className="text-2xl font-black text-[#111311] tracking-tight">Sign In</h2>
-                <p className="text-xs text-slate-600 font-medium">Enter credentials or click any role card</p>
+      <main className="mx-auto flex w-full max-w-6xl flex-1 items-start justify-center px-4 py-8 sm:px-6 lg:items-center">
+        <div className="grid w-full items-start gap-8 lg:grid-cols-[400px_1fr] lg:gap-12">
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
+            className="mx-auto w-full max-w-[400px] rounded-xl border bg-card p-6 shadow-sm sm:p-8"
+            aria-labelledby="sign-in-heading"
+          >
+            <div className="space-y-1.5">
+              <h1 id="sign-in-heading" className="text-xl font-semibold tracking-tight">
+                Sign in
+              </h1>
+              <p className="text-sm text-muted-foreground">Milk Reception &amp; Processing — Shakarganj Food Products</p>
+            </div>
+
+            <AnimatePresence initial={false}>
+              {errorMsg && (
+                <motion.div
+                  role="alert"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="mt-5 flex items-start gap-2 rounded-md border border-red-200 bg-red-50 px-3 py-2.5 text-sm text-red-800">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+                    <span>{errorMsg}</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username-input">Username</Label>
+                <Input
+                  id="username-input"
+                  type="text"
+                  name="username"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  value={username}
+                  onChange={handleUsernameChange}
+                  placeholder="e.g. qa.chemist"
+                  className="h-10"
+                  aria-invalid={Boolean(errorMsg)}
+                  required
+                />
               </div>
 
-              {errorMsg && (
-                <div role="alert" className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center space-x-2">
-                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>{errorMsg}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-1.5">
-                  <label htmlFor="username-input" className="block text-xs font-bold text-[#111311]">
-                    Username
-                  </label>
-                  <input
-                    id="username-input"
-                    type="text"
-                    name="username"
-                    autoComplete="username"
-                    value={username}
-                    onChange={handleUsernameChange}
-                    placeholder="Enter your username"
-                    className="w-full h-11 px-3.5 text-sm font-mono font-bold rounded-xl border border-[#C4B9A3] bg-white text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] transition"
+              <div className="space-y-2">
+                <Label htmlFor="password-input">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="password-input"
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={handlePasswordChange}
+                    className="h-10 pr-10"
+                    aria-invalid={Boolean(errorMsg)}
                     required
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    aria-pressed={showPassword}
+                    className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </div>
+              </div>
 
-                <div className="space-y-1.5">
-                  <label htmlFor="password-input" className="block text-xs font-bold text-[#111311]">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="password-input"
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      autoComplete="current-password"
-                      value={password}
-                      onChange={handlePasswordChange}
-                      placeholder="••••••••"
-                      className="w-full h-11 px-3.5 pr-11 text-sm font-mono font-bold rounded-xl border border-[#C4B9A3] bg-white text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A] transition"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      aria-label={showPassword ? 'Hide password' : 'Show password'}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition focus:outline-none cursor-pointer"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
+              <label className="flex w-fit cursor-pointer select-none items-center gap-2 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-input accent-primary"
+                />
+                Keep me signed in
+              </label>
 
-                <div className="flex items-center justify-between pt-1">
-                  <label className="flex items-center space-x-2 text-xs font-bold text-slate-600 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="w-4 h-4 rounded border-[#C4B9A3] text-[#1E3A8A] focus:ring-[#1E3A8A]"
-                    />
-                    <span>Remember me</span>
-                  </label>
-                </div>
+              <Button type="submit" disabled={isSubmitting} className="h-10 w-full">
+                {isSubmitting ? <Spinner className="text-primary-foreground" /> : null}
+                {isSubmitting ? 'Signing in…' : 'Sign in'}
+                {!isSubmitting ? <ArrowRight /> : null}
+              </Button>
+            </form>
+          </motion.section>
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full h-11 flex items-center justify-center space-x-2 px-4 rounded-xl bg-[#1E3A8A] hover:bg-[#1E40AF] text-white font-extrabold text-xs shadow-sm transition disabled:opacity-50 cursor-pointer"
-                >
-                  <span>{isSubmitting ? 'Signing in...' : 'Sign In'}</span>
-                  <ArrowRight className="w-4 h-4 text-white" />
-                </button>
-              </form>
-            </div>
-          </div>
-
-          {/* 1-Click Role Logins Panel */}
-          <div className="flex-1 w-full max-w-[560px] mx-auto lg:mx-0 space-y-4 order-2 lg:order-1">
-            <div className="space-y-1">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 border border-amber-300 text-amber-900 inline-block uppercase tracking-wider">
-                1-Click Quick Access
-              </span>
-              <h3 className="text-xl font-black text-[#111311]">Operational Role Credentials</h3>
-              <p className="text-xs text-slate-600 font-medium">
-                Click any role card below to immediately sign into its workspace.
-              </p>
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.08, ease: [0.25, 0.1, 0.25, 1] }}
+            className="mx-auto w-full max-w-[640px] lg:mx-0"
+            aria-labelledby="demo-accounts-heading"
+          >
+            <div className="mb-3 flex items-end justify-between gap-4">
+              <div>
+                <h2 id="demo-accounts-heading" className="text-sm font-semibold">
+                  Demo accounts
+                </h2>
+                <p className="text-sm text-muted-foreground">Select a role to sign in instantly.</p>
+              </div>
             </div>
 
-            <div className="space-y-4 max-h-[540px] overflow-y-auto pr-1">
+            <div className="scrollbar-thin max-h-[560px] space-y-5 overflow-y-auto rounded-xl border bg-card p-3 shadow-xs">
               {devGroups.map((group) => (
-                <div key={group.group} className="space-y-2">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-600 block px-1">
-                    {group.group}
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div key={group.group}>
+                  <p className="px-2 pb-1.5 pt-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                    {group.group.toLowerCase()}
+                  </p>
+                  <ul className="grid grid-cols-1 gap-1 sm:grid-cols-2">
                     {group.items.map((item) => {
                       const active = selectedUser === item.username;
+                      const busy = active && isSubmitting;
                       return (
-                        <div
-                          key={item.username}
-                          onClick={() => handleDirectLogin(item)}
-                          tabIndex={0}
-                          role="button"
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              handleDirectLogin(item);
-                            }
-                          }}
-                          className={`p-3 rounded-xl border transition cursor-pointer space-y-2 flex flex-col justify-between group ${
-                            active
-                              ? 'bg-[#1E3A8A] text-white border-blue-900 shadow-md ring-2 ring-[#1E3A8A]'
-                              : 'bg-white text-[#111311] border-[#C4B9A3] hover:border-[#1E3A8A] hover:bg-blue-50/40 shadow-xs'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span
-                              className={`px-2 py-0.5 rounded text-xs font-bold font-mono ${
-                                active ? 'bg-white/20 text-white' : 'bg-[#F4EFE3] text-[#1E40AF] border border-[#C4B9A3]'
-                              }`}
-                            >
-                              {item.label}
-                            </span>
-                            {active ? (
-                              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                            ) : (
-                              <LogIn className="w-4 h-4 text-slate-400 group-hover:text-[#1E3A8A] transition" />
+                        <li key={item.username}>
+                          <button
+                            type="button"
+                            onClick={() => handleDirectLogin(item)}
+                            disabled={isSubmitting}
+                            aria-label={`Sign in as ${item.label}`}
+                            className={cn(
+                              'group flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait',
+                              active ? 'border-primary/30 bg-primary/[0.05]' : 'border-transparent hover:bg-muted'
                             )}
-                          </div>
-
-                          <div>
-                            <p className={`text-xs font-medium truncate ${active ? 'text-slate-200' : 'text-slate-600'}`}>
-                              {item.department}
-                            </p>
-                          </div>
-
-                          <div className={`p-1.5 rounded-lg font-mono text-xs flex justify-between items-center ${
-                            active ? 'bg-blue-950/60 text-white' : 'bg-[#F4EFE3] text-[#111311] border border-[#C4B9A3]'
-                          }`}>
-                            <span className="font-bold">{item.username}</span>
-                            <span className="opacity-75 font-semibold text-slate-600">{item.password || 'admin123'}</span>
-                          </div>
-                        </div>
+                          >
+                            <span className="min-w-0 flex-1">
+                              <span className="block truncate text-sm font-medium text-foreground">{item.label}</span>
+                              <span className="block truncate text-xs text-muted-foreground">{item.username}</span>
+                            </span>
+                            {busy ? (
+                              <Spinner className="text-primary" />
+                            ) : (
+                              <LogIn className="h-4 w-4 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100" />
+                            )}
+                          </button>
+                        </li>
                       );
                     })}
-                  </div>
+                  </ul>
                 </div>
               ))}
             </div>
-          </div>
+          </motion.section>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer
-        suppressHydrationWarning
-        className="max-w-6xl mx-auto w-full pt-4 border-t border-[#C4B9A3] text-center text-xs font-medium text-slate-500"
-      >
-        SFPL Milk Reception & Processing System © 2026 — Operational System Access
+      <footer suppressHydrationWarning className="mx-auto w-full max-w-6xl px-4 py-6 text-center text-xs text-muted-foreground sm:px-6">
+        © {new Date().getFullYear()} Shakarganj Food Products Ltd · Milk Reception &amp; Processing
       </footer>
     </div>
   );

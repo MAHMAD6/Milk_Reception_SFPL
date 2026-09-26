@@ -117,23 +117,23 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
   if (activeTab === 'WAITING') {
     if (!selectedWaitingVisit) {
       return (
-        <div className="p-8 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+        <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
           {searchQuery ? 'No matching vehicles found.' : 'No vehicles are waiting for QA testing.'}
         </div>
       );
     }
 
     return (
-      <div className="p-6 rounded-2xl bg-[#EFE9D9] border border-[#C4B9A3] shadow-md space-y-5 text-[#111311]">
-        <div className="pb-3 border-b border-[#C4B9A3]">
-          <h3 className="text-base font-extrabold text-[#111311]">Vehicle Waiting for QA</h3>
-          <p className="text-xs text-[#334155] font-semibold mt-0.5">
-            Vehicle: <strong className="font-mono text-[#111311]">{selectedWaitingVisit.vehicle_number}</strong> | Token:{' '}
-            <strong className="font-mono text-[#1E3A8A]">{selectedWaitingVisit.token_number || 'NO-TOKEN'}</strong>
+      <div className="p-6 rounded-xl bg-muted border border-border-strong shadow-md space-y-5 text-foreground">
+        <div className="pb-3 border-b border-border-strong">
+          <h3 className="text-base font-semibold text-foreground">Vehicle Waiting for QA</h3>
+          <p className="text-xs text-slate-700 font-semibold mt-0.5">
+            Vehicle: <strong className="tabular-nums text-foreground">{selectedWaitingVisit.vehicle_number}</strong> | Token:{' '}
+            <strong className="tabular-nums text-primary">{selectedWaitingVisit.token_number || 'NO-TOKEN'}</strong>
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-[#F4EFE3] border border-[#C4B9A3] text-xs font-mono font-bold">
+        <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-muted border border-border-strong text-xs tabular-nums font-semibold">
           <div>
             <span className="text-slate-500 font-sans block text-[10px]">Portions</span>
             <span>{selectedWaitingVisit.portion_count} Composite Portions</span>
@@ -149,7 +149,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
             type="button"
             disabled={isSubmitting}
             onClick={() => onOpenActionModal('START', selectedWaitingVisit.id)}
-            className="w-full min-h-[44px] py-3 px-4 rounded-xl bg-[#1E3A8A] hover:bg-blue-800 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2"
+            className="w-full min-h-[44px] py-3 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white font-semibold text-xs shadow-md transition flex items-center justify-center space-x-2"
           >
             <Play className="w-4 h-4 fill-current" />
             <span>Start QA Testing Session</span>
@@ -162,30 +162,30 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
   if (activeTab === 'ON_HOLD') {
     if (!selectedHeldVisit) {
       return (
-        <div className="p-8 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+        <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
           Select a held vehicle to view hold details.
         </div>
       );
     }
 
     return (
-      <div className="p-6 rounded-2xl bg-amber-50 border border-amber-300 shadow-md space-y-5 text-[#111311]">
+      <div className="p-6 rounded-xl bg-amber-50 border border-amber-300 shadow-md space-y-5 text-foreground">
         <div className="pb-3 border-b border-amber-200">
-          <h3 className="text-base font-extrabold text-amber-950">QA Testing On Hold</h3>
+          <h3 className="text-base font-semibold text-amber-950">QA Testing On Hold</h3>
           <p className="text-xs text-amber-800 font-semibold mt-0.5">
-            Vehicle: <strong className="font-mono text-amber-950">{selectedHeldVisit.vehicle_number}</strong> | Token:{' '}
-            <strong className="font-mono text-amber-900">{selectedHeldVisit.token_number || 'NO-TOKEN'}</strong>
+            Vehicle: <strong className="tabular-nums text-amber-950">{selectedHeldVisit.vehicle_number}</strong> | Token:{' '}
+            <strong className="tabular-nums text-amber-900">{selectedHeldVisit.token_number || 'NO-TOKEN'}</strong>
           </p>
         </div>
 
         <div className="p-4 rounded-xl bg-white border border-amber-200 space-y-2">
-          <label className="text-xs font-extrabold text-amber-950 uppercase tracking-wider block">
+          <label className="text-xs font-semibold text-amber-950 uppercase tracking-wider block">
             Reason for Hold
           </label>
-          <p className="text-xs font-bold text-amber-900">{selectedHeldVisit.hold_reason}</p>
+          <p className="text-xs font-semibold text-amber-900">{selectedHeldVisit.hold_reason}</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-amber-100/60 border border-amber-200 text-xs font-mono font-bold">
+        <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-amber-100/60 border border-amber-200 text-xs tabular-nums font-semibold">
           <div>
             <span className="text-amber-800 font-sans block text-[10px]">Chemist</span>
             <span className="text-amber-950">{selectedHeldVisit.chemist_name}</span>
@@ -201,7 +201,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
             type="button"
             disabled={isSubmitting}
             onClick={() => onOpenActionModal('RESUME', selectedHeldVisit.id)}
-            className="w-full min-h-[44px] py-3 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-extrabold text-xs shadow-md transition flex items-center justify-center space-x-2"
+            className="w-full min-h-[44px] py-3 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-semibold text-xs shadow-md transition flex items-center justify-center space-x-2"
           >
             <Play className="w-4 h-4 fill-current" />
             <span>Resume Testing Session</span>
@@ -214,7 +214,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
   // Active IN_TESTING workspace
   if (isLoadingVisit) {
     return (
-      <div className="p-12 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+      <div className="p-12 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
         <RefreshCw className="w-6 h-6 animate-spin mx-auto mb-2 text-blue-700" />
         Loading vehicle testing session...
       </div>
@@ -223,7 +223,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
 
   if (!visitDetail) {
     return (
-      <div className="p-8 text-center border border-dashed border-[#C4B9A3] rounded-2xl bg-[#EFE9D9] text-xs font-bold text-slate-500">
+      <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
         Select an active testing session from the left queue to begin observations.
       </div>
     );
@@ -232,26 +232,26 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
   const currentPortion = visitDetail.portions[activePortionIndex] || null;
 
   return (
-    <div className="p-6 rounded-2xl bg-[#EFE9D9] border border-[#C4B9A3] shadow-md space-y-6 text-[#111311]">
+    <div className="p-6 rounded-xl bg-muted border border-border-strong shadow-md space-y-6 text-foreground">
       {/* Session Header Card */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#C4B9A3]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border-strong">
         <div>
           <div className="flex items-center space-x-3">
-            <span className="font-mono font-black text-lg text-[#111311]">{visitDetail.vehicle_number}</span>
-            <span className="px-2 py-0.5 rounded-lg text-xs font-mono font-black bg-[#1E3A8A] text-white">
+            <span className="tabular-nums font-semibold text-lg text-foreground">{visitDetail.vehicle_number}</span>
+            <span className="px-2 py-0.5 rounded-lg text-xs tabular-nums font-semibold bg-primary text-white">
               {visitDetail.token_number || 'NO-TOKEN'}
             </span>
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-blue-100 text-[#1E3A8A] border border-blue-200">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase bg-blue-100 text-primary border border-blue-200">
               IN_TESTING
             </span>
           </div>
-          <p className="text-xs text-[#334155] font-semibold mt-1">
-            Gate Entry: <span className="font-mono">{formatOperationalTime(visitDetail.entry_timestamp)}</span> | Visit #{visitDetail.visit_number}
+          <p className="text-xs text-slate-700 font-semibold mt-1">
+            Gate Entry: <span className="tabular-nums">{formatOperationalTime(visitDetail.entry_timestamp)}</span> | Visit #{visitDetail.visit_number}
           </p>
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-mono font-bold bg-[#F4EFE3] px-3 py-1.5 rounded-xl border border-[#C4B9A3] text-[#111311]">
+          <span className="text-xs tabular-nums font-semibold bg-muted px-3 py-1.5 rounded-xl border border-border-strong text-foreground">
             Decision: {visitDetail.visit_decision_summary}
           </span>
         </div>
@@ -260,7 +260,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
       {/* Portion Sub-Tabs */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-xs font-black uppercase tracking-wider text-[#111311]">
+          <label className="text-xs font-semibold uppercase tracking-wider text-foreground">
             Select Composite Portion ({visitDetail.portions.length} Total)
           </label>
         </div>
@@ -276,14 +276,14 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
                 key={`portion-tab-${p.id}`}
                 type="button"
                 onClick={() => onSelectPortion(idx)}
-                className={`px-4 py-2.5 rounded-xl text-xs font-extrabold transition flex items-center space-x-2 border shrink-0 min-h-[44px] ${
+                className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 border shrink-0 min-h-[44px] ${
                   isSelected
-                    ? 'bg-[#1E3A8A] text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
+                    ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
                     : isAccepted
                     ? 'bg-emerald-50 text-emerald-900 border-emerald-300 hover:bg-emerald-100'
                     : isRejected
                     ? 'bg-rose-50 text-rose-900 border-rose-300 hover:bg-rose-100'
-                    : 'bg-[#F4EFE3] text-[#111311] border-[#C4B9A3] hover:bg-amber-100/50'
+                    : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/50'
                 }`}
               >
                 <span>Portion {p.portion_number}</span>
@@ -299,7 +299,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
       {currentPortion ? (
         <div className="space-y-5">
           {/* Portion Meta Summary Strip */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 rounded-xl bg-[#F4EFE3] border border-[#C4B9A3] text-xs font-mono font-bold">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 p-3.5 rounded-xl bg-muted border border-border-strong text-xs tabular-nums font-semibold">
             <div>
               <span className="text-slate-500 font-sans block text-[9.5px]">Portion Number</span>
               <span>Portion #{currentPortion.portion_number}</span>
@@ -310,7 +310,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
             </div>
             <div>
               <span className="text-slate-500 font-sans block text-[9.5px]">Decision</span>
-              <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${
+              <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                 currentPortion.plant_decision === 'ACCEPTED'
                   ? 'bg-emerald-100 text-emerald-800'
                   : currentPortion.plant_decision === 'REJECTED'
@@ -328,7 +328,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
 
           {/* Plant Rejection Banner if rejected */}
           {currentPortion.plant_decision === 'REJECTED' && currentPortion.plant_rejection_reason && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-bold space-y-1">
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-300 text-rose-800 text-xs font-semibold space-y-1">
               <span className="uppercase text-[10px] tracking-wider block text-rose-900">
                 Portion Rejection Reason
               </span>
@@ -338,11 +338,11 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
 
           {/* Dynamic Plant Test Observation Matrix */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between pb-1 border-b border-[#C4B9A3]">
-              <h4 className="text-xs font-extrabold uppercase tracking-wider text-[#111311]">
+            <div className="flex items-center justify-between pb-1 border-b border-border-strong">
+              <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
                 Plant Lab Observations ({visitDetail.active_plant_tests.length} Active Tests)
               </h4>
-              <span className="text-[10px] font-bold text-slate-500">
+              <span className="text-[10px] font-semibold text-slate-500">
                 Dynamic Plant Quality Control
               </span>
             </div>
@@ -364,19 +364,19 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
                       key={`plant-test-card-${test.id}`}
                       className={`p-3.5 rounded-xl border space-y-2.5 transition ${
                         isPerformed
-                          ? 'bg-[#F4EFE3] border-[#C4B9A3]'
+                          ? 'bg-muted border-border-strong'
                           : 'bg-slate-100/80 border-slate-300'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <span className="text-xs font-extrabold text-[#111311] block">
-                            {test.testName} {test.isRequired && <span className="text-rose-600 font-bold">*</span>}
+                          <span className="text-xs font-semibold text-foreground block">
+                            {test.testName} {test.isRequired && <span className="text-rose-600 font-semibold">*</span>}
                           </span>
-                          <span className="text-[10px] font-mono text-slate-500">{test.testCode}</span>
+                          <span className="text-[10px] tabular-nums text-slate-500">{test.testCode}</span>
                         </div>
                         {test.unit && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-white text-slate-700 border border-[#C4B9A3]">
+                          <span className="px-2 py-0.5 rounded text-[10px] tabular-nums font-semibold bg-white text-slate-700 border border-border-strong">
                             {test.unit}
                           </span>
                         )}
@@ -387,10 +387,10 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
                         <button
                           type="button"
                           onClick={() => onTestPerformanceStatusChange(test.id, 'PERFORMED')}
-                          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-[11px] font-extrabold transition ${
+                          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-[11px] font-semibold transition ${
                             isPerformed
-                              ? 'bg-[#1E3A8A] text-white shadow-sm'
-                              : 'bg-white text-slate-700 border border-[#C4B9A3] hover:bg-slate-50'
+                              ? 'bg-primary text-white shadow-sm'
+                              : 'bg-white text-slate-700 border border-border-strong hover:bg-slate-50'
                           }`}
                         >
                           PERFORMED
@@ -398,10 +398,10 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
                         <button
                           type="button"
                           onClick={() => onTestPerformanceStatusChange(test.id, 'NOT_PERFORMED')}
-                          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-[11px] font-extrabold transition ${
+                          className={`min-h-[40px] px-3.5 py-2 rounded-lg text-[11px] font-semibold transition ${
                             !isPerformed
                               ? 'bg-rose-700 text-white shadow-sm'
-                              : 'bg-white text-slate-700 border border-[#C4B9A3] hover:bg-slate-50'
+                              : 'bg-white text-slate-700 border border-border-strong hover:bg-slate-50'
                           }`}
                         >
                           NOT PERFORMED
@@ -418,7 +418,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
                               value={state.numericValue}
                               onChange={(e) => onTestNumericChange(test.id, e.target.value)}
                               placeholder={`Enter numeric result (${test.unit || 'value'})`}
-                              className="w-full min-h-[44px] px-3.5 py-2 text-xs font-mono font-bold rounded-lg border border-[#C4B9A3] bg-white text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                              className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-lg border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                           </div>
                         ) : Array.isArray(test.resultOptions) && test.resultOptions.length > 0 ? (
@@ -436,7 +436,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
                               value={state.textValue}
                               onChange={(e) => onTestTextChange(test.id, e.target.value)}
                               placeholder="Enter observation result"
-                              className="w-full min-h-[44px] px-3.5 py-2 text-xs font-mono font-bold rounded-lg border border-[#C4B9A3] bg-white text-[#111311] focus:outline-none focus:ring-2 focus:ring-[#1E3A8A]"
+                              className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-lg border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                           </div>
                         )
@@ -447,7 +447,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
                             value={state.notPerformedReason}
                             onChange={(e) => onTestReasonChange(test.id, e.target.value)}
                             placeholder="Enter reason test was not performed"
-                            className="w-full min-h-[44px] px-3.5 py-2 text-xs font-mono font-bold rounded-lg border border-rose-300 bg-rose-50/50 text-rose-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
+                            className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-lg border border-rose-300 bg-rose-50/50 text-rose-900 focus:outline-none focus:ring-2 focus:ring-rose-500"
                           />
                         </div>
                       )}
@@ -458,27 +458,27 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
           </div>
 
           {/* Test Accountability Status Bar */}
-          <div className="p-3.5 rounded-xl bg-[#F4EFE3] border border-[#C4B9A3] space-y-2">
-            <div className="flex items-center justify-between text-xs font-black text-[#111311]">
+          <div className="p-3.5 rounded-xl bg-muted border border-border-strong space-y-2">
+            <div className="flex items-center justify-between text-xs font-semibold text-foreground">
               <span>Mandatory Test Accountability:</span>
-              <span className="font-mono">
+              <span className="tabular-nums">
                 {performedCount}/{requiredManualPlantTests.length} Performed • {notPerformedCount} Marked Omitted • {unresolvedCount} Unresolved
               </span>
             </div>
             {!canAccept && (
-              <p className="text-[11px] font-bold text-amber-800">
+              <p className="text-[11px] font-semibold text-amber-800">
                 All required manual tests must be either marked PERFORMED with valid observation or explicitly marked NOT PERFORMED before accepting portion.
               </p>
             )}
           </div>
 
           {/* Decision Action Buttons */}
-          <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-[#C4B9A3]">
+          <div className="flex flex-wrap items-center justify-end gap-2.5 pt-3 border-t border-border-strong">
             <button
               type="button"
               disabled={isSubmitting}
               onClick={() => onOpenActionModal('HOLD')}
-              className="min-h-[44px] py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-extrabold transition shadow-sm"
+              className="min-h-[44px] py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold transition shadow-sm"
             >
               Place on Hold
             </button>
@@ -487,7 +487,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
               type="button"
               disabled={isSubmitting}
               onClick={() => onOpenActionModal('REJECT')}
-              className="min-h-[44px] py-2.5 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-extrabold transition shadow-sm"
+              className="min-h-[44px] py-2.5 px-4 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-xs font-semibold transition shadow-sm"
             >
               Reject Portion
             </button>
@@ -496,7 +496,7 @@ export const QATestingSection: React.FC<QATestingSectionProps> = ({
               type="button"
               disabled={!canAccept || isSubmitting}
               onClick={() => onOpenActionModal('ACCEPT')}
-              className="min-h-[44px] py-2.5 px-5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-extrabold transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="min-h-[44px] py-2.5 px-5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Accept Portion
             </button>

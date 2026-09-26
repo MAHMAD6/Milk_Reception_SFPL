@@ -6,6 +6,8 @@ import { User } from '@core/types';
 import { Header } from '@/frontend/modules/shared/Header';
 import { HierarchicalNavDrawer } from '@/frontend/modules/shared/navigation/HierarchicalNavDrawer';
 import { MpdExecutiveWorkspace } from '@/frontend/modules/mpd/MpdExecutiveWorkspace';
+import { PageLoader } from '@/components/ui/spinner';
+import { PageTransition } from '@/components/motion/page-transition';
 
 function HeadOfMpdContent() {
   const router = useRouter();
@@ -64,9 +66,7 @@ function HeadOfMpdContent() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-[#FDFBF9] text-[#111311] font-mono text-xs font-bold">
-        Verifying Authorization...
-      </div>
+      <PageLoader label="Verifying Authorization…" className="min-h-screen" />
     );
   }
 
@@ -75,7 +75,7 @@ function HeadOfMpdContent() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#111311] flex flex-col font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-background text-foreground flex flex-col w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={currentUser}
         title="MPD Head Command Center"
@@ -93,7 +93,9 @@ function HeadOfMpdContent() {
       />
 
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 w-full max-w-full">
+        <PageTransition>
         <MpdExecutiveWorkspace currentUser={currentUser} />
+        </PageTransition>
       </main>
     </div>
   );
@@ -103,9 +105,7 @@ export default function HeadOfMpdPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-screen bg-[#FDFBF9] text-[#111311] font-mono text-xs font-bold">
-          Loading Overview...
-        </div>
+        <PageLoader label="Loading Overview…" className="min-h-screen" />
       }
     >
       <HeadOfMpdContent />

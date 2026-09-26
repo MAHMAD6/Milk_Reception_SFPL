@@ -2,61 +2,153 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+@layer base {
+  :root {
+    /* ── Surfaces ─────────────────────────────────────────── */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    /* Inner surface inside cards (table headers, input wells, list rows) */
+    --subtle: 210 25% 98.5%;
 
-  /* SFPL Design System Tokens */
-  --sfpl-bg: #FDFBF9;
-  --sfpl-surface: #FFFFFF;
-  --sfpl-surface-muted: #F4EFE3;
-  --sfpl-surface-strong: #EFE9D9;
-  --sfpl-border: #EAE4D5;
-  --sfpl-border-strong: #C4B9A3;
-  --sfpl-primary: #1E3A8A;
-  --sfpl-primary-hover: #1E40AF;
-  --sfpl-text: #111311;
-  --sfpl-text-secondary: #475569;
-  --sfpl-text-muted: #64748B;
+    /* ── Brand ────────────────────────────────────────────── */
+    --primary: 224 64% 33%;
+    --primary-hover: 224 71% 40%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 215 25% 27%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 214 25% 93%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* ── Lines ────────────────────────────────────────────── */
+    --border: 214 32% 91%;
+    --border-strong: 214 22% 83%;
+    --input: 214 22% 83%;
+    --ring: 224 64% 33%;
+
+    --radius: 0.5rem;
+    --sidebar-width: 15rem;
+
+    /* ── Layering scale (see tailwind.config.js `zIndex`) ─── */
+    --z-raised: 10;   /* in-flow elements lifted above siblings */
+    --z-sticky: 20;   /* sticky table headers / toolbars */
+    --z-sidebar: 30;  /* persistent desktop navigation */
+    --z-header: 30;   /* app top bar */
+    --z-modal: 50;    /* dialogs, sheets, drawers (+ their overlay) */
+    --z-popover: 60;  /* dropdowns, popovers, selects — above modals */
+    --z-banner: 70;   /* connectivity / update status banners */
+    --z-toast: 80;    /* sonner toasts */
+    --z-tooltip: 90;  /* tooltips always on top */
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-feature-settings: 'cv11', 'ss01';
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numbers line up in tables and KPI tiles */
+  .font-mono,
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+
+  /* Elements that draw their own focus ring should not double-up */
+  [class*='focus-visible:ring']:focus-visible,
+  [class*='focus:ring']:focus-visible {
+    outline: none;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.15);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    @apply text-muted-foreground/70 font-normal;
+    font-family: var(--font-sans, inherit);
+  }
+
+  select {
+    background-color: hsl(var(--card));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
-body {
-  font-family: var(--font-sans);
-  background-color: var(--sfpl-bg);
-  color: var(--sfpl-text);
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@layer utilities {
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border-strong)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border-strong));
+    border-radius: 9999px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.6);
+  }
 }
 
-/* Restrained Focus States */
-:focus-visible {
-  outline: 2px solid #1E3A8A;
-  outline-offset: 2px;
+/* Persistent desktop sidebar: offset the page and hide duplicate header branding. */
+@media (min-width: 1024px) {
+  body:has([data-app-sidebar]) {
+    padding-left: var(--sidebar-width);
+  }
+  body:has([data-app-sidebar]) .hide-with-sidebar {
+    display: none;
+  }
 }
 
-/* Custom Scrollbar Utilities */
-.scrollbar-none::-webkit-scrollbar {
-  display: none;
-}
-.scrollbar-none {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #C4B9A3;
-  border-radius: 9999px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+/* Sonner sits on the shared layering scale */
+[data-sonner-toaster] {
+  z-index: var(--z-toast) !important;
 }

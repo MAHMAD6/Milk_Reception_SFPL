@@ -60,9 +60,9 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
 
   if (error) {
     return (
-      <div className="p-6 rounded-2xl bg-rose-50 border border-rose-200 text-center space-y-2">
+      <div className="p-6 rounded-xl bg-rose-50 border border-rose-200 text-center space-y-2">
         <AlertCircle className="w-8 h-8 text-rose-600 mx-auto" />
-        <h4 className="text-sm font-bold text-rose-900">Failed to Load Overview Data</h4>
+        <h4 className="text-sm font-semibold text-rose-900">Failed to Load Overview Data</h4>
         <p className="text-xs text-rose-700">{error}</p>
       </div>
     );
@@ -71,23 +71,23 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Header Scope Banner */}
-      <div className="p-5 rounded-2xl bg-white border border-[#EAE4D5] shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-5 rounded-xl bg-white border border-border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
           <div className="p-2.5 bg-blue-900 text-white rounded-xl shadow-sm">
             <Building2 className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-base font-extrabold text-slate-900 leading-tight">
+            <h2 className="text-base font-semibold text-slate-900 leading-tight">
               {assignedSourceName} — Pipeline Overview
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
               Direct-to-Plant supply supervision for Business Date:{' '}
-              <strong className="text-slate-700 font-mono">{serverBusinessDate || 'Live'}</strong>
+              <strong className="text-slate-700 tabular-nums">{serverBusinessDate || 'Live'}</strong>
             </p>
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono font-bold text-slate-700 self-start sm:self-auto">
+        <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs tabular-nums font-semibold text-slate-700 self-start sm:self-auto">
           <ShieldCheck className="w-4 h-4 text-blue-700" />
           <span>Server Source Scoped</span>
         </div>
@@ -95,44 +95,44 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
 
       {/* Bounded Window Notification */}
       {pagination && pagination.totalPages > 1 && (
-        <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between">
+        <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
             <span>
               Showing page <strong>{pagination.page}</strong> of <strong>{pagination.totalPages}</strong> ({pagination.totalRecords} total visits in query). Volume metrics reflect the visible page.
             </span>
           </div>
-          <span className="text-[11px] font-bold text-amber-700">Bounded page metrics</span>
+          <span className="text-[11px] font-semibold text-amber-700">Bounded page metrics</span>
         </div>
       )}
 
       {/* 2. Four Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Dispatches */}
-        <div className="p-5 rounded-2xl bg-white border border-[#EAE4D5] shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-slate-500 text-xs font-bold">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
             <span>Total Dispatches</span>
             <Truck className="w-4 h-4 text-blue-700" />
           </div>
-          <p className="text-3xl font-black text-slate-900 font-mono">
+          <p className="text-3xl font-semibold text-slate-900 tabular-nums">
             {summary?.totalVisits ?? metrics.totalDispatches}
           </p>
           <p className="text-[11px] text-slate-500 font-medium">
             {summary?.totalVisits != null ? (
               <span className="text-blue-700 font-semibold">Authoritative Total Visits</span>
             ) : (
-              <>Gross Liters: <strong className="text-slate-700 font-mono">{metrics.totalGrossLiters.toLocaleString()} L</strong></>
+              <>Gross Liters: <strong className="text-slate-700 tabular-nums">{metrics.totalGrossLiters.toLocaleString()} L</strong></>
             )}
           </p>
         </div>
 
         {/* Active In-Plant */}
-        <div className="p-5 rounded-2xl bg-white border border-[#EAE4D5] shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-amber-700 text-xs font-bold">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-amber-700 text-xs font-semibold">
             <span>Active In-Plant</span>
             <Clock className="w-4 h-4 text-amber-600" />
           </div>
-          <p className="text-3xl font-black text-amber-950 font-mono">
+          <p className="text-3xl font-semibold text-amber-950 tabular-nums">
             {summary?.activeInPlantVisits ?? metrics.activeInPlantCount}
           </p>
           <p className="text-[11px] text-amber-700 font-medium">
@@ -141,12 +141,12 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
         </div>
 
         {/* Completed Receipts */}
-        <div className="p-5 rounded-2xl bg-white border border-[#EAE4D5] shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-emerald-700 text-xs font-bold">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-emerald-700 text-xs font-semibold">
             <span>Authoritative Receipts</span>
             <Receipt className="w-4 h-4 text-emerald-600" />
           </div>
-          <p className="text-3xl font-black text-emerald-950 font-mono">
+          <p className="text-3xl font-semibold text-emerald-950 tabular-nums">
             {summary?.completedVisits ?? metrics.completedReceiptsCount}
           </p>
           <p className="text-[11px] text-emerald-700 font-medium">
@@ -155,12 +155,12 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
         </div>
 
         {/* Received Liters */}
-        <div className="p-5 rounded-2xl bg-white border border-[#EAE4D5] shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-blue-800 text-xs font-bold">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+          <div className="flex items-center justify-between text-blue-800 text-xs font-semibold">
             <span>Received Gross Liters {pagination && pagination.totalPages > 1 ? '(Current Page)' : ''}</span>
             <Scale className="w-4 h-4 text-blue-700" />
           </div>
-          <p className="text-2xl font-black text-blue-950 font-mono truncate">
+          <p className="text-2xl font-semibold text-blue-950 tabular-nums truncate">
             {metrics.totalReceivedLiters.toLocaleString()} L
           </p>
           <p className="text-[11px] text-blue-700 font-medium">
@@ -172,25 +172,25 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
       </div>
 
       {/* 3. Recent Dispatches / Activity Table */}
-      <div className="p-5 sm:p-6 rounded-2xl bg-white border border-[#EAE4D5] shadow-sm space-y-4">
-        <div className="flex items-center justify-between border-b border-[#F0EAE1] pb-3">
+      <div className="p-5 sm:p-6 rounded-xl bg-white border border-border shadow-sm space-y-4">
+        <div className="flex items-center justify-between border-b border-muted pb-3">
           <div className="flex items-center space-x-2">
             <Layers className="w-4 h-4 text-blue-800" />
-            <h3 className="text-sm font-extrabold text-slate-900">Recent Plant Dispatches</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Recent Plant Dispatches</h3>
           </div>
-          <span className="text-xs text-slate-500 font-mono font-bold">
+          <span className="text-xs text-slate-500 tabular-nums font-semibold">
             {visits.length} {visits.length === 1 ? 'record' : 'records'}
           </span>
         </div>
 
         {isLoading ? (
-          <div className="py-12 text-center text-xs font-bold text-slate-500">
+          <div className="py-12 text-center text-xs font-semibold text-slate-500">
             Loading recent records...
           </div>
         ) : visits.length === 0 ? (
           <div className="py-12 px-4 rounded-xl bg-slate-50 border border-dashed border-slate-200 text-center space-y-2">
             <FileSpreadsheet className="w-8 h-8 text-slate-400 mx-auto" />
-            <h4 className="text-sm font-bold text-slate-700">No Operational Records</h4>
+            <h4 className="text-sm font-semibold text-slate-700">No Operational Records</h4>
             <p className="text-xs text-slate-500 max-w-md mx-auto">
               No operational records are available for your assigned Plant Contractor.
             </p>
@@ -199,7 +199,7 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 text-slate-600 font-bold uppercase text-[10px] tracking-wider bg-slate-50/70">
+                <tr className="border-b border-slate-200 text-slate-600 font-semibold uppercase text-[10px] tracking-wider bg-slate-50/70">
                   <th className="py-2.5 px-3">Vehicle</th>
                   <th className="py-2.5 px-3">Reception #</th>
                   <th className="py-2.5 px-3">Business Date</th>
@@ -212,21 +212,21 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
               <tbody className="divide-y divide-slate-100 font-medium">
                 {visits.slice(0, 10).map((v) => (
                   <tr key={v.visitId} className="hover:bg-slate-50/80 transition">
-                    <td className="py-3 px-3 font-mono font-extrabold text-slate-900">
+                    <td className="py-3 px-3 tabular-nums font-semibold text-slate-900">
                       {v.vehicleNumber}
                     </td>
-                    <td className="py-3 px-3 font-mono text-slate-600 text-[11px]">
+                    <td className="py-3 px-3 tabular-nums text-slate-600 text-[11px]">
                       {v.receptionNumber}
                     </td>
-                    <td className="py-3 px-3 text-slate-600 font-mono text-[11px]">
+                    <td className="py-3 px-3 text-slate-600 tabular-nums text-[11px]">
                       {v.operationalDate || '—'}
                     </td>
-                    <td className="py-3 px-3 text-right font-mono font-bold text-slate-900">
+                    <td className="py-3 px-3 text-right tabular-nums font-semibold text-slate-900">
                       {v.grossLiters ? `${v.grossLiters.toLocaleString()} L` : '—'}
                     </td>
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${
                           v.journeyStage === 'COMPLETED'
                             ? 'bg-emerald-100 text-emerald-800'
                             : v.journeyStage === 'RECEIPT_PENDING'
@@ -247,7 +247,7 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
                     </td>
                     <td className="py-3 px-3">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold ${
                           v.qaSummary.badgeType === 'ALL_ACCEPTED'
                             ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                             : v.qaSummary.badgeType === 'ALL_REJECTED'
@@ -260,7 +260,7 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
                         {v.qaSummary.summaryText}
                       </span>
                     </td>
-                    <td className="py-3 px-3 text-right font-mono font-bold">
+                    <td className="py-3 px-3 text-right tabular-nums font-semibold">
                       {v.finalReceiptExists && v.authoritativeFinalLiters != null ? (
                         <span className="text-emerald-700">
                           {v.authoritativeFinalLiters.toLocaleString()} L

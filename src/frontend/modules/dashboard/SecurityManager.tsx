@@ -85,7 +85,7 @@ export const SecurityManager: React.FC = () => {
   const completedGateOuts = logs.filter((l) => l.out_from_gate_time).length;
 
   return (
-    <div className="min-h-screen bg-[#FDFBF9] text-[#111311] flex flex-col font-sans w-full max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-subtle text-foreground flex flex-col font-sans w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={currentUser}
         title="Security Manager"
@@ -104,14 +104,14 @@ export const SecurityManager: React.FC = () => {
 
       <main className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 w-full max-w-full">
           {/* Top Header Panel */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-white border border-[#C4B9A3] shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-border-strong shadow-sm">
             <div>
               <div className="flex items-center space-x-2.5 flex-wrap gap-y-1">
-                <ShieldCheck className="w-6 h-6 text-[#1E3A8A]" />
-                <h1 className="text-xl font-black tracking-tight text-[#111311]">
+                <ShieldCheck className="w-6 h-6 text-primary" />
+                <h1 className="text-xl font-semibold tracking-tight text-foreground">
                   Security Time Audit & Gate Performance
                 </h1>
-                <span className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-[#1E3A8A] text-white flex items-center gap-1">
+                <span className="px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-wider bg-primary text-white flex items-center gap-1">
                   <Lock className="w-3 h-3" /> Read-Only Audit Console
                 </span>
               </div>
@@ -124,9 +124,9 @@ export const SecurityManager: React.FC = () => {
               type="button"
               onClick={handleManualSync}
               disabled={isLoading}
-              className="flex items-center justify-center space-x-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-[#FDFBF9] border border-[#C4B9A3] text-xs font-black text-[#111311] hover:bg-[#EFE9D9]/60 active:scale-95 transition-all shadow-sm disabled:opacity-50 self-start md:self-auto"
+              className="flex items-center justify-center space-x-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-subtle border border-border-strong text-xs font-semibold text-foreground hover:bg-muted/60 active:scale-95 transition-all shadow-sm disabled:opacity-50 self-start md:self-auto"
             >
-              <RefreshCw className={`w-4 h-4 text-[#1E3A8A] ${isLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-4 h-4 text-primary ${isLoading ? 'animate-spin' : ''}`} />
               <span>{isLoading ? 'Syncing...' : 'Refresh Audit Log'}</span>
             </button>
           </div>
@@ -134,42 +134,42 @@ export const SecurityManager: React.FC = () => {
           {/* SECURITY AUDIT METRIC CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Blue Box: Gate Entries */}
-            <div className="p-5 rounded-2xl bg-[#EFF6FF] border border-[#BFDBFE] shadow-sm space-y-1.5 transition-all hover:bg-[#DBEAFE]/80">
-              <span className="text-[#1E40AF] font-sans block text-[11px] font-black uppercase tracking-wider">
+            <div className="p-5 rounded-xl bg-blue-50 border border-blue-200 shadow-sm space-y-1.5 transition-all hover:bg-blue-100/80">
+              <span className="text-primary-hover font-sans block text-[11px] font-semibold uppercase tracking-wider">
                 Total Gate 2 IGP Entries
               </span>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-[#111311]">
-                {totalGateEntries} <span className="text-base font-bold font-sans text-slate-600">Vehicles</span>
+              <div className="text-2xl sm:text-3xl font-semibold tabular-nums text-foreground">
+                {totalGateEntries} <span className="text-base font-semibold font-sans text-slate-600">Vehicles</span>
               </div>
-              <span className="text-[11px] text-[#1E40AF] font-bold block">Issued entry tokens</span>
+              <span className="text-[11px] text-primary-hover font-semibold block">Issued entry tokens</span>
             </div>
 
             {/* Red Alert Box: Delays */}
-            <div className="p-5 rounded-2xl bg-[#FEF2F2] border border-[#FECACA] shadow-sm space-y-1.5 transition-all hover:bg-[#FEE2E2]/80">
-              <span className="text-[#991B1B] font-sans block text-[11px] font-black uppercase tracking-wider">
+            <div className="p-5 rounded-xl bg-red-50 border border-red-200 shadow-sm space-y-1.5 transition-all hover:bg-red-100/80">
+              <span className="text-red-800 font-sans block text-[11px] font-semibold uppercase tracking-wider">
                 Gate-to-Lab Transit Delays (&gt;15 mins)
               </span>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-[#991B1B] flex items-center gap-2">
-                <AlertTriangle className="w-6 h-6 text-[#991B1B] shrink-0" />
-                <span>{delayedTransitCount} <span className="text-base font-bold font-sans text-[#991B1B]">Delays</span></span>
+              <div className="text-2xl sm:text-3xl font-semibold tabular-nums text-red-800 flex items-center gap-2">
+                <AlertTriangle className="w-6 h-6 text-red-800 shrink-0" />
+                <span>{delayedTransitCount} <span className="text-base font-semibold font-sans text-red-800">Delays</span></span>
               </div>
-              <span className="text-[11px] text-[#991B1B] font-bold block">Flagged for team review</span>
+              <span className="text-[11px] text-red-800 font-semibold block">Flagged for team review</span>
             </div>
 
             {/* Green Box: Completed Clearance */}
-            <div className="p-5 rounded-2xl bg-[#F0FDF4] border border-[#BBF7D0] shadow-sm space-y-1.5 transition-all hover:bg-[#DCFCE7]/80">
-              <span className="text-[#166534] font-sans block text-[11px] font-black uppercase tracking-wider">
+            <div className="p-5 rounded-xl bg-green-50 border border-green-200 shadow-sm space-y-1.5 transition-all hover:bg-green-100/80">
+              <span className="text-green-800 font-sans block text-[11px] font-semibold uppercase tracking-wider">
                 Completed Gate Clearance Outs
               </span>
-              <div className="text-2xl sm:text-3xl font-black font-mono text-[#166534]">
-                {completedGateOuts} <span className="text-base font-bold font-sans text-slate-600">Vehicles</span>
+              <div className="text-2xl sm:text-3xl font-semibold tabular-nums text-green-800">
+                {completedGateOuts} <span className="text-base font-semibold font-sans text-slate-600">Vehicles</span>
               </div>
-              <span className="text-[11px] text-[#166534] font-bold block">Final out timestamp recorded</span>
+              <span className="text-[11px] text-green-800 font-semibold block">Final out timestamp recorded</span>
             </div>
           </div>
 
           {/* Filter Bar */}
-          <div className="p-4 rounded-2xl bg-white border border-[#C4B9A3] shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-white border border-border-strong shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
@@ -177,29 +177,29 @@ export const SecurityManager: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search vehicle #, token #..."
-                className="w-full pl-10 pr-4 py-2.5 min-h-[44px] text-xs font-bold rounded-xl bg-[#FDFBF9] border border-[#C4B9A3] text-[#111311] focus:ring-2 focus:ring-[#1E3A8A] outline-none shadow-xs"
+                className="w-full pl-10 pr-4 py-2.5 min-h-[44px] text-xs font-semibold rounded-xl bg-subtle border border-border-strong text-foreground focus:ring-2 focus:ring-primary outline-none shadow-xs"
               />
             </div>
-            <span className="text-xs font-extrabold text-[#334155] self-end sm:self-center">
-              Audited Records: <strong className="font-mono text-[#111311]">{filteredLogs.length}</strong>
+            <span className="text-xs font-semibold text-slate-700 self-end sm:self-center">
+              Audited Records: <strong className="tabular-nums text-foreground">{filteredLogs.length}</strong>
             </span>
           </div>
 
           {/* SECURITY AUDIT LEDGER TABLE */}
-          <div className="p-5 rounded-2xl bg-white border border-[#C4B9A3] shadow-sm space-y-4 text-[#111311]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#EAE4D5]">
-              <h3 className="text-sm font-black text-[#111311]">
+          <div className="p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-4 text-foreground">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border">
+              <h3 className="text-sm font-semibold text-foreground">
                 Guard Team Station Timestamps & Transit Durations
               </h3>
-              <span className="text-[10px] font-black text-[#991B1B] bg-[#FEF2F2] px-2.5 py-1 rounded-lg border border-[#FECACA] self-start sm:self-auto">
+              <span className="text-[10px] font-semibold text-red-800 bg-red-50 px-2.5 py-1 rounded-lg border border-red-200 self-start sm:self-auto">
                 Auto-Alerts Enabled (&gt;15m Gate-to-Lab)
               </span>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-[#C4B9A3] bg-[#FDFBF9]">
-              <table className="w-full text-left border-collapse text-xs font-mono">
+            <div className="overflow-x-auto rounded-xl border border-border-strong bg-subtle">
+              <table className="w-full text-left border-collapse text-xs tabular-nums">
                 <thead>
-                  <tr className="bg-[#EFE9D9]/60 border-b border-[#C4B9A3] text-[#111311] font-sans font-black uppercase text-[10px] tracking-wider whitespace-nowrap">
+                  <tr className="bg-muted/60 border-b border-border-strong text-foreground font-sans font-semibold uppercase text-[10px] tracking-wider whitespace-nowrap">
                     <th className="p-3">Date</th>
                     <th className="p-3">Vehicle #</th>
                     <th className="p-3">Token #</th>
@@ -211,10 +211,10 @@ export const SecurityManager: React.FC = () => {
                     <th className="p-3 text-center">Transit Delay Alert</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#EAE4D5] font-bold text-[#111311]">
+                <tbody className="divide-y divide-border font-semibold text-foreground">
                   {filteredLogs.length === 0 ? (
                     <tr>
-                      <td colSpan={9} className="p-8 text-center text-slate-500 font-sans font-bold">
+                      <td colSpan={9} className="p-8 text-center text-slate-500 font-sans font-semibold">
                         No security audit records found.
                       </td>
                     </tr>
@@ -227,8 +227,8 @@ export const SecurityManager: React.FC = () => {
                       return (
                         <tr
                           key={`sec-mgr-log-${String(log.id)}`}
-                          className={`hover:bg-[#EFE9D9]/40 transition-colors ${
-                            hasTransitDelayAlert ? 'bg-[#FEF2F2] border-l-4 border-l-[#991B1B]' : ''
+                          className={`hover:bg-muted/40 transition-colors ${
+                            hasTransitDelayAlert ? 'bg-red-50 border-l-4 border-l-red-800' : ''
                           }`}
                         >
                           {/* Date */}
@@ -237,13 +237,13 @@ export const SecurityManager: React.FC = () => {
                           </td>
 
                           {/* Vehicle # */}
-                          <td className="p-3 font-black text-[#111311] font-mono text-sm whitespace-nowrap">
+                          <td className="p-3 font-semibold text-foreground tabular-nums text-sm whitespace-nowrap">
                             {log.vehicle_number}
                           </td>
 
                           {/* Token # */}
                           <td className="p-3 whitespace-nowrap">
-                            <span className="px-2 py-0.5 rounded text-[10px] bg-[#EFF6FF] border border-[#BFDBFE] font-black text-[#1E40AF]">
+                            <span className="px-2 py-0.5 rounded text-[10px] bg-blue-50 border border-blue-200 font-semibold text-primary-hover">
                               {log.token_number || 'PENDING'}
                             </span>
                           </td>
@@ -270,7 +270,7 @@ export const SecurityManager: React.FC = () => {
 
                           {/* Gate-to-Gate Duration */}
                           <td className="p-3 text-right whitespace-nowrap">
-                            <span className="font-black text-[#111311]">
+                            <span className="font-semibold text-foreground">
                               {totalGateMins !== null ? `${totalGateMins} mins` : 'In Pipeline'}
                             </span>
                           </td>
@@ -278,8 +278,8 @@ export const SecurityManager: React.FC = () => {
                           {/* Transit Delay Alert */}
                           <td className="p-3 text-center whitespace-nowrap">
                             {hasTransitDelayAlert ? (
-                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-black uppercase bg-[#FEF2F2] text-[#991B1B] border border-[#FECACA] animate-pulse">
-                                <AlertTriangle className="w-3.5 h-3.5 text-[#991B1B]" />
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold uppercase bg-red-50 text-red-800 border border-red-200 animate-pulse">
+                                <AlertTriangle className="w-3.5 h-3.5 text-red-800" />
                                 ⚠ Gate-to-Lab Delay ({transitMins}m)
                               </span>
                             ) : (

@@ -30,6 +30,7 @@ import {
 import { ZmccMasterDataWorkspace } from '@/frontend/modules/zmcc/ZmccMasterDataWorkspace';
 import { ZmccArrivalsWorkspace } from '@/frontend/modules/zmcc/arrivals/ZmccArrivalsWorkspace';
 import { ZmccLabWorkspace } from '@/frontend/modules/zmcc/lab/ZmccLabWorkspace';
+import { PageTransition } from '@/components/motion/page-transition';
 
 interface ZMCCManagerWorkspaceProps {
   currentUser: User | null;
@@ -362,11 +363,11 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
     const startItem = (reportingPage - 1) * 20 + 1;
     const endItem = Math.min(reportingPage * 20, reportingTotalRecords);
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-[#EAE4D5] rounded-xl text-xs shadow-xs mt-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-border rounded-xl text-xs shadow-xs mt-4">
         <div className="text-slate-600 font-medium">
-          Showing visits <span className="font-bold text-slate-900">{startItem}</span> to{' '}
-          <span className="font-bold text-slate-900">{endItem}</span> of{' '}
-          <span className="font-bold text-slate-900">{reportingTotalRecords}</span> total
+          Showing visits <span className="font-semibold text-slate-900">{startItem}</span> to{' '}
+          <span className="font-semibold text-slate-900">{endItem}</span> of{' '}
+          <span className="font-semibold text-slate-900">{reportingTotalRecords}</span> total
           {reportingTotalPages > 1 && (
             <span className="ml-2 text-[11px] text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
               Page {reportingPage} of {reportingTotalPages}
@@ -381,7 +382,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
               fetchReportingLogs(fromDate, toDate, prevPage, 'report');
             }}
             disabled={reportingPage <= 1 || reportingLoading}
-            className="px-3.5 py-1.5 min-h-[36px] bg-[#FDFBF9] hover:bg-[#EFE9D9]/60 border border-[#C4B9A3] rounded-lg font-bold text-[#111311] disabled:opacity-40 disabled:cursor-not-allowed transition"
+            className="px-3.5 py-1.5 min-h-[36px] bg-subtle hover:bg-muted/60 border border-border-strong rounded-lg font-semibold text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             Previous
           </button>
@@ -392,7 +393,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
               fetchReportingLogs(fromDate, toDate, nextPage, 'report');
             }}
             disabled={reportingPage >= reportingTotalPages || !reportingHasMore || reportingLoading}
-            className="px-3.5 py-1.5 min-h-[36px] bg-[#FDFBF9] hover:bg-[#EFE9D9]/60 border border-[#C4B9A3] rounded-lg font-bold text-[#111311] disabled:opacity-40 disabled:cursor-not-allowed transition"
+            className="px-3.5 py-1.5 min-h-[36px] bg-subtle hover:bg-muted/60 border border-border-strong rounded-lg font-semibold text-foreground disabled:opacity-40 disabled:cursor-not-allowed transition"
           >
             Next
           </button>
@@ -402,7 +403,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
   };
 
   return (
-    <div className="w-full max-w-full flex flex-col h-screen bg-[#FDFBF9] text-[#111311] overflow-hidden font-sans">
+    <div className="w-full max-w-full flex flex-col h-screen bg-background text-foreground overflow-hidden">
       {/* Header with Hamburger Trigger */}
       <Header
         currentUser={currentUser}
@@ -423,6 +424,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
 
       {/* Main Content Area */}
       <main className="flex-1 p-3 sm:p-6 overflow-y-auto space-y-5 sm:space-y-6 w-full max-w-full">
+        <PageTransition>
         {/* TAB 1: OVERVIEW */}
         {activeTab === 'OVERVIEW' && (
           <div id="tabpanel-OVERVIEW" role="tabpanel" aria-labelledby="tab-OVERVIEW" className="space-y-6">
@@ -499,14 +501,14 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
         {activeTab === 'HISTORY' && (
           <div id="tabpanel-HISTORY" role="tabpanel" aria-labelledby="tab-HISTORY" className="space-y-6">
             {/* Secondary Sub-Navigation for History View */}
-            <div className="flex items-center gap-2 p-1.5 bg-[#FFFFFF] border border-[#EAE4D5] rounded-xl shadow-xs w-fit">
+            <div className="flex items-center gap-2 p-1.5 bg-card border border-border rounded-xl shadow-xs w-fit">
               <button
                 type="button"
                 onClick={() => setHistoryView('PLANT_HISTORY')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'PLANT_HISTORY'
-                    ? 'bg-[#1E3A8A] text-white shadow-xs'
-                    : 'text-slate-700 hover:bg-[#F4F0E6]'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-slate-700 hover:bg-muted'
                 }`}
               >
                 Plant / Dispatch History
@@ -514,10 +516,10 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setHistoryView('QUALITY_REJECTIONS')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'QUALITY_REJECTIONS'
-                    ? 'bg-[#1E3A8A] text-white shadow-xs'
-                    : 'text-slate-700 hover:bg-[#F4F0E6]'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-slate-700 hover:bg-muted'
                 }`}
               >
                 Quality & Rejections Review
@@ -525,10 +527,10 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setHistoryView('ARRIVAL_CORRECTIONS')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'ARRIVAL_CORRECTIONS'
-                    ? 'bg-[#1E3A8A] text-white shadow-xs'
-                    : 'text-slate-700 hover:bg-[#F4F0E6]'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-slate-700 hover:bg-muted'
                 }`}
               >
                 Arrival Corrections
@@ -536,10 +538,10 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
               <button
                 type="button"
                 onClick={() => setHistoryView('LAB_CORRECTIONS')}
-                className={`px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'LAB_CORRECTIONS'
-                    ? 'bg-[#1E3A8A] text-white shadow-xs'
-                    : 'text-slate-700 hover:bg-[#F4F0E6]'
+                    ? 'bg-primary text-white shadow-xs'
+                    : 'text-slate-700 hover:bg-muted'
                 }`}
               >
                 Lab Corrections
@@ -615,7 +617,8 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
               assignedSourceName={assignedSourceName}
             />
           )}
-        </main>
+        </PageTransition>
+      </main>
     </div>
   );
 };
