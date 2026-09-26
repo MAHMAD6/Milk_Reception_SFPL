@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { resetOperationalData } from './reset_demo_operational_data';
 import { seedOperationalData } from './seed_demo_operational_data';
 import { prisma } from '../src/backend/core/db';

@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { prisma } from '../src/backend/core/db';
 
 export async function resetOperationalData() {

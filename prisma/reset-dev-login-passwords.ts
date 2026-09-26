@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { prisma } from '../src/backend/core/db';
 import bcrypt from 'bcryptjs';
 

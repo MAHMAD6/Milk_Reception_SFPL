@@ -1,6 +1,7 @@
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import { createPrismaClient } from '../src/backend/core/db';
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 const LAB_TESTS_SEED = [
   { displayOrder: 1, testCode: 'LT-000001', testName: 'Temperature', resultType: 'NUMERIC', unit: '°C', testScope: 'BOTH', isRequired: true, isActive: true },

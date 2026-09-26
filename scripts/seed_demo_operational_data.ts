@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { prisma } from '../src/backend/core/db';
 import { evaluateLabResult } from '../src/lib/lab-rules';
 import { QualityRuleService } from '../src/backend/services/qualityRuleService';
