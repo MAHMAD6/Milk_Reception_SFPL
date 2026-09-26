@@ -8,6 +8,7 @@ import { ShieldCheck, Plus, Filter, CheckCircle2, AlertTriangle, XCircle, ArrowU
 import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 interface LabTest {
   id: string;
@@ -319,8 +320,8 @@ export default function QAHeadDepartmentPage() {
       </main>
 
       {/* Modal for Creating New Rule Version */}
-      {isModalOpen && (
-        <Modal onClose={() => setIsModalOpen(false)} title="Create rule version" className="max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <AnimatePresence>{isModalOpen && (
+        <Modal key="modal-0" onClose={() => setIsModalOpen(false)} title="Create rule version" className="max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center border-b border-slate-100 pb-3">
               <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
                 <ShieldCheck className="w-5 h-5 text-emerald-900" />
@@ -482,7 +483,7 @@ export default function QAHeadDepartmentPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 }

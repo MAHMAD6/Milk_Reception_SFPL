@@ -2,6 +2,8 @@
 
 import React from 'react';
 import { Droplet, Truck, ShieldAlert, Layers, Building2 } from 'lucide-react';
+import { StatCard } from '@/components/ui/stat-card';
+import { Skeleton } from '@/components/ui/skeleton';
 import type { MpdSummary } from '../types';
 
 interface MpdExecutiveKpiRibbonProps {
@@ -9,100 +11,62 @@ interface MpdExecutiveKpiRibbonProps {
   isLoading?: boolean;
 }
 
+const loadingValue = <Skeleton className="h-7 w-24" />;
+
 export const MpdExecutiveKpiRibbon: React.FC<MpdExecutiveKpiRibbonProps> = ({ summary, isLoading }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-      {/* 1. Total Division Intake */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Gross Intake</span>
-          <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-primary">
-            <Droplet className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-semibold tabular-nums text-foreground">
-            {isLoading ? '...' : `${summary.totalIntakeLiters.toLocaleString()} L`}
-          </div>
-          <div className="mt-1 flex items-center gap-2 text-xs font-medium text-slate-500">
-            <span>Fat: <strong className="tabular-nums text-slate-700">{summary.weightedFatPercent}%</strong></span>
-            <span>•</span>
-            <span>LR: <strong className="tabular-nums text-slate-700">{summary.weightedLr}</strong></span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Standardized 13% TS */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">13% TS Equivalent</span>
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700">
-            <Layers className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-semibold tabular-nums text-foreground">
-            {isLoading ? '...' : `${summary.standardized13TsLiters.toLocaleString()} L`}
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            Solid Solids equivalent base
-          </div>
-        </div>
-      </div>
-
-      {/* 3. In-Transit Volume */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active In-Transit</span>
-          <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700">
-            <Truck className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-semibold tabular-nums text-foreground">
-            {isLoading ? '...' : `${summary.inTransitLiters.toLocaleString()} L`}
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            <strong className="tabular-nums text-slate-700">{summary.inTransitTankerCount}</strong> tankers en route to Plant
-          </div>
-        </div>
-      </div>
-
-      {/* 4. Supply Chain Loss Rate */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Supply Chain Loss</span>
-          <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-700">
-            <ShieldAlert className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-semibold tabular-nums text-foreground">
-            {isLoading ? '...' : `${summary.supplyChainLossPercent}%`}
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            Net: <strong className="tabular-nums text-slate-700">{summary.supplyChainLossLiters.toLocaleString()} L</strong> across 4 tiers
-          </div>
-        </div>
-      </div>
-
-      {/* 5. Active Supply Nodes */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm flex flex-col justify-between">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Active Supply Nodes</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
-            <Building2 className="w-4 h-4" />
-          </div>
-        </div>
-        <div className="mt-3">
-          <div className="text-2xl font-semibold tabular-nums text-foreground">
-            {isLoading ? '...' : `${summary.activeZmccCount + summary.activeContractorCount}`}
-          </div>
-          <div className="mt-1 text-xs text-slate-500">
-            <strong className="tabular-nums text-slate-700">{summary.activeZmccCount}</strong> ZMCCs • <strong className="tabular-nums text-slate-700">{summary.activeContractorCount}</strong> Plant Contractors
-          </div>
-        </div>
-      </div>
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      <StatCard
+        label="Gross intake"
+        icon={Droplet}
+        tone="info"
+        value={isLoading ? loadingValue : `${summary.totalIntakeLiters.toLocaleString()} L`}
+        hint={
+          <span className="tabular-nums">
+            Fat {summary.weightedFatPercent}% · LR {summary.weightedLr}
+          </span>
+        }
+      />
+      <StatCard
+        label="13% TS equivalent"
+        icon={Layers}
+        tone="success"
+        value={isLoading ? loadingValue : `${summary.standardized13TsLiters.toLocaleString()} L`}
+        hint="Total-solids standardized volume"
+      />
+      <StatCard
+        label="In transit"
+        icon={Truck}
+        tone="warning"
+        value={isLoading ? loadingValue : `${summary.inTransitLiters.toLocaleString()} L`}
+        hint={
+          <span>
+            <span className="tabular-nums">{summary.inTransitTankerCount}</span> tankers en route to plant
+          </span>
+        }
+      />
+      <StatCard
+        label="Supply chain loss"
+        icon={ShieldAlert}
+        tone="warning"
+        value={isLoading ? loadingValue : `${summary.supplyChainLossPercent}%`}
+        hint={
+          <span>
+            Net <span className="tabular-nums">{summary.supplyChainLossLiters.toLocaleString()} L</span> across 4 tiers
+          </span>
+        }
+      />
+      <StatCard
+        label="Active supply nodes"
+        icon={Building2}
+        value={isLoading ? loadingValue : summary.activeZmccCount + summary.activeContractorCount}
+        hint={
+          <span>
+            <span className="tabular-nums">{summary.activeZmccCount}</span> ZMCCs ·{' '}
+            <span className="tabular-nums">{summary.activeContractorCount}</span> plant contractors
+          </span>
+        }
+      />
     </div>
   );
 };

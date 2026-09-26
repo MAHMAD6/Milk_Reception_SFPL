@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Factory, Search, Clock, Database, Play, CheckCheck, RefreshCw, Radio, MinusCircle } from 'lucide-react';
+import { Search, Clock, Database, Play, CheckCheck, RefreshCw, Radio, MinusCircle } from 'lucide-react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
 import { User } from '@core/types';
+import { PageHeader } from '@/components/ui/page-header';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { onActivateKey } from '@/lib/a11y';
 
 interface SiloOption {
   id: string;
@@ -456,90 +459,22 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 text-foreground">
       {/* Top Header & Tab Navigation */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-strong">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-            <Factory className="w-6 h-6 text-primary" />
-            Production & Silo Unloading
-          </h2>
-          <p className="text-xs text-slate-700 font-semibold mt-0.5">
-            Operator: <strong className="text-foreground">{currentUser?.name || 'Production Operator'}</strong> | Unloading Bays & Silo Stock Management
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2 bg-muted p-1.5 rounded-xl border border-border-strong overflow-x-auto max-w-full">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('READY');
-              setErrorMsg(null);
-              setSuccessMsg(null);
-            }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'READY'
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-slate-700 hover:bg-amber-100/50'
-            }`}
-          >
-            <Clock className="w-4 h-4" />
-            <span>Ready for Unloading</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
-              activeTab === 'READY' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
-            }`}>
-              {readyVisits.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('UNLOADING');
-              setErrorMsg(null);
-              setSuccessMsg(null);
-            }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'UNLOADING'
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-slate-700 hover:bg-amber-100/50'
-            }`}
-          >
-            <Play className="w-4 h-4" />
-            <span>Unloading Active</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
-              activeTab === 'UNLOADING' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
-            }`}>
-              {unloadingVisits.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTab('SILO_ISSUE');
-              setErrorMsg(null);
-              setSuccessMsg(null);
-            }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'SILO_ISSUE'
-                ? 'bg-primary text-white shadow-sm'
-                : 'text-slate-700 hover:bg-amber-100/50'
-            }`}
-          >
-            <MinusCircle className="w-4 h-4" />
-            <span>Silo Issue</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
-              activeTab === 'SILO_ISSUE' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
-            }`}>
-              {activeSilos.filter((s) => s.current_stock_liters > 0).length}
-            </span>
-          </button>
-        </div>
-
-        <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white rounded-xl border border-border-strong shrink-0">
-          <Factory className="w-4 h-4 text-slate-600" />
-          <span>Active Bays</span>
-        </div>
-      </div>
+      <PageHeader
+        title="Production & silo unloading"
+        description="Assign unloading bays, record silo receipts and issue stock."
+        actions={
+          <SegmentedTabs
+            label="Production queues"
+            value={activeTab}
+            onValueChange={(tab) => { setActiveTab(tab); setErrorMsg(null); setSuccessMsg(null); }}
+            tabs={[
+            { value: 'READY', label: 'Ready for unloading', icon: Clock, count: readyVisits.length },
+            { value: 'UNLOADING', label: 'Unloading', icon: Play, count: unloadingVisits.length },
+            { value: 'SILO_ISSUE', label: 'Silo issue', icon: MinusCircle, count: activeSilos.filter((s) => s.current_stock_liters > 0).length },
+            ]}
+          />
+        }
+      />
 
       {/* Workspace Split Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -562,19 +497,19 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
               placeholder={activeTab === 'SILO_ISSUE' ? 'Search silo code or name...' : 'Search vehicle or token...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
             />
           </div>
 
           <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
             {isLoading ? (
-              <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+              <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
                 <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-700" />
                 Loading production queue...
               </div>
             ) : activeTab === 'READY' ? (
               readyVisits.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+                <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
                   No vehicles currently ready for unloading.
                 </div>
               ) : (
@@ -582,24 +517,27 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                   const isSelected = v.id === selectedReadyVisitId;
                   return (
                     <div
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={onActivateKey}
                       key={v.id}
                       onClick={() => setSelectedReadyVisitId(v.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
-                          : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/60'
+                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <span className="tabular-nums font-semibold text-sm">{v.vehicle_number}</span>
                           {v.token_number && (
-                            <span className={`tabular-nums text-xs font-semibold ${isSelected ? 'text-blue-200' : 'text-primary'}`}>
+                            <span className={`tabular-nums text-xs font-semibold text-primary`}>
                               ({v.token_number})
                             </span>
                           )}
                         </div>
-                        <span className={`text-[10px] tabular-nums font-semibold flex items-center space-x-1 ${isSelected ? 'text-blue-200' : 'text-slate-500'}`}>
+                        <span className={`text-[10px] tabular-nums font-semibold flex items-center space-x-1 text-slate-500`}>
                           <Clock className="w-3 h-3" />
                           <span>{v.waiting_minutes}m wait</span>
                         </span>
@@ -609,11 +547,11 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                         isSelected ? 'bg-blue-900/60 text-slate-100 border border-blue-800' : 'bg-muted text-slate-700 border border-border-strong'
                       }`}>
                         <div>
-                          <span className="font-sans block text-[9.5px] opacity-75">Gross Weight</span>
+                          <span className="font-sans block text-[10px] opacity-75">Gross Weight</span>
                           <span>{v.gross_weight_kg ? `${v.gross_weight_kg.toLocaleString()} kg` : '—'}</span>
                         </div>
                         <div>
-                          <span className="font-sans block text-[9.5px] opacity-75">Expected Volume</span>
+                          <span className="font-sans block text-[10px] opacity-75">Expected Volume</span>
                           <span>{v.total_accepted_physical_liters !== null ? `~${v.total_accepted_physical_liters.toLocaleString()} L` : '—'}</span>
                         </div>
                       </div>
@@ -623,7 +561,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
               )
             ) : activeTab === 'UNLOADING' ? (
               unloadingVisits.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+                <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
                   No vehicles are currently unloading.
                 </div>
               ) : (
@@ -631,24 +569,25 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                   const isSelected = v.id === selectedUnloadingVisitId;
                   return (
                     <div
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={onActivateKey}
                       key={v.id}
                       onClick={() => setSelectedUnloadingVisitId(v.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
-                          : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/60'
+                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <span className="tabular-nums font-semibold text-sm">{v.vehicle_number}</span>
-                          <span className={`px-2 py-0.5 rounded text-[9.5px] font-semibold tabular-nums ${
-                            isSelected ? 'bg-white/20 text-white' : 'bg-blue-100 text-primary border border-blue-300'
-                          }`}>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-semibold tabular-nums bg-blue-100 text-primary border border-blue-300`}>
                             Unloading Active
                           </span>
                         </div>
-                        <span className={`text-[10px] tabular-nums font-semibold flex items-center space-x-1 ${isSelected ? 'text-blue-200' : 'text-amber-800'}`}>
+                        <span className={`text-[10px] tabular-nums font-semibold flex items-center space-x-1 text-amber-800`}>
                           <Clock className="w-3 h-3" />
                           <span>{v.elapsed_minutes}m</span>
                         </span>
@@ -658,11 +597,11 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                         isSelected ? 'bg-blue-900/60 text-slate-100 border border-blue-800' : 'bg-muted text-slate-700 border border-border-strong'
                       }`}>
                         <div>
-                          <span className="font-sans block text-[9.5px] opacity-75">Unloading Volume</span>
+                          <span className="font-sans block text-[10px] opacity-75">Unloading Volume</span>
                           <span>{v.total_accepted_physical_liters !== null ? `~${v.total_accepted_physical_liters.toLocaleString()} L` : '—'}</span>
                         </div>
                         <div>
-                          <span className="font-sans block text-[9.5px] opacity-75">Started By</span>
+                          <span className="font-sans block text-[10px] opacity-75">Started By</span>
                           <span className="truncate block">{v.started_by_name}</span>
                         </div>
                       </div>
@@ -672,7 +611,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
               )
             ) : (
               siloIssueList.length === 0 ? (
-                <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+                <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
                   No silos match query or have stock available.
                 </div>
               ) : (
@@ -680,25 +619,28 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                   const isSelected = silo.id === selectedIssueSiloId;
                   return (
                     <div
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={onActivateKey}
                       key={silo.id}
                       onClick={() => setSelectedIssueSiloId(silo.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
-                          : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/60'
+                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                           <span className="tabular-nums font-semibold text-sm">{silo.silo_code}</span>
-                          <span className={`text-xs font-semibold ${isSelected ? 'text-blue-200' : 'text-slate-700'}`}>
+                          <span className={`text-xs font-semibold text-slate-700`}>
                             ({silo.silo_name})
                           </span>
                         </div>
-                        <span className={`px-2 py-0.5 rounded text-[9.5px] font-semibold tabular-nums ${
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-semibold tabular-nums ${
                           silo.is_active
-                            ? isSelected ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
-                            : isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800 border border-amber-300'
+                            ? isSelected ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                            : isSelected ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
                         }`}>
                           {silo.is_active ? 'Active' : 'Inactive'}
                         </span>
@@ -708,11 +650,11 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                         isSelected ? 'bg-blue-900/60 text-slate-100 border border-blue-800' : 'bg-muted text-slate-700 border border-border-strong'
                       }`}>
                         <div>
-                          <span className="font-sans block text-[9.5px] opacity-75">Physical Stock</span>
+                          <span className="font-sans block text-[10px] opacity-75">Physical Stock</span>
                           <span className="text-sm font-semibold">{silo.current_stock_liters.toLocaleString()} L</span>
                         </div>
                         <div>
-                          <span className="font-sans block text-[9.5px] opacity-75">Capacity</span>
+                          <span className="font-sans block text-[10px] opacity-75">Capacity</span>
                           <span>{silo.capacity_liters.toLocaleString()} L</span>
                         </div>
                       </div>
@@ -728,11 +670,11 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
         <div className="lg:col-span-7">
           {activeTab === 'READY' && (
             !selectedReadyVisit ? (
-              <div className="p-12 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+              <div className="p-12 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
                 Select a vehicle from the ready queue to assign silos and start unloading.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-muted border border-border-strong shadow-md space-y-6 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-6 text-foreground">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-strong pb-4">
                   <div>
                     <h3 className="text-base font-semibold text-foreground">Start Silo Unloading</h3>
@@ -747,11 +689,11 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
 
                 {/* Portion Assignment Table */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                  <h4 className="text-xs font-semibold text-foreground">
                     Accepted Portions & Destination Silos
                   </h4>
                   {selectedReadyVisit.portions.filter((p) => p.plant_decision === 'ACCEPTED').map((p) => (
-                    <div key={p.id} className="p-4 bg-muted rounded-xl border border-border-strong space-y-3">
+                    <div key={p.id} className="p-4 bg-subtle rounded-xl border border-border space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="tabular-nums font-semibold text-sm text-foreground">
                           Portion #{p.portion_number} ({p.dispatch_quantity_value !== null && p.dispatch_quantity_value !== undefined ? p.dispatch_quantity_value.toLocaleString() : '—'} {p.dispatch_quantity_unit === 'LITER' ? 'L' : 'kg'})
@@ -784,7 +726,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
 
                 {/* Operational Timestamp */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
+                  <label className="block text-xs font-semibold text-foreground">
                     Unloading Start Time <span className="text-rose-600">*</span>
                   </label>
                   <input
@@ -812,11 +754,11 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
 
           {activeTab === 'UNLOADING' && (
             !selectedUnloadingVisit ? (
-              <div className="p-12 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+              <div className="p-12 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
                 Select a vehicle from the unloading in-progress queue to record completion.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-muted border border-border-strong shadow-md space-y-6 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-6 text-foreground">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-strong pb-4">
                   <div>
                     <h3 className="text-base font-semibold text-foreground">Complete Silo Unloading</h3>
@@ -831,11 +773,11 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
 
                 {/* Portion Silo Assignments Read-Only */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                  <h4 className="text-xs font-semibold text-foreground">
                     Assigned Silo Allocation
                   </h4>
                   {selectedUnloadingVisit.portions.filter((p) => p.plant_decision === 'ACCEPTED').map((p) => (
-                    <div key={p.id} className="p-4 bg-muted rounded-xl border border-border-strong flex items-center justify-between text-xs tabular-nums font-semibold">
+                    <div key={p.id} className="p-4 bg-subtle rounded-xl border border-border flex items-center justify-between text-xs tabular-nums font-semibold">
                       <div>
                         <span className="font-semibold text-foreground block">
                           Portion #{p.portion_number} ({p.dispatch_quantity_value !== null && p.dispatch_quantity_value !== undefined ? p.dispatch_quantity_value.toLocaleString() : '—'} {p.dispatch_quantity_unit === 'LITER' ? 'L' : 'kg'})
@@ -853,7 +795,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
 
                 {/* Operational Timestamp */}
                 <div className="space-y-1.5">
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
+                  <label className="block text-xs font-semibold text-foreground">
                     Unloading Completion Time <span className="text-rose-600">*</span>
                   </label>
                   <input
@@ -881,12 +823,12 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
 
           {activeTab === 'SILO_ISSUE' && (
             !selectedIssueSilo ? (
-              <div className="p-12 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+              <div className="p-12 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
                 Select a silo from the list to record outbound milk issue.
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="p-6 rounded-xl bg-muted border border-border-strong shadow-md space-y-6 text-foreground">
+                <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-6 text-foreground">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-strong pb-4">
                     <div>
                       <h3 className="text-base font-semibold text-foreground">Record Outbound Milk Issue</h3>
@@ -901,13 +843,13 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-muted border border-border-strong text-xs tabular-nums font-semibold">
+                  <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-subtle border border-border text-xs tabular-nums font-semibold">
                     <div>
-                      <span className="text-slate-500 font-sans block text-[9.5px]">Physical Stock</span>
+                      <span className="text-slate-500 font-sans block text-[10px]">Physical Stock</span>
                       <span className="text-base font-semibold text-primary">{selectedIssueSilo.current_stock_liters.toLocaleString()} L</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 font-sans block text-[9.5px]">After-Issue Stock Preview</span>
+                      <span className="text-slate-500 font-sans block text-[10px]">After-Issue Stock Preview</span>
                       <span className={`text-base font-semibold ${isOverIssue ? 'text-rose-600' : 'text-emerald-800'}`}>
                         {previewRemaining.toLocaleString()} L
                       </span>
@@ -917,7 +859,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                   {/* Form Inputs */}
                   <div className="space-y-4">
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
+                      <label className="block text-xs font-semibold text-foreground">
                         Issue Quantity (Liters) <span className="text-rose-600">*</span>
                       </label>
                       <input
@@ -932,7 +874,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
+                        <label className="block text-xs font-semibold text-foreground">
                           Purpose / Destination
                         </label>
                         <input
@@ -945,7 +887,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
+                        <label className="block text-xs font-semibold text-foreground">
                           Flow Meter Reference
                         </label>
                         <input
@@ -959,7 +901,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-xs font-semibold uppercase tracking-wider text-foreground">
+                      <label className="block text-xs font-semibold text-foreground">
                         Operational Timestamp <span className="text-rose-600">*</span>
                       </label>
                       <input
@@ -984,9 +926,9 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                 </div>
 
                 {/* Compact Recent Issues Card */}
-                <div className="p-5 rounded-xl bg-muted border border-border-strong shadow-md space-y-3 text-foreground">
+                <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3 text-foreground">
                   <div className="flex items-center justify-between border-b border-border-strong pb-2">
-                    <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+                    <h4 className="text-xs font-semibold text-foreground">
                       Recent Issues — {selectedIssueSilo.silo_code}
                     </h4>
                     <span className="text-[11px] text-slate-500 tabular-nums font-semibold">Last 10 Records</span>
@@ -999,7 +941,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                   ) : (
                     <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
                       {issueHistory.map((h) => (
-                        <div key={h.id} className="p-3 bg-muted rounded-xl border border-border-strong flex items-center justify-between text-xs">
+                        <div key={h.id} className="p-3 bg-subtle rounded-xl border border-border flex items-center justify-between text-xs">
                           <div>
                             <span className="font-semibold text-foreground block">{h.purpose}</span>
                             <span className="text-[11px] text-slate-500 tabular-nums font-semibold">

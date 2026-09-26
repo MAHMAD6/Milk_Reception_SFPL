@@ -43,7 +43,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
             <ShieldAlert className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            <h2 className="text-xs font-semibold text-foreground">
               Executive Governance & Exception Audit Desk
             </h2>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">
@@ -98,7 +98,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <UserCheck className="w-4 h-4 text-primary" />
-            <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            <h2 className="text-xs font-semibold text-foreground">
               Operational Override Records Log
             </h2>
           </div>

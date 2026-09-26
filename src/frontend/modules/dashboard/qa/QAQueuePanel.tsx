@@ -3,6 +3,7 @@
 import React from 'react';
 import { Search, RefreshCw, Play } from 'lucide-react';
 import { formatOperationalTime } from '@/lib/datetime-utils';
+import { onActivateKey } from '@/lib/a11y';
 
 export interface WaitingVisit {
   id: string;
@@ -102,20 +103,20 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search vehicle or token..."
-          className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-muted text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
         />
       </div>
 
       {/* Queue Content */}
       <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
         {isLoadingQueues ? (
-          <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+          <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
             <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-700" />
             Loading QA queues...
           </div>
         ) : activeTab === 'WAITING' ? (
           waitingVisits.length === 0 ? (
-            <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+            <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
               No vehicles waiting for QA testing.
             </div>
           ) : (
@@ -123,29 +124,30 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
               const isSelected = selectedWaitingVisitId === v.id;
               return (
                 <div
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={onActivateKey}
                   key={`waiting-${v.id}`}
                   onClick={() => onSelectWaitingVisit(v.id)}
                   className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                     isSelected
-                      ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
-                      : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/60'
+                      ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                      : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="tabular-nums font-semibold text-sm">{v.vehicle_number}</span>
-                      <span className={`tabular-nums text-xs font-semibold ${isSelected ? 'text-blue-200' : 'text-primary'}`}>
+                      <span className={`tabular-nums text-xs font-semibold text-primary`}>
                         ({v.token_number || 'No Token'})
                       </span>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[9.5px] font-semibold tabular-nums ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-muted text-foreground border border-border-strong'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold tabular-nums bg-muted text-foreground border border-border-strong`}>
                       Waiting
                     </span>
                   </div>
 
-                  <div className={`flex items-center justify-between text-xs font-semibold ${isSelected ? 'text-slate-200' : 'text-slate-700'}`}>
+                  <div className={`flex items-center justify-between text-xs font-semibold text-slate-700`}>
                     <span>
                       {v.portion_count} Portion{v.portion_count > 1 ? 's' : ''}
                       {v.vehicle_dispatch_quantity_value != null && v.vehicle_dispatch_quantity_unit
@@ -175,7 +177,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
           )
         ) : activeTab === 'IN_TESTING' ? (
           inTestingVisits.length === 0 ? (
-            <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+            <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
               No QA testing sessions in progress.
             </div>
           ) : (
@@ -183,34 +185,35 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
               const isSelected = selectedTestingVisitId === v.id;
               return (
                 <div
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={onActivateKey}
                   key={`in-testing-${v.id}`}
                   onClick={() => onSelectTestingVisit(v.id)}
                   className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                     isSelected
-                      ? 'bg-primary text-white border-blue-900 shadow-md ring-2 ring-blue-500/30'
-                      : 'bg-muted text-foreground border-border-strong hover:bg-amber-100/60'
+                      ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                      : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <span className="tabular-nums font-semibold text-sm">{v.vehicle_number}</span>
-                      <span className={`tabular-nums text-xs font-semibold ${isSelected ? 'text-blue-200' : 'text-primary'}`}>
+                      <span className={`tabular-nums text-xs font-semibold text-primary`}>
                         ({v.token_number || 'No Token'})
                       </span>
                     </div>
-                    <span className={`px-2 py-0.5 rounded text-[9.5px] font-semibold tabular-nums ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-muted text-foreground border border-border-strong'
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-semibold tabular-nums bg-muted text-foreground border border-border-strong`}>
                       In Testing
                     </span>
                   </div>
 
-                  <div className={`flex items-center justify-between text-xs font-semibold ${isSelected ? 'text-slate-200' : 'text-slate-700'}`}>
+                  <div className={`flex items-center justify-between text-xs font-semibold text-slate-700`}>
                     <span>Chemist: {v.started_by_name}</span>
                     <span>Elapsed: {v.elapsed_minutes} min</span>
                   </div>
 
-                  <div className={`text-[11px] tabular-nums font-semibold ${isSelected ? 'text-blue-100' : 'text-slate-600'}`}>
+                  <div className={`text-[11px] tabular-nums font-semibold text-slate-600`}>
                     Portions: {v.finalized_portion_count} of {v.portion_count} finalized
                   </div>
                 </div>
@@ -218,7 +221,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
             })
           )
         ) : onHoldVisits.length === 0 ? (
-          <div className="p-8 text-center border border-dashed border-border-strong rounded-xl bg-muted text-xs font-semibold text-slate-500">
+          <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
             No QA sessions currently on hold.
           </div>
         ) : (
@@ -226,35 +229,34 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
             const isSelected = selectedHeldVisitId === v.id;
             return (
               <div
+                role="button"
+                tabIndex={0}
+                onKeyDown={onActivateKey}
                 key={`on-hold-${v.id}`}
                 onClick={() => onSelectHeldVisit(v.id)}
                 className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                   isSelected
-                    ? 'bg-amber-900 text-white border-amber-950 shadow-md ring-2 ring-amber-500/30'
-                    : 'bg-amber-50 text-foreground border-amber-200 hover:bg-amber-100/80'
+                    ? 'bg-amber-50/70 text-foreground border-amber-500 ring-1 ring-amber-500 shadow-sm'
+                    : 'bg-amber-50 text-foreground border-amber-200 hover:bg-accent'
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     <span className="tabular-nums font-semibold text-sm">{v.vehicle_number}</span>
-                    <span className={`tabular-nums text-xs font-semibold ${isSelected ? 'text-amber-200' : 'text-amber-800'}`}>
+                    <span className={`tabular-nums text-xs font-semibold text-amber-800`}>
                       ({v.token_number || 'No Token'})
                     </span>
                   </div>
-                  <span className={`px-2 py-0.5 rounded text-[9.5px] font-semibold tabular-nums ${
-                    isSelected ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-900 border border-amber-300'
-                  }`}>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-semibold tabular-nums bg-amber-100 text-amber-900 border border-amber-300`}>
                     ON HOLD
                   </span>
                 </div>
 
-                <p className={`text-xs font-semibold p-2 rounded-lg border ${
-                  isSelected ? 'bg-amber-950/60 text-amber-100 border-amber-800' : 'bg-amber-100/60 text-amber-900 border-amber-200'
-                }`}>
+                <p className={`text-xs font-semibold p-2 rounded-lg border bg-amber-100/60 text-amber-900 border-amber-200`}>
                   Reason: {v.hold_reason}
                 </p>
 
-                <div className={`flex items-center justify-between text-[11px] font-semibold ${isSelected ? 'text-amber-200' : 'text-amber-800'}`}>
+                <div className={`flex items-center justify-between text-[11px] font-semibold text-amber-800`}>
                   <span>Chemist: {v.chemist_name}</span>
                   <span>Held since: {formatOperationalTime(v.held_since)}</span>
                 </div>

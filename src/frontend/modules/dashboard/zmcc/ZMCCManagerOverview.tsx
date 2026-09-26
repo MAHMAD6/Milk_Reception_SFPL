@@ -29,6 +29,7 @@ import {
   Clock,
   CheckCircle2,
 } from 'lucide-react';
+import { StatCard } from '@/components/ui/stat-card';
 
 interface ZMCCManagerOverviewProps {
   logs: MilkProcessLog[];
@@ -143,10 +144,10 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
             <Layers className="w-5 h-5 text-primary" />
             <div>
               <h3 className="text-sm font-semibold text-foreground">
-                Operational Overview: {assignedSourceName}
+                {assignedSourceName} overview
               </h3>
-              <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
-                Pakistan Calendar Date: {displayCalendarDate}
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Business date {displayCalendarDate} (PKT)
               </p>
             </div>
           </div>
@@ -170,97 +171,42 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
           </div>
         </div>
 
-        {/* 2. Primary 6 Operational KPI Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3.5">
-          {/* Card 1: Current ZMCC Tank Stock */}
-          <div className="p-4 rounded-xl bg-blue-50 border border-blue-200 shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-primary-hover uppercase tracking-wider">
-                Current Tank Stock
-              </p>
-              <h2 className="text-xl font-semibold tabular-nums text-foreground mt-1">
-                {zmccTankStock != null ? `${zmccTankStock.toLocaleString()} L` : '—'}
-              </h2>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-blue-200 text-primary-hover">
-              <Milk className="w-5 h-5" />
-            </div>
-          </div>
-
-          {/* Card 2: Today Accepted Intake */}
-          <div className="p-4 rounded-xl bg-green-50 border border-green-200 shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-green-800 uppercase tracking-wider">
-                Today Accepted Intake
-              </p>
-              <h2 className="text-xl font-semibold tabular-nums text-foreground mt-1">
-                {todayAcceptedIntakeLiters != null ? `${todayAcceptedIntakeLiters.toLocaleString()} L` : '—'}
-              </h2>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-green-200 text-green-800">
-              <CheckCircle2 className="w-5 h-5" />
-            </div>
-          </div>
-
-          {/* Card 3: Today Dispatch to Plant */}
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-300 shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Dispatches to Plant
-              </p>
-              <h2 className="text-xl font-semibold tabular-nums text-foreground mt-1">
-                {summary?.totalVisits != null ? summary.totalVisits : '—'}
-              </h2>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-slate-300 text-slate-700">
-              <Truck className="w-5 h-5" />
-            </div>
-          </div>
-
-          {/* Card 4: Vehicles Inside ZMCC */}
-          <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-amber-800 uppercase tracking-wider">
-                Vehicles Inside ZMCC
-              </p>
-              <h2 className="text-xl font-semibold tabular-nums text-foreground mt-1">
-                {vehiclesInsideZmccCount != null ? vehiclesInsideZmccCount : '—'}
-              </h2>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-amber-200 text-amber-800">
-              <Clock className="w-5 h-5" />
-            </div>
-          </div>
-
-          {/* Card 5: Active Plant-Bound Vehicles */}
-          <div className="p-4 rounded-xl bg-purple-50 border border-purple-200 shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-purple-800 uppercase tracking-wider">
-                Active Plant-Bound
-              </p>
-              <h2 className="text-xl font-semibold tabular-nums text-foreground mt-1">
-                {liveActiveInPlantCount != null ? liveActiveInPlantCount : '—'}
-              </h2>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-purple-200 text-purple-800">
-              <Factory className="w-5 h-5" />
-            </div>
-          </div>
-
-          {/* Card 6: Needs Attention */}
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200 shadow-xs flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold text-red-800 uppercase tracking-wider">
-                Needs Attention
-              </p>
-              <h2 className="text-xl font-semibold tabular-nums text-red-800 mt-1">
-                {attentionItems.length}
-              </h2>
-            </div>
-            <div className="p-2.5 rounded-xl bg-white border border-red-200 text-red-800">
-              <AlertTriangle className="w-5 h-5" />
-            </div>
-          </div>
+        {/* 2. Primary operational KPIs */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+          <StatCard
+            label="Current tank stock"
+            icon={Milk}
+            tone="info"
+            value={zmccTankStock != null ? `${zmccTankStock.toLocaleString()} L` : '—'}
+          />
+          <StatCard
+            label="Accepted intake today"
+            icon={CheckCircle2}
+            tone="success"
+            value={todayAcceptedIntakeLiters != null ? `${todayAcceptedIntakeLiters.toLocaleString()} L` : '—'}
+          />
+          <StatCard
+            label="Dispatches to plant"
+            icon={Truck}
+            value={summary?.totalVisits != null ? summary.totalVisits : '—'}
+          />
+          <StatCard
+            label="Vehicles inside ZMCC"
+            icon={Clock}
+            tone="warning"
+            value={vehiclesInsideZmccCount != null ? vehiclesInsideZmccCount : '—'}
+          />
+          <StatCard
+            label="Active plant-bound"
+            icon={Factory}
+            value={liveActiveInPlantCount != null ? liveActiveInPlantCount : '—'}
+          />
+          <StatCard
+            label="Needs attention"
+            icon={AlertTriangle}
+            tone={attentionItems.length > 0 ? 'danger' : 'default'}
+            value={attentionItems.length}
+          />
         </div>
 
         {/* 3. Secondary Quantity & Volume Summary */}
@@ -275,7 +221,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs pt-1">
               <div>
-                <span className="text-xs text-slate-500 font-sans block">Dispatch Gross:</span>
+                <span className="text-xs text-slate-500 font-sans block">Dispatch gross</span>
                 <span className="font-semibold text-foreground">
                   {metrics.totalDispatchGrossLiters != null
                     ? `${metrics.totalDispatchGrossLiters.toLocaleString()} L`
@@ -283,7 +229,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
                 </span>
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-sans block">Physical Received:</span>
+                <span className="text-xs text-slate-500 font-sans block">Physical received</span>
                 <span className="font-semibold text-green-800">
                   {metrics.totalPhysicalReceivedLiters != null
                     ? `${metrics.totalPhysicalReceivedLiters.toLocaleString()} L`
@@ -291,7 +237,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
                 </span>
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-sans block">Difference:</span>
+                <span className="text-xs text-slate-500 font-sans block">Difference</span>
                 <span
                   className={`font-semibold ${
                     metrics.quantityDifferenceLiters == null
@@ -315,13 +261,13 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
           <div className="p-4 rounded-xl bg-subtle border border-border space-y-2">
             <div className="flex items-center justify-between font-sans">
               <span className="text-xs font-semibold text-foreground flex items-center gap-1.5">
-                <FlaskConical className="w-4 h-4 text-purple-800" />
+                <FlaskConical className="w-4 h-4 text-primary" />
                 <span>Commercial Volume (13% TS)</span>
               </span>
             </div>
             <div className="grid grid-cols-3 gap-2 text-xs pt-1">
               <div>
-                <span className="text-xs text-slate-500 font-sans block">Dispatch @13TS:</span>
+                <span className="text-xs text-slate-500 font-sans block">Dispatch @13% TS</span>
                 <span className="font-semibold text-foreground">
                   {metrics.totalDispatch13TsLiters != null
                     ? `${metrics.totalDispatch13TsLiters.toLocaleString()} L`
@@ -329,15 +275,15 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
                 </span>
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-sans block">Plant @13TS:</span>
-                <span className="font-semibold text-purple-800">
+                <span className="text-xs text-slate-500 font-sans block">Plant @13% TS</span>
+                <span className="font-semibold text-foreground">
                   {metrics.totalPlant13TsLiters != null
                     ? `${metrics.totalPlant13TsLiters.toLocaleString()} L`
                     : '—'}
                 </span>
               </div>
               <div>
-                <span className="text-xs text-slate-500 font-sans block">TS Variance:</span>
+                <span className="text-xs text-slate-500 font-sans block">TS variance</span>
                 <span
                   className={`font-semibold ${
                     metrics.tsDifferenceLiters == null

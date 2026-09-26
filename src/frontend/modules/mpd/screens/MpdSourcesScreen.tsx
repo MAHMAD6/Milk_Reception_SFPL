@@ -69,7 +69,7 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Building2 className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h2 className="text-xs font-semibold text-foreground">
                 ZMCC Chilling Centers (Intake & Silo Stocks)
               </h2>
             </div>
@@ -151,7 +151,7 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Building className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h2 className="text-xs font-semibold text-foreground">
                 Direct Plant Commercial Contractors
               </h2>
             </div>

@@ -138,12 +138,15 @@
   }
 }
 
-/* Persistent desktop sidebar: offset the page and hide duplicate header branding. */
+/* Persistent desktop sidebar: offset the page and hide duplicate header branding.
+   `html body` out-ranks the `body[data-scroll-locked] { padding-left: 0 }` rule that
+   Radix's scroll lock injects while a dialog or menu is open, so the page doesn't
+   slide under the sidebar. */
 @media (min-width: 1024px) {
-  body:has([data-app-sidebar]) {
+  html body:has([data-app-sidebar]) {
     padding-left: var(--sidebar-width);
   }
-  body:has([data-app-sidebar]) .hide-with-sidebar {
+  html body:has([data-app-sidebar]) .hide-with-sidebar {
     display: none;
   }
 }

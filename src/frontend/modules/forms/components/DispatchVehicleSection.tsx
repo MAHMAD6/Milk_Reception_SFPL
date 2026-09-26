@@ -134,7 +134,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
       <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-4">
         <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
           <Truck className="w-4 h-4 text-primary-hover" />
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+          <h3 className="text-xs font-semibold text-foreground">
             Vehicle & Dispatch Time
           </h3>
         </div>
@@ -199,13 +199,13 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
       {/* Whole-Vehicle Dispatch Quantity Section */}
       <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-2 gap-1">
-          <label className="text-xs font-semibold uppercase tracking-wider text-foreground">
+          <label className="text-xs font-semibold text-foreground">
             {sourceType === 'ZMCC' ? 'Measured Tank / Vehicle Issue' : 'Measured Whole-Vehicle Dispatch Quantity'} *
           </label>
         </div>
 
         {!isPolicyReady ? (
-          <div className="p-4 text-center rounded-xl bg-slate-50 border border-dashed border-border-strong text-xs font-semibold text-slate-500">
+          <div className="p-4 text-center rounded-xl bg-slate-50 border border-dashed border-border text-sm text-muted-foreground">
             Loading frozen quantity policy snapshot...
           </div>
         ) : (

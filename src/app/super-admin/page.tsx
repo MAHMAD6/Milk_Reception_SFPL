@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { Users, Truck, Database, FlaskConical, AlertCircle } from 'lucide-react';
+import { PageHeader } from '@/components/ui/page-header';
+import { StatCard } from '@/components/ui/stat-card';
 
 interface OverviewMetrics {
   totalUsers: number;
@@ -68,54 +70,36 @@ export default function SuperAdminOverviewPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold text-foreground">System Architecture & Master Overview</h1>
-        <p className="text-xs font-semibold text-slate-500 mt-1">
-          Real-time enterprise metric monitoring across database models and administration layers.
-        </p>
-      </div>
+      <PageHeader
+        title="Administration overview"
+        description="Accounts, procurement sources, storage and quality configuration at a glance."
+      />
 
-      {/* METRIC CARDS GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-border-strong shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold uppercase text-slate-600">User Accounts</span>
-            <Users className="w-4 h-4 text-primary" />
-          </div>
-          <div className="text-3xl font-semibold tabular-nums text-foreground">{metrics?.totalUsers ?? '—'}</div>
-          <div className="text-[11px] font-semibold text-emerald-700">{metrics?.activeUsers ?? 0} Active Accounts</div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-border-strong shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold uppercase text-slate-600">Procurement Sources</span>
-            <Truck className="w-4 h-4 text-primary" />
-          </div>
-          <div className="text-3xl font-semibold tabular-nums text-foreground">{metrics?.totalSources ?? '—'}</div>
-          <div className="text-[11px] font-semibold text-slate-600">
-            {metrics?.activeZmccs ?? 0} ZMCCs | {metrics?.activeContractors ?? 0} Contractors
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-border-strong shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold uppercase text-slate-600">Silo Tanks</span>
-            <Database className="w-4 h-4 text-primary" />
-          </div>
-          <div className="text-3xl font-semibold tabular-nums text-foreground">{metrics?.totalSilos ?? '—'}</div>
-          <div className="text-[11px] font-semibold text-emerald-700">{metrics?.activeSilos ?? 0} Active Storage Silos</div>
-        </div>
-
-        <div className="bg-white p-5 rounded-xl border border-border-strong shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-slate-500">
-            <span className="text-xs font-semibold uppercase text-slate-600">Lab Tests & Rules</span>
-            <FlaskConical className="w-4 h-4 text-primary" />
-          </div>
-          <div className="text-3xl font-semibold tabular-nums text-foreground">{metrics?.totalLabTests ?? '—'}</div>
-          <div className="text-[11px] font-semibold text-slate-600">
-            {metrics?.activeLabTests ?? 0} Active Tests | {metrics?.activeRules ?? 0} Active SOP Rules
-          </div>
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="User accounts"
+          icon={Users}
+          value={metrics?.totalUsers ?? '—'}
+          hint={`${metrics?.activeUsers ?? 0} active`}
+        />
+        <StatCard
+          label="Procurement sources"
+          icon={Truck}
+          value={metrics?.totalSources ?? '—'}
+          hint={`${metrics?.activeZmccs ?? 0} ZMCCs · ${metrics?.activeContractors ?? 0} contractors`}
+        />
+        <StatCard
+          label="Silo tanks"
+          icon={Database}
+          value={metrics?.totalSilos ?? '—'}
+          hint={`${metrics?.activeSilos ?? 0} active`}
+        />
+        <StatCard
+          label="Lab tests"
+          icon={FlaskConical}
+          value={metrics?.totalLabTests ?? '—'}
+          hint={`${metrics?.activeLabTests ?? 0} active tests · ${metrics?.activeRules ?? 0} SOP rules`}
+        />
       </div>
 
       {/* RECENT AUDIT LOG TABLE */}

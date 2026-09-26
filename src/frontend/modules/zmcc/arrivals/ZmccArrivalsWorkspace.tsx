@@ -24,6 +24,9 @@ import {
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
 import { Modal } from '@/components/ui/modal';
+import { onActivateKey } from '@/lib/a11y';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { AnimatePresence } from 'framer-motion';
 
 export type MainTab = 'MOT_ARRIVAL' | 'LOCAL_SUPPLIER_ARRIVAL' | 'INSIDE_ZMCC' | 'HISTORY';
 
@@ -615,65 +618,29 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
     <div className="space-y-6">
       {/* Tab Navigation */}
       {!hideTabBar && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-          <div className="flex flex-wrap gap-2">
-            {canSubmit && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('MOT_ARRIVAL')}
-                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    activeTab === 'MOT_ARRIVAL'
-                      ? 'bg-primary text-white shadow-xs'
-                      : 'bg-white text-slate-700 hover:bg-muted border border-border'
-                  }`}
-                >
-                  <Truck className="w-4 h-4" />
-                  <span>Record MOT Arrival</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab('LOCAL_SUPPLIER_ARRIVAL')}
-                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    activeTab === 'LOCAL_SUPPLIER_ARRIVAL'
-                      ? 'bg-emerald-700 text-white shadow-xs'
-                      : 'bg-white text-slate-700 hover:bg-emerald-50/50 border border-border'
-                  }`}
-                >
-                  <Users className="w-4 h-4" />
-                  <span>Record Local Supplier Arrival</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab('INSIDE_ZMCC');
-                    fetchInsideVehicles();
-                  }}
-                  className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                    activeTab === 'INSIDE_ZMCC'
-                      ? 'bg-indigo-800 text-white shadow-xs'
-                      : 'bg-white text-slate-700 hover:bg-indigo-50/50 border border-border'
-                  }`}
-                >
-                  <MapPin className="w-4 h-4" />
-                  <span>Vehicles Inside ZMCC {insideVehicles.length > 0 ? `(${insideVehicles.length})` : ''}</span>
-                </button>
-              </>
-            )}
-            <button
-              type="button"
-              onClick={() => setActiveTab('HISTORY')}
-              className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all ${
-                activeTab === 'HISTORY'
-                  ? 'bg-primary text-white shadow-xs'
-                  : 'bg-white text-slate-700 hover:bg-muted border border-border'
-              }`}
-            >
-              <Clock className="w-4 h-4" />
-              <span>Arrival History & Corrections</span>
-            </button>
-          </div>
-        </div>
+        <SegmentedTabs
+          label="Arrival views"
+          value={activeTab}
+          onValueChange={(tab) => {
+            setActiveTab(tab);
+            if (tab === 'INSIDE_ZMCC') fetchInsideVehicles();
+          }}
+          tabs={[
+            ...(canSubmit
+              ? [
+                  { value: 'MOT_ARRIVAL' as const, label: 'MOT arrival', icon: Truck },
+                  { value: 'LOCAL_SUPPLIER_ARRIVAL' as const, label: 'Local supplier arrival', icon: Users },
+                  {
+                    value: 'INSIDE_ZMCC' as const,
+                    label: 'Inside ZMCC',
+                    icon: MapPin,
+                    count: insideVehicles.length > 0 ? insideVehicles.length : undefined,
+                  },
+                ]
+              : []),
+            { value: 'HISTORY' as const, label: 'History & corrections', icon: Clock },
+          ]}
+        />
       )}
 
       {/* 1. MOT ARRIVAL SUB-TAB */}
@@ -845,6 +812,9 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                       const isSelected = selectedJourney?.id === j.id;
                       return (
                         <div
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={onActivateKey}
                           key={j.id}
                           onClick={() => setSelectedJourney(j)}
                           className={`p-4 rounded-xl border transition-all cursor-pointer ${
@@ -1665,8 +1635,8 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
       )}
 
       {/* 4. CORRECTION MODAL (ZMCC MANAGER / SUPER ADMIN) */}
-      {correctionTarget && (
-        <Modal onClose={() => setCorrectionTarget(null)} title="Correct arrival record" className="max-w-lg p-6 space-y-4">
+      <AnimatePresence>{correctionTarget && (
+        <Modal key="modal-0" onClose={() => setCorrectionTarget(null)} title="Correct arrival record" className="max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-slate-900">
@@ -1864,11 +1834,11 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* 5. INLINE ADD LOCAL SUPPLIER MODAL */}
-      {showAddSupplierModal && (
-        <Modal onClose={() => setShowAddSupplierModal(false)} title="Add local supplier" className="max-w-md p-6 space-y-4 border-emerald-200">
+      <AnimatePresence>{showAddSupplierModal && (
+        <Modal key="modal-1" onClose={() => setShowAddSupplierModal(false)} title="Add local supplier" className="max-w-md p-6 space-y-4 border-emerald-200">
             <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
               <div className="flex items-center space-x-2">
                 <UserPlus className="w-5 h-5 text-emerald-700" />
@@ -1977,11 +1947,11 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* Gate Exit Modal */}
-      {exitModalTarget && (
-        <Modal onClose={closeExitModal} title="Record gate exit" className="max-w-md p-6 space-y-4">
+      <AnimatePresence>{exitModalTarget && (
+        <Modal key="modal-2" onClose={closeExitModal} title="Record gate exit" className="max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between border-b pb-3">
               <div className="flex items-center space-x-2">
                 <MapPin className="w-5 h-5 text-indigo-700" />
@@ -2042,7 +2012,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 };

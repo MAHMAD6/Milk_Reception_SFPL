@@ -107,7 +107,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
   return (
     <div className="space-y-4 pt-1">
       <div className="flex items-center justify-between">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+        <h3 className="text-xs font-semibold text-foreground">
           Milk Portions ({portions.length})
         </h3>
 
@@ -187,24 +187,24 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
 
                 {/* Calculated Milk Summary Strip */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2 border-t border-slate-100 text-xs tabular-nums font-semibold text-slate-700">
-                  <div className="p-2 rounded-xl bg-muted/60 border border-border-strong">
-                    <span className="text-[9.5px] font-sans text-slate-500 block">SNF %</span>
+                  <div className="p-2 rounded-xl bg-subtle border border-border">
+                    <span className="text-[10px] font-sans text-slate-500 block">SNF %</span>
                     <span className="text-foreground">{calcValues.snf !== null ? `${calcValues.snf.toFixed(2)}%` : '—'}</span>
                   </div>
-                  <div className="p-2 rounded-xl bg-muted/60 border border-border-strong">
-                    <span className="text-[9.5px] font-sans text-slate-500 block">TS %</span>
+                  <div className="p-2 rounded-xl bg-subtle border border-border">
+                    <span className="text-[10px] font-sans text-slate-500 block">TS %</span>
                     <span className="text-foreground">{calcValues.ts !== null ? `${calcValues.ts.toFixed(2)}%` : '—'}</span>
                   </div>
-                  <div className="p-2 rounded-xl bg-muted/60 border border-border-strong">
-                    <span className="text-[9.5px] font-sans text-slate-500 block">Gross Liters</span>
+                  <div className="p-2 rounded-xl bg-subtle border border-border">
+                    <span className="text-[10px] font-sans text-slate-500 block">Gross Liters</span>
                     <span className="text-emerald-900 font-semibold">
                       {calcValues.grossLiters !== null
                         ? `${Math.round(calcValues.grossLiters).toLocaleString()} L`
                         : '—'}
                     </span>
                   </div>
-                  <div className="p-2 rounded-xl bg-muted/60 border border-border-strong">
-                    <span className="text-[9.5px] font-sans text-slate-500 block">Liters @ 13% TS</span>
+                  <div className="p-2 rounded-xl bg-subtle border border-border">
+                    <span className="text-[10px] font-sans text-slate-500 block">Liters @ 13% TS</span>
                     <span className="text-emerald-900 font-semibold">
                       {calcValues.at13TsLiters !== null
                         ? `${Math.round(calcValues.at13TsLiters).toLocaleString()} L`
@@ -257,7 +257,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                         value={portion.quantity.value}
                         onChange={(e) => onPortionQuantityValueChange(index, e.target.value)}
                         placeholder="e.g. 8500"
-                        className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-muted text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+                        className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-card text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
                           portionErrors[index]?.quantity
                             ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500'
                             : 'border-border-strong'
@@ -336,7 +336,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                 {isContractorSource ? (
                   <div className="space-y-3 pt-2 border-t border-slate-100">
                     <div className="flex items-center justify-between">
-                      <label className="block text-xs font-semibold uppercase text-foreground">
+                      <label className="block text-xs font-semibold text-foreground">
                         Contractor Dispatch Tests ({manualLabTests.length} Tests)
                       </label>
                       <span className="text-[10px] font-semibold text-slate-500">
@@ -476,7 +476,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                   /* ZMCC Full Manual Lab Tests Input Grid */
                   <div className="space-y-2.5 pt-2 border-t border-slate-100">
                     <div className="flex items-center justify-between pb-1">
-                      <label className="block text-xs font-semibold uppercase text-foreground">
+                      <label className="block text-xs font-semibold text-foreground">
                         Lab Tests ({manualLabTests.length} Manual Observations)
                       </label>
                       <span className="text-[10px] font-semibold text-slate-500">
@@ -651,7 +651,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                 )}
 
                 {/* Calculation summary notice */}
-                <div className="flex items-center space-x-2 text-xs font-medium text-slate-600 bg-muted/70 p-2.5 rounded-xl border border-border-strong">
+                <div className="flex items-center space-x-2 text-xs font-medium text-slate-600 bg-subtle p-2.5 rounded-xl border border-border">
                   <Calculator className="w-4 h-4 text-primary-hover shrink-0" />
                   <span>Canonical milk values update live in the summary panel.</span>
                 </div>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { AlertTriangle, CheckCircle2, Loader2, X } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 type Report = {
   summary: {
@@ -248,8 +249,8 @@ export function FinanceReconciliationWorkspace() {
       </div>
 
       {/* 1-Click ERP Mapping Modal */}
-      {showMappingModal && (
-        <Modal onClose={() => setShowMappingModal(false)} title="Finance mapping" className="max-w-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <AnimatePresence>{showMappingModal && (
+        <Modal key="modal-0" onClose={() => setShowMappingModal(false)} title="Finance mapping" className="max-w-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-slate-200">
               <div className="flex items-center space-x-2">
                 <AlertTriangle className="w-5 h-5 text-amber-600" />
@@ -283,7 +284,7 @@ export function FinanceReconciliationWorkspace() {
             {selectedSupplier ? (
               <form onSubmit={handleMapErp} className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-semibold uppercase text-slate-700">
+                  <h3 className="text-xs font-semibold text-slate-700">
                     Assign ERP Code for: {selectedSupplier.name} ({selectedSupplier.local_supplier_code})
                   </h3>
                   <button
@@ -299,7 +300,7 @@ export function FinanceReconciliationWorkspace() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase text-slate-600 mb-1">
+                  <label className="block text-xs font-semibold text-slate-600 mb-1">
                     Official ERP Vendor Reference *
                   </label>
                   <input
@@ -399,7 +400,7 @@ export function FinanceReconciliationWorkspace() {
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </section>
   );
 }

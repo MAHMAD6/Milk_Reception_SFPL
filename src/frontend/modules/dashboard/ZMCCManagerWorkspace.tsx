@@ -407,6 +407,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
       {/* Header with Hamburger Trigger */}
       <Header
         currentUser={currentUser}
+        title={subpageTitle ? `${sectionTitle} · ${subpageTitle}` : sectionTitle}
         sourceName={assignedSourceName}
         showBranding={true}
         onMenuClick={openDrawer}

@@ -57,7 +57,7 @@ export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
             <Layers className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            <h2 className="text-xs font-semibold text-foreground">
               4-Tier Physical Supply Chain Loss Diagnostics
             </h2>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">

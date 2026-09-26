@@ -19,6 +19,7 @@ import {
 import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 interface LabResultItem {
   id: string;
@@ -321,8 +322,8 @@ export default function QAManagerDepartmentPage() {
       </main>
 
       {/* Decision Confirmation Modal */}
-      {selectedPortion && actionType && (
-        <Modal onClose={() => {
+      <AnimatePresence>{selectedPortion && actionType && (
+        <Modal key="modal-0" onClose={() => {
             setSelectedPortion(null);
             setActionType(null);
           }} title="Confirm QA decision" className="max-w-lg p-6 space-y-4">
@@ -402,7 +403,7 @@ export default function QAManagerDepartmentPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 }

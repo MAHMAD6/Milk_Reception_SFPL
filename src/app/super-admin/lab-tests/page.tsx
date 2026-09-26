@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Edit2, ShieldAlert, CheckCircle2, Lock, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
 import { mapScopeCheckboxes } from '@/lib/validations/labTest';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 interface LabTestResultOption {
   value: string;
@@ -490,8 +491,8 @@ export default function SuperAdminLabTestsPage() {
       </div>
 
       {/* CREATE LAB TEST MODAL */}
-      {showCreateModal && (
-        <Modal onClose={closeCreateModal} title="Create laboratory test" className="p-6 max-w-lg space-y-4">
+      <AnimatePresence>{showCreateModal && (
+        <Modal key="modal-0" onClose={closeCreateModal} title="Create laboratory test" className="p-6 max-w-lg space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold text-foreground">Create New Laboratory Test</h3>
               <button
@@ -720,11 +721,11 @@ export default function SuperAdminLabTestsPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* EDIT LAB TEST METADATA MODAL */}
-      {showEditModal && (
-        <Modal onClose={closeEditModal} title="Edit test metadata" className="p-6 max-w-lg space-y-4">
+      <AnimatePresence>{showEditModal && (
+        <Modal key="modal-1" onClose={closeEditModal} title="Edit test metadata" className="p-6 max-w-lg space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold text-foreground">
                 Edit Test Metadata ({showEditModal.testCode})
@@ -934,11 +935,11 @@ export default function SuperAdminLabTestsPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* ACTIVATION / DEACTIVATION CONFIRMATION MODAL */}
-      {showConfirmModal && (
-        <Modal onClose={closeConfirmModal} title="Confirm test status change" className="p-6 max-w-md space-y-4">
+      <AnimatePresence>{showConfirmModal && (
+        <Modal key="modal-2" onClose={closeConfirmModal} title="Confirm test status change" className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <AlertTriangle
@@ -1020,7 +1021,7 @@ export default function SuperAdminLabTestsPage() {
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 }

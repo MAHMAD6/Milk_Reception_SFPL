@@ -194,7 +194,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center space-x-2">
               <Calculator className="w-4 h-4 text-primary-hover" />
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+              <h3 className="text-xs font-semibold text-foreground">
                 Dispatch Summary
               </h3>
             </div>
@@ -205,7 +205,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
 
           {/* Measured Vehicle Quantity & Average Quality */}
           <div className="grid grid-cols-2 gap-2.5 text-xs tabular-nums font-semibold">
-            <div className="p-3 rounded-xl bg-muted/70 border border-border-strong">
+            <div className="p-3 rounded-xl bg-subtle border border-border">
               <span className="text-xs font-sans text-slate-500 block font-semibold">Vehicle Issue</span>
               <span className="text-slate-900 text-sm font-semibold block mt-0.5">
                 {vehicleQuantity.value ? `${Number(vehicleQuantity.value).toLocaleString()} ${vehicleQuantity.unit}` : '—'}
@@ -215,7 +215,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-muted/70 border border-border-strong">
+            <div className="p-3 rounded-xl bg-subtle border border-border">
               <span className="text-xs font-sans text-slate-500 block font-semibold">Portions Total</span>
               <span className="text-slate-900 text-sm font-semibold block mt-0.5">
                 {portionSummary.complete && portionSummary.formattedTotal
@@ -265,7 +265,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
 
         {/* Compact Portion Breakdown List */}
         <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-3">
-          <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+          <h4 className="text-xs font-semibold text-foreground">
             Portion Details
           </h4>
 
@@ -285,7 +285,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
               return (
                 <div
                   key={`portion-breakdown-${idx}`}
-                  className="p-3 rounded-xl bg-muted/50 border border-border-strong space-y-1.5"
+                  className="p-3 rounded-xl bg-subtle border border-border space-y-1.5"
                 >
                   <div className="flex items-center justify-between text-xs tabular-nums font-semibold">
                     <span className="font-sans font-semibold text-foreground">

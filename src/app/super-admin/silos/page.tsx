@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, ShieldAlert, CheckCircle2, Edit2, AlertTriangle, X } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 interface Silo {
   id: string;
@@ -358,8 +359,8 @@ export default function SuperAdminSilosPage() {
       </div>
 
       {/* CREATE SILO MODAL */}
-      {showCreateModal && (
-        <Modal onClose={closeModals} title="Add silo" className="p-6 max-w-md space-y-4">
+      <AnimatePresence>{showCreateModal && (
+        <Modal key="modal-0" onClose={closeModals} title="Add silo" className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-semibold text-foreground">Add Silo Storage</h3>
               <button
@@ -447,11 +448,11 @@ export default function SuperAdminSilosPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* EDIT SILO MODAL */}
-      {showEditModal && (
-        <Modal onClose={closeModals} title="Edit silo capacity" className="p-6 max-w-md space-y-4">
+      <AnimatePresence>{showEditModal && (
+        <Modal key="modal-1" onClose={closeModals} title="Edit silo capacity" className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-semibold text-foreground">
                 Edit Silo ({showEditModal.siloCode})
@@ -541,11 +542,11 @@ export default function SuperAdminSilosPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* DEACTIVATION CONFIRMATION MODAL */}
-      {deactivatingSilo && (
-        <Modal onClose={closeModals} title="Confirm silo deactivation" className="border-rose-200 p-6 max-w-md space-y-4">
+      <AnimatePresence>{deactivatingSilo && (
+        <Modal key="modal-2" onClose={closeModals} title="Confirm silo deactivation" className="border-rose-200 p-6 max-w-md space-y-4">
             <div className="flex items-center space-x-3 text-rose-700">
               <div className="p-2.5 bg-rose-100 rounded-xl shrink-0">
                 <AlertTriangle className="w-5 h-5 text-rose-700" />
@@ -589,7 +590,7 @@ export default function SuperAdminSilosPage() {
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 }

@@ -10,7 +10,9 @@ const Toaster = ({ ...props }: ToasterProps) => (
     closeButton
     richColors
     visibleToasts={4}
-    offset={16}
+    // Clear the 56px app header so toasts never cover the bell or account menu.
+    offset={{ top: 68, right: 16 }}
+    mobileOffset={{ top: 64, right: 12, left: 12 }}
     toastOptions={{
       classNames: {
         toast: 'group font-sans !rounded-lg !border !shadow-lg !text-sm',

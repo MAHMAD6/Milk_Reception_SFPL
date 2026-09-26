@@ -69,7 +69,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h2 className="text-xs font-semibold text-foreground">
                 Inter-Facility In-Transit Tankers (ZMCC → Plant)
               </h2>
             </div>
@@ -159,7 +159,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Navigation className="w-4 h-4 text-primary" />
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h2 className="text-xs font-semibold text-foreground">
                 Active MOT Field Routes (Village Shops → ZMCC)
               </h2>
             </div>
@@ -250,7 +250,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-amber-600" />
-              <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h2 className="text-xs font-semibold text-foreground">
                 Emergency Vehicle Substitutions (Field Breakdown Swaps)
               </h2>
             </div>

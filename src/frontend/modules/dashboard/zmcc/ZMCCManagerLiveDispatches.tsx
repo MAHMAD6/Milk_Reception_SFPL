@@ -263,10 +263,10 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
                         <span className="tabular-nums font-semibold text-base text-foreground">
                           {group.vehicleNumber}
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-subtle border border-border tabular-nums text-[10.5px] font-semibold text-slate-700">
+                        <span className="px-2 py-0.5 rounded bg-subtle border border-border tabular-nums text-[11px] font-semibold text-slate-700">
                           Visit #{group.visitId}
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-green-50 border border-green-200 tabular-nums text-[10.5px] font-semibold text-green-800">
+                        <span className="px-2 py-0.5 rounded bg-green-50 border border-green-200 tabular-nums text-[11px] font-semibold text-green-800">
                           {group.portions.length} Portion{group.portions.length > 1 ? 's' : ''}
                         </span>
                       </div>
@@ -301,7 +301,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-3 border-t border-border/80 text-xs tabular-nums">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div>
-                      <span className="text-[9.5px] text-slate-500 font-sans block">Declared Dispatch:</span>
+                      <span className="text-[10px] text-slate-500 font-sans block">Declared Dispatch:</span>
                       <span className="font-semibold text-foreground">
                         {group.vehicleDispatchQuantityValue != null
                           ? `${group.vehicleDispatchQuantityValue.toLocaleString()} ${group.vehicleDispatchQuantityUnit || ''}`
@@ -312,21 +312,21 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
                     </div>
 
                     <div>
-                      <span className="text-[9.5px] text-slate-500 font-sans block">First Weight (Loaded Vehicle):</span>
+                      <span className="text-[10px] text-slate-500 font-sans block">First Weight (Loaded Vehicle):</span>
                       <span className="font-semibold text-foreground">
                         {group.firstWeightKg != null ? `${group.firstWeightKg.toLocaleString()} KG` : '—'}
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-[9.5px] text-slate-500 font-sans block">Second Weight (After Unloading):</span>
+                      <span className="text-[10px] text-slate-500 font-sans block">Second Weight (After Unloading):</span>
                       <span className="font-semibold text-foreground">
                         {group.secondWeightKg != null ? `${group.secondWeightKg.toLocaleString()} KG` : '—'}
                       </span>
                     </div>
 
                     <div>
-                      <span className="text-[9.5px] text-slate-500 font-sans block">Latest Milestone:</span>
+                      <span className="text-[10px] text-slate-500 font-sans block">Latest Milestone:</span>
                       <span className="font-semibold text-primary block truncate" title={lc.latestEventLabel}>
                         {lc.latestEventLabel}
                       </span>

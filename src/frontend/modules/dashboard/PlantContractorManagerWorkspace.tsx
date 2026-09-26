@@ -19,6 +19,7 @@ import {
   Calendar,
   AlertCircle,
 } from 'lucide-react';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 
 interface PlantContractorManagerWorkspaceProps {
   currentUser: User | null;
@@ -113,12 +114,12 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
   return (
     <div className="flex-1 flex flex-col min-w-0 overflow-hidden w-full max-w-full">
       {/* Workspace Toolbar */}
-      <div className="bg-white border-b border-border-strong px-4 sm:px-6 py-3.5 shrink-0 shadow-xs">
+      <div className="bg-card border-b px-4 sm:px-6 py-4 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <div className="flex items-center space-x-2 flex-wrap">
-                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-blue-100 text-primary uppercase tracking-wider border border-blue-200">
-                  Direct-to-Plant Supplier
+                <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary">
+                  Direct-to-plant supplier
                 </span>
                 <span className="text-xs text-slate-400 font-semibold">•</span>
                 <span className="text-xs font-semibold text-slate-700 flex items-center space-x-1">
@@ -127,7 +128,7 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
                 </span>
               </div>
               <h1 className="text-lg font-semibold text-foreground tracking-tight mt-0.5">
-                Plant Contractor Manager Station
+                Contractor operations
               </h1>
             </div>
 
@@ -151,34 +152,20 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
           </div>
 
           {/* Navigation Tab Strip */}
-          <div className="flex items-center space-x-1.5 mt-3.5 overflow-x-auto scrollbar-thin -mb-px pt-1">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveTab(tab.id);
-                    setPage(1);
-                  }}
-                  className={`flex items-center space-x-2 px-4 py-2.5 min-h-[44px] text-xs font-semibold rounded-t-xl border-t border-l border-r whitespace-nowrap transition shrink-0 ${
-                    isActive
-                      ? 'border-border-strong text-primary bg-subtle shadow-xs'
-                      : 'border-transparent text-slate-600 hover:text-foreground hover:bg-muted/40'
-                  }`}
-                >
-                  <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-slate-500'}`} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-          </div>
+          <SegmentedTabs
+            className="mt-4"
+            label="Contractor views"
+            value={activeTab}
+            onValueChange={(tab) => {
+              setActiveTab(tab);
+              setPage(1);
+            }}
+            tabs={TABS.map((tab) => ({ value: tab.id, label: tab.label, icon: tab.icon }))}
+          />
         </div>
 
         {/* Tab Content Body */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-subtle space-y-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
           {error && (
             <div className="p-4 mb-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center space-x-2 shadow-sm">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />

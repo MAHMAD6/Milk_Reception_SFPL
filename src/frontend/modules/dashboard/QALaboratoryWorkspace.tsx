@@ -22,6 +22,8 @@ import {
   TestInputState,
 } from './qa/QATestingSection';
 import { QADecisionModals } from './qa/QADecisionModals';
+import { PageHeader } from '@/components/ui/page-header';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 
 export type {
   WaitingVisit,
@@ -571,72 +573,22 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 text-foreground">
       {/* QA Header & Queue Tabs */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border-strong">
-        <div>
-          <h2 className="text-xl font-semibold tracking-tight text-foreground flex items-center gap-2">
-            <FlaskConical className="w-6 h-6 text-primary" />
-            QA Laboratory Workstation
-          </h2>
-          <p className="text-xs text-slate-700 font-semibold mt-0.5">
-            Chemist: <strong className="text-foreground">{currentUser?.name || 'QA Chemist'}</strong> | Dedicated QA Testing & Session Controller
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-2 bg-muted p-1.5 rounded-xl border border-border-strong overflow-x-auto max-w-full">
-          <button
-            type="button"
-            onClick={() => { setActiveTab('WAITING'); fetchQueues(); }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'WAITING' ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-amber-100/50'
-            }`}
-          >
-            <Clock className="w-4 h-4" />
-            <span>Waiting for Testing</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
-              activeTab === 'WAITING' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
-            }`}>
-              {waitingVisits.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setActiveTab('IN_TESTING'); fetchQueues(); }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'IN_TESTING' ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-amber-100/50'
-            }`}
-          >
-            <FlaskConical className="w-4 h-4" />
-            <span>In Testing</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
-              activeTab === 'IN_TESTING' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
-            }`}>
-              {inTestingVisits.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => { setActiveTab('ON_HOLD'); fetchQueues(); }}
-            className={`px-4 py-2.5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 shrink-0 min-h-[44px] ${
-              activeTab === 'ON_HOLD' ? 'bg-primary text-white shadow-sm' : 'text-slate-700 hover:bg-amber-100/50'
-            }`}
-          >
-            <PauseCircle className="w-4 h-4" />
-            <span>On Hold</span>
-            <span className={`px-2 py-0.5 rounded-full text-[10px] tabular-nums ${
-              activeTab === 'ON_HOLD' ? 'bg-white/20 text-white' : 'bg-muted text-slate-700'
-            }`}>
-              {onHoldVisits.length}
-            </span>
-          </button>
-        </div>
-
-        <div className="hidden lg:flex items-center space-x-1.5 px-3 py-1.5 text-xs font-semibold text-slate-700 bg-white rounded-xl border border-border-strong shrink-0">
-          <FlaskConical className="w-4 h-4 text-slate-600" />
-          <span>Active QA</span>
-        </div>
-      </div>
+      <PageHeader
+        title="QA laboratory"
+        description="Test arriving vehicles, record results and release or hold portions."
+        actions={
+          <SegmentedTabs
+            label="QA queues"
+            value={activeTab}
+            onValueChange={(tab) => { setActiveTab(tab); fetchQueues(); }}
+            tabs={[
+            { value: 'WAITING', label: 'Waiting for testing', icon: Clock, count: waitingVisits.length },
+            { value: 'IN_TESTING', label: 'In testing', icon: FlaskConical, count: inTestingVisits.length },
+            { value: 'ON_HOLD', label: 'On hold', icon: PauseCircle, count: onHoldVisits.length },
+            ]}
+          />
+        }
+      />
 
       {/* Workspace Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

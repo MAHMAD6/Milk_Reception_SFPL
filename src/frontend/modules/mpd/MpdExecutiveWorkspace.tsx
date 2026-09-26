@@ -9,8 +9,6 @@ import {
   ShieldAlert,
   Sliders,
   RefreshCw,
-  Clock,
-  Calendar,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { MpdTabId, MpdExecutiveTelemetryData } from './types';
@@ -23,6 +21,9 @@ import { MpdGovernanceScreen } from './screens/MpdGovernanceScreen';
 import { MpdPolicyScreen } from './screens/MpdPolicyScreen';
 
 import type { User } from '@core/types';
+import { PageHeader } from '@/components/ui/page-header';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { Button } from '@/components/ui/button';
 
 interface MpdExecutiveWorkspaceProps {
   currentUser?: User | null;
@@ -135,80 +136,38 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Executive Command Center Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-xl border border-border shadow-sm">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary bg-blue-50 px-2.5 py-0.5 rounded-full border border-blue-100">
-              Milk Procurement Division
+      <PageHeader
+        title="Executive command center"
+        description={
+          <span className="inline-flex flex-wrap items-center gap-x-2">
+            <span>ZMCCs, MOT routes, in-transit tankers and plant contractors</span>
+            <span aria-hidden="true">·</span>
+            <span className="tabular-nums">{telemetry?.calendarDate || new Date().toISOString().split('T')[0]}</span>
+          </span>
+        }
+        actions={
+          <>
+            <span className="hidden text-xs text-muted-foreground sm:inline tabular-nums">
+              Updated {lastRefreshedAt.toLocaleTimeString()}
             </span>
-            <span className="text-xs text-slate-400">•</span>
-            <span className="text-xs font-semibold text-slate-600 flex items-center gap-1">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
-              {telemetry?.calendarDate || new Date().toISOString().split('T')[0]}
-            </span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight mt-1">
-            Executive Command Center
-          </h1>
-          <p className="text-xs text-slate-600 mt-0.5">
-            Unified telemetry across ZMCC chilling centers, village MOT routes, in-transit tankers, and direct Plant contractors.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <div className="text-right hidden sm:block">
-            <div className="text-xs text-slate-500 font-medium">Last Telemetry Sync</div>
-            <div className="text-xs tabular-nums font-semibold text-slate-700 flex items-center gap-1 justify-end">
-              <Clock className="w-3 h-3 text-slate-400" />
-              {lastRefreshedAt.toLocaleTimeString()}
-            </div>
-          </div>
-          <button
-            onClick={() => fetchTelemetry(true)}
-            disabled={isRefreshing}
-            aria-label="Refresh telemetry data"
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary hover:bg-primary/90 text-white transition-all shadow-sm disabled:opacity-60 min-h-[44px]"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span>{isRefreshing ? 'Syncing...' : 'Refresh'}</span>
-          </button>
-        </div>
-      </div>
+            <Button variant="outline" size="sm" onClick={() => fetchTelemetry(true)} disabled={isRefreshing}>
+              <RefreshCw className={isRefreshing ? 'animate-spin' : ''} />
+              {isRefreshing ? 'Refreshing…' : 'Refresh'}
+            </Button>
+          </>
+        }
+      />
 
       {/* Top Level KPI Ribbon */}
       {telemetry && <MpdExecutiveKpiRibbon summary={telemetry.summary} isLoading={loading} />}
 
       {/* Segmented Sub-Screen Tabs Bar */}
-      <div className="bg-white border border-border rounded-xl p-1.5 shadow-sm overflow-x-auto">
-        <div className="flex items-center gap-1 min-w-max">
-          {tabs.map((tab) => {
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all min-h-[40px] ${
-                  isActive
-                    ? 'bg-primary text-white shadow-sm'
-                    : 'text-slate-600 hover:text-foreground hover:bg-slate-50'
-                }`}
-              >
-                {tab.icon}
-                <span>{tab.label}</span>
-                {typeof tab.count === 'number' && (
-                  <span
-                    className={`tabular-nums text-xs px-1.5 py-0.5 rounded-full ${
-                      isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      <SegmentedTabs
+        label="Executive views"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        tabs={tabs.map((tab) => ({ value: tab.id, label: tab.label, icon: tab.icon as React.ReactElement, count: tab.count }))}
+      />
 
       {/* Error state */}
       {error && (

@@ -25,6 +25,8 @@ import { useToast } from '@/frontend/context/ToastContext';
 import { computeCanonicalMilkMetrics } from '@/backend/utils/milkFormulas';
 import { resolveCoreMilkTestResults } from '@/backend/utils/milkTestResolvers';
 import { Modal } from '@/components/ui/modal';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { AnimatePresence } from 'framer-motion';
 
 interface ZmccLabWorkspaceProps {
   currentUser: User | null;
@@ -633,55 +635,18 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   return (
     <div className="space-y-4 max-w-7xl mx-auto pb-12 w-full">
       {/* Tabs */}
-      <div className="flex border-b border-border gap-1 overflow-x-auto pb-1" role="tablist">
-        {canTest && (
-          <button
-            onClick={() => setActiveTab('QUEUE')}
-            className={`px-5 py-3 font-semibold text-sm flex items-center gap-2 border-b-2 transition-colors ${
-              activeTab === 'QUEUE'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <Clock className="w-4 h-4" />
-            Arrivals Queue
-            {queueItems.length > 0 && (
-              <span className="ml-1 bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-semibold">
-                {queueItems.length}
-              </span>
-            )}
-          </button>
-        )}
-
-        {canTest && activeSession && (
-          <button
-            onClick={() => setActiveTab('TESTING')}
-            className={`px-5 py-3 font-semibold text-sm flex items-center gap-2 border-b-2 transition-colors ${
-              activeTab === 'TESTING'
-                ? 'border-primary text-primary'
-                : 'border-transparent text-slate-500 hover:text-slate-700'
-            }`}
-          >
-            <FlaskConical className="w-4 h-4 text-emerald-600" />
-            Active Session
-            <span className="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-semibold">
-              In Progress
-            </span>
-          </button>
-        )}
-
-        <button
-          onClick={() => setActiveTab('HISTORY')}
-          className={`px-5 py-3 font-semibold text-sm flex items-center gap-2 border-b-2 transition-colors ${
-            activeTab === 'HISTORY'
-              ? 'border-primary text-primary'
-              : 'border-transparent text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <FileText className="w-4 h-4" />
-          Test History & Corrections
-        </button>
-      </div>
+      <SegmentedTabs
+        label="Laboratory views"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        tabs={[
+          ...(canTest ? [{ value: 'QUEUE' as const, label: 'Arrivals queue', icon: Clock, count: queueItems.length }] : []),
+          ...(canTest && activeSession
+            ? [{ value: 'TESTING' as const, label: 'Active session', icon: FlaskConical, badge: 'In progress' }]
+            : []),
+          { value: 'HISTORY' as const, label: 'History & corrections', icon: FileText },
+        ]}
+      />
 
       {/* TAB 1: ARRIVALS QUEUE */}
       {activeTab === 'QUEUE' && canTest && (
@@ -1446,8 +1411,8 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
     )}
 
       {/* COMPLETION MODAL */}
-      {showCompleteModal && (
-        <Modal onClose={() => setShowCompleteModal(false)} title="Complete lab session" className="max-w-lg p-6 space-y-4">
+      <AnimatePresence>{showCompleteModal && (
+        <Modal key="modal-0" onClose={() => setShowCompleteModal(false)} title="Complete lab session" className="max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 {completionDecision === 'ACCEPTED' ? (
@@ -1556,11 +1521,11 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* CORRECTION MODAL (ZMCC MANAGER / SUPER ADMIN) */}
-      {showCorrectionModal && selectedHistorySession && (
-        <Modal onClose={() => setShowCorrectionModal(false)} title="Correct lab record" className="max-w-2xl p-6 space-y-4">
+      <AnimatePresence>{showCorrectionModal && selectedHistorySession && (
+        <Modal key="modal-1" onClose={() => setShowCorrectionModal(false)} title="Correct lab record" className="max-w-2xl p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <ShieldAlert className="w-5 h-5 text-amber-600" />
@@ -1812,10 +1777,10 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
-      {rmrSession && (
-        <Modal onClose={() => setRmrSession(null)} title="Issue local supplier RMR" className="max-w-md p-6 space-y-4">
+      <AnimatePresence>{rmrSession && (
+        <Modal key="modal-2" onClose={() => setRmrSession(null)} title="Issue local supplier RMR" className="max-w-md p-6 space-y-4">
             <div className="flex justify-between"><h3 className="font-semibold text-slate-800">Issue Local Supplier RMR</h3><button onClick={() => setRmrSession(null)}><X className="w-4 h-4" /></button></div>
             <p className="text-xs text-slate-600">Enter the physical receipt book details. This number is permanent and cannot be reused.</p>
             <input value={rmrSeries} onChange={(e) => setRmrSeries(e.target.value)} placeholder="Series (for example LSR)" className="w-full p-2 border rounded-lg text-sm" />
@@ -1823,11 +1788,11 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
             <input value={rmrReceiptNumber} onChange={(e) => setRmrReceiptNumber(e.target.value)} placeholder="Receipt number" className="w-full p-2 border rounded-lg text-sm" />
             <div className="flex justify-end gap-2"><button onClick={() => setRmrSession(null)} className="px-3 py-2 text-xs border rounded-lg">Cancel</button><button disabled={issuingRmr} onClick={issueLocalSupplierRmr} className="px-3 py-2 text-xs font-semibold text-white bg-emerald-600 rounded-lg disabled:opacity-50">{issuingRmr ? 'Issuing...' : 'Issue RMR'}</button></div>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* HISTORICAL RECEIPT MODAL */}
-      {showHistoricalReceiveModal && historicalSession && (
-        <Modal onClose={() => setShowHistoricalReceiveModal(false)} title="Receive historical session" className="max-w-lg p-6 space-y-4">
+      <AnimatePresence>{showHistoricalReceiveModal && historicalSession && (
+        <Modal key="modal-3" onClose={() => setShowHistoricalReceiveModal(false)} title="Receive historical session" className="max-w-lg p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-primary" />
@@ -1896,7 +1861,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 };

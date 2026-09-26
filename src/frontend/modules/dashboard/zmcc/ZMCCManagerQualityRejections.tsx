@@ -24,6 +24,7 @@ import {
   X,
 } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 interface ZmccLabResultItem {
   id: string;
@@ -905,8 +906,8 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
       )}
 
       {/* 8. Manager Review & Exception Modal */}
-      {reviewModalSession && (
-        <Modal onClose={() => setReviewModalSession(null)} title="Manager review" className="max-w-xl overflow-hidden">
+      <AnimatePresence>{reviewModalSession && (
+        <Modal key="modal-0" onClose={() => setReviewModalSession(null)} title="Manager review" className="max-w-xl overflow-hidden">
             {/* Modal Header */}
             <div className="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
               <div className="flex items-center space-x-2">
@@ -1003,7 +1004,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
 
               {/* Decision Radio Choice */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-800 uppercase block">Manager Decision</label>
+                <label className="text-xs font-semibold text-slate-800 block">Manager Decision</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -1035,7 +1036,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
 
               {/* Substantive Reason Textarea */}
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-slate-800 uppercase block">
+                <label className="text-xs font-semibold text-slate-800 block">
                   Substantive Justification / Reason <span className="text-red-600">*</span>
                 </label>
                 <textarea
@@ -1071,7 +1072,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 };

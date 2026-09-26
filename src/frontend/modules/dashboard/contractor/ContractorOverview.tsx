@@ -21,6 +21,7 @@ import {
   Clock,
   ShieldCheck,
 } from 'lucide-react';
+import { StatCard } from '@/components/ui/stat-card';
 
 interface ContractorOverviewProps {
   logs: MilkProcessLog[];
@@ -106,69 +107,37 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
         </div>
       )}
 
-      {/* 2. Four Summary KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Dispatches */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-slate-500 text-xs font-semibold">
-            <span>Total Dispatches</span>
-            <Truck className="w-4 h-4 text-blue-700" />
-          </div>
-          <p className="text-3xl font-semibold text-slate-900 tabular-nums">
-            {summary?.totalVisits ?? metrics.totalDispatches}
-          </p>
-          <p className="text-[11px] text-slate-500 font-medium">
-            {summary?.totalVisits != null ? (
-              <span className="text-blue-700 font-semibold">Authoritative Total Visits</span>
-            ) : (
-              <>Gross Liters: <strong className="text-slate-700 tabular-nums">{metrics.totalGrossLiters.toLocaleString()} L</strong></>
-            )}
-          </p>
-        </div>
-
-        {/* Active In-Plant */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-amber-700 text-xs font-semibold">
-            <span>Active In-Plant</span>
-            <Clock className="w-4 h-4 text-amber-600" />
-          </div>
-          <p className="text-3xl font-semibold text-amber-950 tabular-nums">
-            {summary?.activeInPlantVisits ?? metrics.activeInPlantCount}
-          </p>
-          <p className="text-[11px] text-amber-700 font-medium">
-            {summary?.activeInPlantVisits != null ? 'Authoritative Active Visits' : 'Gate, Lab, Scale, or Silo'}
-          </p>
-        </div>
-
-        {/* Completed Receipts */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-emerald-700 text-xs font-semibold">
-            <span>Authoritative Receipts</span>
-            <Receipt className="w-4 h-4 text-emerald-600" />
-          </div>
-          <p className="text-3xl font-semibold text-emerald-950 tabular-nums">
-            {summary?.completedVisits ?? metrics.completedReceiptsCount}
-          </p>
-          <p className="text-[11px] text-emerald-700 font-medium">
-            {summary?.completedVisits != null ? 'Authoritative Completed Visits' : 'Verified Silo Receipts'}
-          </p>
-        </div>
-
-        {/* Received Liters */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
-          <div className="flex items-center justify-between text-blue-800 text-xs font-semibold">
-            <span>Received Gross Liters {pagination && pagination.totalPages > 1 ? '(Current Page)' : ''}</span>
-            <Scale className="w-4 h-4 text-blue-700" />
-          </div>
-          <p className="text-2xl font-semibold text-blue-950 tabular-nums truncate">
-            {metrics.totalReceivedLiters.toLocaleString()} L
-          </p>
-          <p className="text-[11px] text-blue-700 font-medium">
-            {pagination && pagination.totalPages > 1
-              ? `Page Silo Gross Liters (${visits.length} visits)`
-              : 'Silo Transaction Gross Liters'}
-          </p>
-        </div>
+      {/* 2. Summary KPIs */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          label="Total dispatches"
+          icon={Truck}
+          tone="info"
+          value={summary?.totalVisits ?? metrics.totalDispatches}
+          hint={
+            summary?.totalVisits != null ? 'All visits in period' : `${metrics.totalGrossLiters.toLocaleString()} L gross`
+          }
+        />
+        <StatCard
+          label="Active in plant"
+          icon={Clock}
+          tone="warning"
+          value={summary?.activeInPlantVisits ?? metrics.activeInPlantCount}
+          hint="At gate, lab, scale or silo"
+        />
+        <StatCard
+          label="Completed receipts"
+          icon={Receipt}
+          tone="success"
+          value={summary?.completedVisits ?? metrics.completedReceiptsCount}
+          hint="Verified silo receipts"
+        />
+        <StatCard
+          label={pagination && pagination.totalPages > 1 ? 'Received gross (this page)' : 'Received gross'}
+          icon={Scale}
+          value={`${metrics.totalReceivedLiters.toLocaleString()} L`}
+          hint={pagination && pagination.totalPages > 1 ? `${visits.length} visits on this page` : 'From silo transactions'}
+        />
       </div>
 
       {/* 3. Recent Dispatches / Activity Table */}

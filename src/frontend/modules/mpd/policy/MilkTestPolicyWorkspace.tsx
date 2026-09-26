@@ -22,6 +22,7 @@ import {
   SerializedPolicyAssignment,
 } from '@/types/milk-test-policy';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 export type StationKey = 'PLANT_QA' | 'DISPATCH' | 'ZMCC_LAB' | 'MOT_SHOP';
 
@@ -713,8 +714,8 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
       </div>
 
       {/* UNIFIED ASSIGN TEST MODAL WITH ACCEPTANCE CRITERIA */}
-      {isAddModalOpen && (
-        <Modal onClose={() => setIsAddModalOpen(false)} title="Assign milk test" className="max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <AnimatePresence>{isAddModalOpen && (
+        <Modal key="modal-0" onClose={() => setIsAddModalOpen(false)} title="Assign milk test" className="max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <div className="flex items-center gap-2">
                 <FlaskConical className="w-5 h-5 text-primary" />
@@ -885,11 +886,11 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* DEDICATED EDIT CRITERIA MODAL */}
-      {isCriteriaModalOpen && criteriaTargetPolicy && (
-        <Modal onClose={() => setIsCriteriaModalOpen(false)} title="Edit acceptance criteria" className="max-w-md p-6 space-y-4">
+      <AnimatePresence>{isCriteriaModalOpen && criteriaTargetPolicy && (
+        <Modal key="modal-1" onClose={() => setIsCriteriaModalOpen(false)} title="Edit acceptance criteria" className="max-w-md p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <div className="flex items-center gap-2">
                 <Sliders className="w-5 h-5 text-primary" />
@@ -1006,7 +1007,7 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 };

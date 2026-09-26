@@ -19,7 +19,7 @@ export const MpdPolicyScreen: React.FC<MpdPolicyScreenProps> = ({ currentUser })
             <Sliders className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+            <h2 className="text-xs font-semibold text-foreground">
               Upstream Milk Quality & Testing Policies Configuration
             </h2>
             <p className="text-xs text-slate-600 mt-1 leading-relaxed">

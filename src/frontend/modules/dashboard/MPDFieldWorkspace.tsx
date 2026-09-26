@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { User } from '@core/types';
 import { ChevronLeft, ChevronRight, RefreshCw, Calendar, Truck } from 'lucide-react';
 import { DynamicDispatchForm } from '@modules/forms/DynamicDispatchForm';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 
 interface DispatchRecord {
   id: string;
@@ -162,48 +163,21 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
   return (
     <div className="max-w-7xl mx-auto space-y-6 w-full overflow-x-hidden">
       {/* Top-Level Dispatch Workspace Tabs */}
-      <div className="flex items-center space-x-2 border-b border-border-strong pb-3" role="tablist">
-        <button
-          type="button"
-          role="tab"
-          id="tab-new-dispatch"
-          aria-selected={activeTab === 'new'}
-          aria-controls="panel-new-dispatch"
-          onClick={() => setActiveTab('new')}
-          className={`h-11 px-5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
-            activeTab === 'new'
-              ? 'bg-primary-hover text-white shadow-sm ring-2 ring-primary-hover/20'
-              : 'bg-white text-slate-700 hover:bg-muted border border-border-strong'
-          }`}
-        >
-          <span>New Dispatch</span>
-        </button>
-
-        <button
-          type="button"
-          role="tab"
-          id="tab-recent-dispatches"
-          aria-selected={activeTab === 'recent'}
-          aria-controls="panel-recent-dispatches"
-          onClick={() => setActiveTab('recent')}
-          className={`h-11 px-5 rounded-xl text-xs font-semibold transition flex items-center space-x-2 ${
-            activeTab === 'recent'
-              ? 'bg-primary-hover text-white shadow-sm ring-2 ring-primary-hover/20'
-              : 'bg-white text-slate-700 hover:bg-muted border border-border-strong'
-          }`}
-        >
-          <span>Recent Dispatches</span>
-          {pagination.totalRecords > 0 && (
-            <span
-              className={`px-2 py-0.5 rounded-full text-xs tabular-nums font-semibold ${
-                activeTab === 'recent' ? 'bg-blue-900 text-white' : 'bg-muted text-slate-700 border border-border-strong'
-              }`}
-            >
-              {pagination.totalRecords}
-            </span>
-          )}
-        </button>
-      </div>
+      <SegmentedTabs
+        label="Dispatch views"
+        value={activeTab}
+        onValueChange={setActiveTab}
+        tabs={[
+          { value: 'new', label: 'New dispatch', id: 'tab-new-dispatch', panelId: 'panel-new-dispatch' },
+          {
+            value: 'recent',
+            label: 'Recent dispatches',
+            id: 'tab-recent-dispatches',
+            panelId: 'panel-recent-dispatches',
+            count: pagination.totalRecords > 0 ? pagination.totalRecords : undefined,
+          },
+        ]}
+      />
 
       {/* Tab Panels: New Dispatch Panel (state preserved when hidden) */}
       <div
@@ -235,7 +209,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
             </div>
 
             {/* Quick Date Window Filter Buttons */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-xl bg-muted border border-border-strong text-xs font-semibold">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 p-1.5 rounded-xl bg-subtle border border-border text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => handleRangeChange('today')}
@@ -335,12 +309,12 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
           {/* Records List */}
           <div className="space-y-3 max-h-[580px] overflow-y-auto pr-1">
             {isLoading ? (
-              <div className="p-10 text-center border border-dashed border-border-strong rounded-xl bg-white text-xs font-semibold text-slate-500">
+              <div className="p-10 text-center border border-dashed border-border rounded-xl bg-white text-sm text-muted-foreground">
                 <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-700" />
                 Loading dispatches...
               </div>
             ) : dbDispatches.length === 0 ? (
-              <div className="p-10 text-center border border-dashed border-border-strong rounded-xl bg-white text-xs font-semibold text-slate-500">
+              <div className="p-10 text-center border border-dashed border-border rounded-xl bg-white text-sm text-muted-foreground">
                 No dispatches found for this period.
               </div>
             ) : (
@@ -379,7 +353,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                     </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-muted/70 border border-border-strong text-xs tabular-nums font-semibold">
+                  <div className="grid grid-cols-2 gap-2 p-2.5 rounded-xl bg-subtle border border-border text-xs tabular-nums font-semibold">
                     <div>
                       <span className="text-slate-500 font-sans block text-xs font-semibold">Vehicle Quantity</span>
                       <span className="text-slate-900 font-semibold text-sm">
@@ -423,7 +397,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                     type="button"
                     disabled={page <= 1 || isLoading}
                     onClick={() => handlePageChange(page - 1)}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-100/50 transition focus:outline-none focus:ring-2 focus:ring-primary-hover"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent transition focus:outline-none focus:ring-2 focus:ring-primary-hover"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -438,7 +412,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                     type="button"
                     disabled={page >= pagination.totalPages || isLoading}
                     onClick={() => handlePageChange(page + 1)}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-100/50 transition focus:outline-none focus:ring-2 focus:ring-primary-hover"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent transition focus:outline-none focus:ring-2 focus:ring-primary-hover"
                     aria-label="Next page"
                   >
                     <span>Next</span>

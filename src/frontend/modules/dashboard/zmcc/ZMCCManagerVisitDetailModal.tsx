@@ -82,7 +82,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
           <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <FileText className="w-4 h-4 text-primary" />
-              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-foreground">
                 Dispatch Details
               </h3>
             </div>
@@ -161,7 +161,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
           <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <Scale className="w-4 h-4 text-primary" />
-              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-foreground">
                 Weight & Quantity
               </h3>
             </div>
@@ -243,7 +243,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
           <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <FlaskConical className="w-4 h-4 text-primary" />
-              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-foreground">
                 Portion Quality Results
               </h3>
             </div>
@@ -423,7 +423,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
           <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <Receipt className="w-4 h-4 text-primary" />
-              <h3 className="text-xs font-semibold text-foreground uppercase tracking-wider">
+              <h3 className="text-xs font-semibold text-foreground">
                 Receipt Details
               </h3>
             </div>

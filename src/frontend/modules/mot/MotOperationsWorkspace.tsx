@@ -26,6 +26,8 @@ import { User } from '@core/types';
 import { ManagerJourneyMap } from './ManagerJourneyMap';
 import { SmsOutboxView } from './SmsOutboxView';
 import { Modal } from '@/components/ui/modal';
+import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { AnimatePresence } from 'framer-motion';
 
 export type MotWorkspaceTab =
   | 'DISPATCH'
@@ -704,31 +706,16 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* Tabs */}
       {!hideTabBar && (
-        <div className="flex flex-wrap gap-1.5 p-1.5 bg-muted/50 rounded-xl border border-border">
-          {permittedTabs.map((tab) => {
-            const IconComp = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => {
-                  setActiveTab(tab.id);
-                  setError(null);
-                  setSuccessMessage(null);
-                }}
-                className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  isActive
-                    ? 'bg-primary text-white shadow-xs'
-                    : 'bg-transparent text-slate-700 hover:bg-white/80 hover:text-foreground'
-                }`}
-              >
-                <IconComp className="w-4 h-4" />
-                <span>{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        <SegmentedTabs
+          label="MOT operations views"
+          value={activeTab}
+          onValueChange={(tab) => {
+            setActiveTab(tab);
+            setError(null);
+            setSuccessMessage(null);
+          }}
+          tabs={permittedTabs.map((tab) => ({ value: tab.id, label: tab.label, icon: tab.icon }))}
+        />
       )}
 
       {/* TAB 1: ASSIGN & DISPATCH */}
@@ -879,7 +866,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
           {/* Quick Rules & Architecture info panel */}
           <div className="bg-white p-5 rounded-xl border border-border shadow-xs space-y-3 h-fit">
-            <h3 className="text-xs font-semibold uppercase text-foreground tracking-wider">
+            <h3 className="text-xs font-semibold text-foreground">
               Operational Rules
             </h3>
             <ul className="text-xs text-slate-600 space-y-2 font-medium">
@@ -1359,8 +1346,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       )}
 
       {/* DETAIL MODAL: JOURNEY STOPS & LOCATIONS */}
-      {selectedJourneyDetail && (
-        <Modal onClose={() => setSelectedJourneyDetail(null)} title="Journey details" closeOnOutsideClick className="max-w-2xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+      <AnimatePresence>{selectedJourneyDetail && (
+        <Modal key="modal-0" onClose={() => setSelectedJourneyDetail(null)} title="Journey details" closeOnOutsideClick className="max-w-2xl p-6 space-y-4 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
                 <h3 className="text-base font-semibold text-foreground">
@@ -1460,7 +1447,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             )}
 
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold uppercase tracking-wider text-foreground">
+              <h4 className="text-xs font-semibold text-foreground">
                 Frozen Route Stops ({selectedJourneyDetail.stops?.length || 0} shops)
               </h4>
               <div className="space-y-2">
@@ -1508,11 +1495,11 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* CANCELLATION MODAL */}
-      {cancelModalJourney && (
-        <Modal onClose={() => setCancelModalJourney(null)} title="Cancel collection journey" className="max-w-md p-5 space-y-4">
+      <AnimatePresence>{cancelModalJourney && (
+        <Modal key="modal-1" onClose={() => setCancelModalJourney(null)} title="Cancel collection journey" className="max-w-md p-5 space-y-4">
             <div className="flex items-center space-x-2 text-rose-700">
               <Ban className="w-5 h-5" />
               <h3 className="text-sm font-semibold">Cancel Collection Journey</h3>
@@ -1554,11 +1541,11 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* PROFILE CREATE/EDIT MODAL */}
-      {profileModalOpen && (
-        <Modal onClose={() => setProfileModalOpen(false)} title="MOT driver profile" className="max-w-md p-5 space-y-4">
+      <AnimatePresence>{profileModalOpen && (
+        <Modal key="modal-2" onClose={() => setProfileModalOpen(false)} title="MOT driver profile" className="max-w-md p-5 space-y-4">
             <h3 className="text-sm font-semibold text-foreground">
               {editingProfile ? 'Edit MOT Profile' : 'New MOT Driver Profile'}
             </h3>
@@ -1632,11 +1619,11 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* VEHICLE CREATE/EDIT MODAL */}
-      {vehicleModalOpen && (
-        <Modal onClose={() => setVehicleModalOpen(false)} title="MOT vehicle" className="max-w-md p-5 space-y-4">
+      <AnimatePresence>{vehicleModalOpen && (
+        <Modal key="modal-3" onClose={() => setVehicleModalOpen(false)} title="MOT vehicle" className="max-w-md p-5 space-y-4">
             <h3 className="text-sm font-semibold text-foreground">
               {editingVehicle ? 'Edit MOT Vehicle' : 'New MOT Collection Vehicle'}
             </h3>
@@ -1672,7 +1659,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 };

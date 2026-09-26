@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 interface Source {
   id: string;
@@ -360,8 +361,8 @@ export default function SuperAdminProcurementSourcesPage() {
       </div>
 
       {/* CREATE SOURCE MODAL */}
-      {showCreateModal && (
-        <Modal onClose={closeCreateModal} title="Add procurement source" preventClose={isSubmittingCreate} className="p-6 max-w-md space-y-4">
+      <AnimatePresence>{showCreateModal && (
+        <Modal key="modal-0" onClose={closeCreateModal} title="Add procurement source" preventClose={isSubmittingCreate} className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <h3 className="text-base font-semibold text-foreground">Add Procurement Source</h3>
               <button
@@ -443,11 +444,11 @@ export default function SuperAdminProcurementSourcesPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* EDIT SOURCE MODAL */}
-      {showEditModal && (
-        <Modal onClose={closeEditModal} title="Edit procurement source" preventClose={isSubmittingEdit} className="p-6 max-w-md space-y-4">
+      <AnimatePresence>{showEditModal && (
+        <Modal key="modal-1" onClose={closeEditModal} title="Edit procurement source" preventClose={isSubmittingEdit} className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <h3 className="text-base font-semibold text-foreground">Edit Procurement Source</h3>
               <button
@@ -523,11 +524,11 @@ export default function SuperAdminProcurementSourcesPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* CONFIRM TOGGLE STATUS MODAL */}
-      {showConfirmModal && (
-        <Modal onClose={closeConfirmModal} title="Confirm source status change" preventClose={isSubmittingConfirm} closeOnOutsideClick className="p-6 max-w-md space-y-4">
+      <AnimatePresence>{showConfirmModal && (
+        <Modal key="modal-2" onClose={closeConfirmModal} title="Confirm source status change" preventClose={isSubmittingConfirm} closeOnOutsideClick className="p-6 max-w-md space-y-4">
             <div className="flex items-center space-x-3">
               <div
                 className={`p-2 rounded-xl shrink-0 ${
@@ -603,7 +604,7 @@ export default function SuperAdminProcurementSourcesPage() {
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 }

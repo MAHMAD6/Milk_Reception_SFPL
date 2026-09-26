@@ -154,7 +154,7 @@ export default function PublicYardTVBoardPage() {
           {/* Vehicle Queue Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeVehicles.length === 0 ? (
-              <div className="col-span-full p-16 text-center border-2 border-dashed border-border-strong rounded-xl bg-white text-slate-500 font-semibold text-sm shadow-xs">
+              <div className="col-span-full p-16 text-center border-2 border-dashed border-border rounded-xl bg-white text-muted-foreground text-sm shadow-xs">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-muted text-slate-400 flex items-center justify-center">
                   <Truck className="w-6 h-6" />
                 </div>

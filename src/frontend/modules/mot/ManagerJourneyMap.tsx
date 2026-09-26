@@ -14,6 +14,7 @@ import {
   Calendar,
   X,
 } from 'lucide-react';
+import { onActivateKey } from '@/lib/a11y';
 
 interface ManagerJourneyMapProps {
   currentUser: User | null;
@@ -579,12 +580,15 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
 
       {/* Stops List */}
       <div className="p-4 bg-white rounded-xl border border-border shadow-xs space-y-3">
-        <h3 className="text-xs font-semibold uppercase text-slate-500 tracking-wider">
+        <h3 className="text-xs font-semibold text-slate-500">
           Journey Stops & Collections ({stops.length})
         </h3>
         <div className="divide-y divide-border">
           {stops.map((s) => (
             <div
+              role="button"
+              tabIndex={0}
+              onKeyDown={onActivateKey}
               key={s.id}
               onClick={() => setSelectedStop(s)}
               className={`p-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 cursor-pointer hover:bg-subtle rounded-xl transition-colors ${

@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { AnimatePresence } from 'framer-motion';
 
 interface Source {
   id: string;
@@ -585,8 +586,8 @@ export default function SuperAdminUsersPage() {
       </div>
 
       {/* CREATE USER MODAL */}
-      {showCreateModal && (
-        <Modal onClose={closeCreateModal} title="Create user account" preventClose={isSubmittingCreate} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+      <AnimatePresence>{showCreateModal && (
+        <Modal key="modal-0" onClose={closeCreateModal} title="Create user account" preventClose={isSubmittingCreate} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-semibold text-foreground">Create New User Account</h3>
               <button
@@ -766,11 +767,11 @@ export default function SuperAdminUsersPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* EDIT USER MODAL */}
-      {showEditModal && (
-        <Modal onClose={closeEditModal} title="Edit user" preventClose={isSubmittingEdit} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+      <AnimatePresence>{showEditModal && (
+        <Modal key="modal-1" onClose={closeEditModal} title="Edit user" preventClose={isSubmittingEdit} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-semibold text-foreground">
                 Edit User: <span className="tabular-nums text-primary">@{showEditModal.username}</span>
@@ -928,11 +929,11 @@ export default function SuperAdminUsersPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* CONFIRM ACTIVATION / DEACTIVATION MODAL */}
-      {showConfirmModal && (
-        <Modal onClose={closeConfirmModal} title="Confirm account status change" preventClose={isSubmittingConfirm} className="p-5 sm:p-6 max-w-md space-y-4">
+      <AnimatePresence>{showConfirmModal && (
+        <Modal key="modal-2" onClose={closeConfirmModal} title="Confirm account status change" preventClose={isSubmittingConfirm} className="p-5 sm:p-6 max-w-md space-y-4">
             <div className="flex items-center space-x-3">
               <div
                 className={`p-2 rounded-xl shrink-0 ${
@@ -1029,11 +1030,11 @@ export default function SuperAdminUsersPage() {
               </button>
             </div>
           </Modal>
-      )}
+      )}</AnimatePresence>
 
       {/* RESET PASSWORD MODAL */}
-      {showResetModal && (
-        <Modal onClose={closeResetModal} title="Reset password" preventClose={isSubmittingReset} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
+      <AnimatePresence>{showResetModal && (
+        <Modal key="modal-3" onClose={closeResetModal} title="Reset password" preventClose={isSubmittingReset} className="p-5 sm:p-6 max-w-md space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
                 <h3 className="text-base font-semibold text-foreground">
@@ -1119,7 +1120,7 @@ export default function SuperAdminUsersPage() {
               </div>
             </form>
           </Modal>
-      )}
+      )}</AnimatePresence>
     </div>
   );
 }

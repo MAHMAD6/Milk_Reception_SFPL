@@ -89,7 +89,7 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
               {/* Specific Stage Contexts */}
               {stage.id === 'PLANT_QA' && stage.detailText && (
                 <span
-                  className={`mt-1 text-[9.5px] tabular-nums font-semibold px-1.5 py-0.5 rounded ${
+                  className={`mt-1 text-[10px] tabular-nums font-semibold px-1.5 py-0.5 rounded ${
                     lifecycle.portionQA.badgeType === 'ALL_ACCEPTED'
                       ? 'bg-green-50 text-green-800'
                       : lifecycle.portionQA.badgeType === 'ALL_REJECTED' || lifecycle.portionQA.badgeType === 'MIXED'
@@ -104,7 +104,7 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
               )}
 
               {stage.metricText && (
-                <span className="mt-0.5 text-[9.5px] tabular-nums font-semibold text-slate-700">
+                <span className="mt-0.5 text-[10px] tabular-nums font-semibold text-slate-700">
                   {stage.metricText}
                 </span>
               )}
@@ -119,19 +119,19 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
               {stage.id === 'UNLOADING' ? (
                 <div className="mt-0.5 space-y-0.5">
                   {stage.eventTimestamp && (
-                    <span className="text-[8.5px] tabular-nums text-slate-500 block leading-tight">
+                    <span className="text-[10px] tabular-nums text-slate-500 block leading-tight">
                       Started: {stage.eventTimestamp}
                     </span>
                   )}
                   {stage.eventTimestampEnd && (
-                    <span className="text-[8.5px] tabular-nums text-slate-500 block leading-tight">
+                    <span className="text-[10px] tabular-nums text-slate-500 block leading-tight">
                       Completed: {stage.eventTimestampEnd}
                     </span>
                   )}
                 </div>
               ) : (
                 stage.eventTimestamp && (
-                  <span className="mt-0.5 text-[8.5px] tabular-nums text-slate-500 block leading-tight">
+                  <span className="mt-0.5 text-[10px] tabular-nums text-slate-500 block leading-tight">
                     {stage.eventTimestamp}
                   </span>
                 )

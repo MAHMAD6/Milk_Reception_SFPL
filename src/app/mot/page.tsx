@@ -38,6 +38,7 @@ import { computeCanonicalMilkMetrics } from '@/backend/utils/milkFormulas';
 import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';
+import { AnimatePresence } from 'framer-motion';
 
 interface StopDetail {
   id: string;
@@ -754,7 +755,7 @@ export default function MotDriverPage() {
                                     ({shopCode})
                                   </span>
                                   <span
-                                    className={`px-2 py-0.5 rounded-md text-[9.5px] font-semibold uppercase ${
+                                    className={`px-2 py-0.5 rounded-md text-[10px] font-semibold uppercase ${
                                       isVisited
                                         ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                                         : 'bg-amber-100 text-amber-800 border border-amber-300'
@@ -801,8 +802,8 @@ export default function MotDriverPage() {
           )}
 
           {/* Collection Entry Modal / Drawer */}
-          {activeStop && (
-            <Modal onClose={() => setActiveStop(null)} title="Collection stop" className="max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+          <AnimatePresence>{activeStop && (
+            <Modal key="modal-0" onClose={() => setActiveStop(null)} title="Collection stop" className="max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
                 {/* Modal Header */}
                 <div className="p-4 border-b border-border flex items-center justify-between bg-subtle">
                   <div className="flex items-center space-x-2">
@@ -1054,7 +1055,7 @@ export default function MotDriverPage() {
                   </div>
                 </form>
               </Modal>
-          )}
+          )}</AnimatePresence>
           </PageTransition>
         </main>
       </div>
