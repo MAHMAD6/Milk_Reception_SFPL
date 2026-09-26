@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
     }
 
     if (tag) {
-      revalidateTag(tag);
+      // Expire immediately (pre-Next-16 behaviour) rather than stale-while-revalidate.
+      revalidateTag(tag, { expire: 0 });
       return NextResponse.json({ revalidated: true, type: 'tag', value: tag });
     }
 

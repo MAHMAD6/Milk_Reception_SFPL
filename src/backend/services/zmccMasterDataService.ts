@@ -1825,7 +1825,7 @@ export async function updateShop(
 
   let targetAreaId = existing.area_id;
   let targetRouteId = existing.route_id;
-  let targetZmccId = existing.zmcc_id;
+  const targetZmccId = existing.zmcc_id;
 
   if (body.area_id && BigInt(body.area_id) !== existing.area_id) {
     targetAreaId = BigInt(body.area_id);

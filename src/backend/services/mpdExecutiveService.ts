@@ -188,7 +188,7 @@ export async function getMpdExecutiveTelemetry(): Promise<MpdExecutiveTelemetry>
   const zmccCenters = activeSources
     .filter((s) => s.source_type === 'ZMCC')
     .map((zmcc) => {
-      let totalIntake = 0;
+      const totalIntake = 0;
       let totalDispatched = 0;
       let fatSum = 0;
       let lrSum = 0;
@@ -235,8 +235,8 @@ export async function getMpdExecutiveTelemetry(): Promise<MpdExecutiveTelemetry>
     .filter((s) => s.source_type === 'CONTRACTOR')
     .map((c) => {
       let delivered = 0;
-      let fatSum = 0;
-      let lrSum = 0;
+      const fatSum = 0;
+      const lrSum = 0;
       let passedPortions = 0;
       let totalPortions = 0;
 

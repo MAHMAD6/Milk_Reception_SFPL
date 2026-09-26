@@ -476,7 +476,7 @@ export async function seedOperationalData() {
         if (t.testScope === 'DISPATCH' || t.testScope === 'BOTH') {
           let numVal: number | null = null;
           let textVal: string | null = null;
-          let isPassed = true;
+          const isPassed = true;
 
           if (t.testName === 'Fat') numVal = fatVal;
           else if (t.testName.includes('Lactometer') || t.testName.includes('LR')) numVal = lrVal;

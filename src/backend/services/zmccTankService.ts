@@ -925,7 +925,7 @@ export async function receiveHistoricalSession(
   }
 
   const soleTank = activeTanks[0];
-  let targetTankId = soleTank.id;
+  const targetTankId = soleTank.id;
 
   if (payload?.tank_id !== undefined && payload.tank_id !== null && String(payload.tank_id).trim() !== '') {
     try {
