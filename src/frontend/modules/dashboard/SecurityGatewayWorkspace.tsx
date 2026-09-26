@@ -274,7 +274,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
 
       {/* TAB 1: WAITING FOR ENTRY */}
       {activeTab === 'WAITING_ENTRY' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-panel-in">
           {/* LEFT (5/12): WAITING FOR ENTRY QUEUE */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-center justify-between px-1">
@@ -413,7 +413,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
 
       {/* TAB 2: INSIDE PLANT */}
       {activeTab === 'INSIDE_PLANT' && (
-        <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-4">
+        <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-4 animate-panel-in">
           <div className="flex items-center justify-between pb-2 border-b border-border-strong">
             <h3 className="text-sm font-semibold text-foreground">
               Vehicles Inside Plant ({activeVisits.length})
@@ -470,7 +470,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
 
       {/* TAB 3: READY FOR EXIT */}
       {activeTab === 'READY_EXIT' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-panel-in">
           {/* LEFT (5/12): READY FOR EXIT QUEUE */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-center justify-between px-1">

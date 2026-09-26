@@ -108,7 +108,7 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
       )}
 
       {/* 2. Summary KPIs */}
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
         <StatCard
           label="Total dispatches"
           icon={Truck}

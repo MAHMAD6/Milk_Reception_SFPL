@@ -252,7 +252,7 @@ export const ZMCCManagerReceiptsPerformance: React.FC<ZMCCManagerReceiptsPerform
 
       {/* 3. Error Banner */}
       {error && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between">
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between animate-panel-in">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-red-600" />
             <span>{error}</span>

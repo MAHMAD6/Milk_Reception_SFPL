@@ -184,7 +184,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
         id="panel-new-dispatch"
         role="tabpanel"
         aria-labelledby="tab-new-dispatch"
-        className={activeTab === 'new' ? 'block' : 'hidden'}
+        className={activeTab === 'new' ? 'block animate-panel-in' : 'hidden'}
       >
         <DynamicDispatchForm currentUser={currentUser} onSuccess={() => fetchDbDispatches(1, dateRange)} />
       </div>
@@ -194,7 +194,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
         id="panel-recent-dispatches"
         role="tabpanel"
         aria-labelledby="tab-recent-dispatches"
-        className={activeTab === 'recent' ? 'block' : 'hidden'}
+        className={activeTab === 'recent' ? 'block animate-panel-in' : 'hidden'}
       >
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Header & Date Controls */}

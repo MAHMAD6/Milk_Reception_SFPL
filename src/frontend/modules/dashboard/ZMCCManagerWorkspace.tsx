@@ -30,6 +30,7 @@ import {
 import { ZmccMasterDataWorkspace } from '@/frontend/modules/zmcc/ZmccMasterDataWorkspace';
 import { ZmccArrivalsWorkspace } from '@/frontend/modules/zmcc/arrivals/ZmccArrivalsWorkspace';
 import { ZmccLabWorkspace } from '@/frontend/modules/zmcc/lab/ZmccLabWorkspace';
+import { AnimatePresence } from 'framer-motion';
 import { PageTransition } from '@/components/motion/page-transition';
 
 interface ZMCCManagerWorkspaceProps {
@@ -428,7 +429,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
         <PageTransition>
         {/* TAB 1: OVERVIEW */}
         {activeTab === 'OVERVIEW' && (
-          <div id="tabpanel-OVERVIEW" role="tabpanel" aria-labelledby="tab-OVERVIEW" className="space-y-6">
+          <div id="tabpanel-OVERVIEW" role="tabpanel" aria-labelledby="tab-OVERVIEW" className="space-y-6 animate-panel-in">
             <ZMCCManagerOverview
               logs={reportingLogs}
               serverBusinessDate={serverBusinessDate}
@@ -465,7 +466,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
 
         {/* TAB 2: LIVE OPERATIONS */}
         {activeTab === 'LIVE' && (
-          <div id="tabpanel-LIVE" role="tabpanel" aria-labelledby="tab-LIVE" className="space-y-6">
+          <div id="tabpanel-LIVE" role="tabpanel" aria-labelledby="tab-LIVE" className="space-y-6 animate-panel-in">
             <ZMCCManagerLiveDispatches
               logs={liveLogs}
               assignedSourceName={assignedSourceName}
@@ -479,7 +480,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
 
         {/* TAB 3: RECONCILIATION */}
         {activeTab === 'RECONCILIATION' && (
-          <div id="tabpanel-RECONCILIATION" role="tabpanel" aria-labelledby="tab-RECONCILIATION" className="space-y-6">
+          <div id="tabpanel-RECONCILIATION" role="tabpanel" aria-labelledby="tab-RECONCILIATION" className="space-y-6 animate-panel-in">
             <ZMCCManagerReconciliation
               logs={reportingLogs}
               assignedSourceName={assignedSourceName}
@@ -500,7 +501,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
 
         {/* TAB 4: HISTORY & REPORTS */}
         {activeTab === 'HISTORY' && (
-          <div id="tabpanel-HISTORY" role="tabpanel" aria-labelledby="tab-HISTORY" className="space-y-6">
+          <div id="tabpanel-HISTORY" role="tabpanel" aria-labelledby="tab-HISTORY" className="space-y-6 animate-panel-in">
             {/* Secondary Sub-Navigation for History View */}
             <div className="flex items-center gap-2 p-1.5 bg-card border border-border rounded-xl shadow-2xs w-fit">
               <button
@@ -598,7 +599,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
 
         {/* TAB 5: MASTER DATA */}
         {activeTab === 'MASTER_DATA' && (
-          <div id="tabpanel-MASTER_DATA" role="tabpanel" aria-labelledby="tab-MASTER_DATA" className="space-y-6">
+          <div id="tabpanel-MASTER_DATA" role="tabpanel" aria-labelledby="tab-MASTER_DATA" className="space-y-6 animate-panel-in">
             <ZmccMasterDataWorkspace
               currentUser={currentUser}
               activeTab={
@@ -609,15 +610,18 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
         )}
 
           {/* Detail Inspection Modal */}
-          {selectedLog && (
-            <ZMCCManagerVisitDetailModal
-              isOpen={!!selectedLog}
-              log={selectedLog}
-              portions={selectedVisitPortions}
-              onClose={() => setSelectedLog(null)}
-              assignedSourceName={assignedSourceName}
-            />
-          )}
+          <AnimatePresence>
+            {selectedLog && (
+              <ZMCCManagerVisitDetailModal
+                key="visit-detail"
+                isOpen={!!selectedLog}
+                log={selectedLog}
+                portions={selectedVisitPortions}
+                onClose={() => setSelectedLog(null)}
+                assignedSourceName={assignedSourceName}
+              />
+            )}
+          </AnimatePresence>
         </PageTransition>
       </main>
     </div>

@@ -15,7 +15,7 @@ const loadingValue = <Skeleton className="h-7 w-24" />;
 
 export const MpdExecutiveKpiRibbon: React.FC<MpdExecutiveKpiRibbonProps> = ({ summary, isLoading }) => {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5 stagger-children">
       <StatCard
         label="Gross intake"
         icon={Droplet}

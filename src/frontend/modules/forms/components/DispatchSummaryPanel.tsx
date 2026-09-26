@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Calculator, ChevronDown, ChevronUp } from 'lucide-react';
+import { Calculator, ChevronDown } from 'lucide-react';
 import {
   QuantityUnit,
   MeasurementBasis,
@@ -181,14 +181,14 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
 
             <div className="flex items-center space-x-1.5 text-xs font-semibold text-primary-hover">
               <span>{isMobileExpanded ? 'Hide Details' : 'View Details'}</span>
-              {isMobileExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isMobileExpanded ? 'rotate-180' : ''}`} />
             </div>
           </button>
         </div>
       )}
 
       {/* Summary Content Body */}
-      <div className={`space-y-4 ${isCollapsible ? (isMobileExpanded ? 'block' : 'hidden lg:block') : 'block'}`}>
+      <div className={`space-y-4 ${isCollapsible ? (isMobileExpanded ? 'block max-lg:animate-panel-in' : 'hidden lg:block') : 'block'}`}>
         {/* Single Unified Dispatch Summary Card */}
         <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">

@@ -58,7 +58,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
   }, [statusFilter]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 animate-panel-in">
       {/* Header & Controls */}
       <div className="p-4 bg-white rounded-xl border border-border shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center space-x-3">
@@ -96,7 +96,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2 animate-panel-in">
           <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>

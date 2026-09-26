@@ -355,7 +355,7 @@ export default function QAManagerDepartmentPage() {
             </p>
 
             {submitError && (
-              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center gap-2">
+              <div className="p-3 bg-red-50 border border-red-200 text-red-700 text-xs rounded-lg flex items-center gap-2 animate-panel-in">
                 <AlertOctagon className="w-4 h-4 shrink-0" />
                 <span>{submitError}</span>
               </div>

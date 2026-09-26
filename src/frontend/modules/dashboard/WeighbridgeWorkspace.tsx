@@ -402,7 +402,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
 
       {/* TAB 1: FIRST WEIGHT (GROSS) */}
       {activeTab === 'FIRST_WEIGHT' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-panel-in">
           {/* LEFT (5/12): FIRST WEIGHT QUEUE */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-center justify-between px-1">
@@ -584,7 +584,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
 
       {/* TAB 2: SECOND WEIGHT (TARE) */}
       {activeTab === 'SECOND_WEIGHT' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-panel-in">
           {/* LEFT (5/12): SECOND WEIGHT QUEUE */}
           <div className="lg:col-span-5 space-y-3">
             <div className="flex items-center justify-between px-1">

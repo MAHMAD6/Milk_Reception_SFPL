@@ -848,7 +848,7 @@ export default function MotDriverPage() {
                 {/* Modal Form */}
                 <form onSubmit={handleRecordCollection} className="p-4 overflow-y-auto space-y-4">
                   {formError && (
-                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold">
+                    <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold animate-panel-in">
                       {formError}
                     </div>
                   )}

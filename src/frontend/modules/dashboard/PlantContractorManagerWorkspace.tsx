@@ -167,65 +167,67 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
         {/* Tab Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
           {error && (
-            <div className="p-4 mb-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center space-x-2 shadow-xs">
+            <div className="p-4 mb-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center space-x-2 shadow-xs animate-panel-in">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
-          {activeTab === 'OVERVIEW' && (
-            <ContractorOverview
-              logs={logs}
-              serverBusinessDate={serverBusinessDate}
-              assignedSourceName={assignedSourceName}
-              isLoading={loading}
-              error={error}
-              pagination={{
-                page,
-                totalPages,
-                totalRecords,
-                hasMore,
-              }}
-              summary={summary || undefined}
-            />
-          )}
+          <div key={activeTab} className="animate-panel-in">
+            {activeTab === 'OVERVIEW' && (
+              <ContractorOverview
+                logs={logs}
+                serverBusinessDate={serverBusinessDate}
+                assignedSourceName={assignedSourceName}
+                isLoading={loading}
+                error={error}
+                pagination={{
+                  page,
+                  totalPages,
+                  totalRecords,
+                  hasMore,
+                }}
+                summary={summary || undefined}
+              />
+            )}
 
-          {activeTab === 'LIVE' && (
-            <ContractorLivePipeline
-              logs={logs}
-              assignedSourceName={assignedSourceName}
-              isLoading={loading}
-              error={error}
-            />
-          )}
+            {activeTab === 'LIVE' && (
+              <ContractorLivePipeline
+                logs={logs}
+                assignedSourceName={assignedSourceName}
+                isLoading={loading}
+                error={error}
+              />
+            )}
 
-          {activeTab === 'QUALITY' && (
-            <ContractorQualityRejections
-              logs={logs}
-              serverBusinessDate={serverBusinessDate}
-              assignedSourceName={assignedSourceName}
-              isLoading={loading}
-              error={error}
-            />
-          )}
+            {activeTab === 'QUALITY' && (
+              <ContractorQualityRejections
+                logs={logs}
+                serverBusinessDate={serverBusinessDate}
+                assignedSourceName={assignedSourceName}
+                isLoading={loading}
+                error={error}
+              />
+            )}
 
-          {activeTab === 'RECEIPTS' && (
-            <ContractorReceiptsReconciliation
-              logs={logs}
-              serverBusinessDate={serverBusinessDate}
-              assignedSourceName={assignedSourceName}
-              isLoading={loading}
-              error={error}
-            />
-          )}
+            {activeTab === 'RECEIPTS' && (
+              <ContractorReceiptsReconciliation
+                logs={logs}
+                serverBusinessDate={serverBusinessDate}
+                assignedSourceName={assignedSourceName}
+                isLoading={loading}
+                error={error}
+              />
+            )}
 
-          {activeTab === 'HISTORY' && (
-            <ContractorHistoryReports
-              initialLogs={logs}
-              serverBusinessDate={serverBusinessDate}
-              assignedSourceName={assignedSourceName}
-            />
-          )}
+            {activeTab === 'HISTORY' && (
+              <ContractorHistoryReports
+                initialLogs={logs}
+                serverBusinessDate={serverBusinessDate}
+                assignedSourceName={assignedSourceName}
+              />
+            )}
+          </div>
 
           {/* Pagination bar for non-history tabs */}
           {activeTab !== 'HISTORY' && totalRecords > 0 && (
