@@ -1,5 +1,5 @@
 import { prisma } from '@core/db';
-import { Prisma } from '@prisma/client';
+import { Prisma, QuantityUnit } from '@prisma/client';
 import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { validateCategoricalOption } from '@/lib/lab-rules';
@@ -12,6 +12,8 @@ import { TestingPoint } from '@/types/milk-test-policy';
 import { getTankPhysicalStock, serializeTankReceipt } from '@/backend/services/zmccTankService';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
 import { getErrorCode, getErrorMessage } from '@/lib/errors';
+import { jsonRecord, toJsonInput } from '@/lib/json';
+import type { LabTestResultOption } from '@/lib/validations/labTest';
 
 export interface ZmccLabAuthContext {
   user: User;
@@ -192,7 +194,7 @@ function serializeLocalSupplierRmr(issuance: any) {
 
 export async function issueLocalSupplierRmr(
   reqOrUser: Request | User, arrivalIdParam: string | number | bigint, payload: IssueLocalSupplierRmrPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'ISSUE_LOCAL_SUPPLIER_RMR');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -352,7 +354,7 @@ export async function createCanonicalTankReceiptTx(
       tank_id: targetTankId,
       arrival_type: arrivalType,
       quantity_value: new Prisma.Decimal(quantityNum.toFixed(2)),
-      quantity_unit: quantityUnitNorm as any,
+      quantity_unit: quantityUnitNorm as QuantityUnit,
       density: new Prisma.Decimal(metrics.density.toFixed(4)),
       gross_liters: new Prisma.Decimal(metrics.grossLiters.toFixed(2)),
       lr: new Prisma.Decimal(lr.toFixed(2)),
@@ -588,7 +590,7 @@ export function serializeLabSession(session: any) {
 
 export async function getArrivalsQueue(
   reqOrUser: Request | User
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'READ_LAB');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -752,7 +754,7 @@ export interface StartOrResumePayload {
 export async function startOrResumeSession(
   reqOrUser: Request | User,
   payload: StartOrResumePayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'START_OR_RESUME_SESSION');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1050,7 +1052,7 @@ export async function startOrResumeSession(
 export async function getSessionById(
   reqOrUser: Request | User,
   sessionIdParam: string | number | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'READ_LAB');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1132,7 +1134,7 @@ export async function updateDraftResults(
   reqOrUser: Request | User,
   sessionIdParam: string | number | bigint,
   payload: UpdateDraftPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'UPDATE_DRAFT');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1217,7 +1219,7 @@ export async function updateDraftResults(
     } else if (['QUALITATIVE', 'BOOLEAN', 'OK_NOT_OK', 'POSITIVE_NEGATIVE'].includes(resType)) {
       if (item.text_value !== undefined && item.text_value !== null && item.text_value.trim()) {
         const rawText = item.text_value.trim().toUpperCase();
-        const options = existing.result_options_snapshot as any[];
+        const options = existing.result_options_snapshot as LabTestResultOption[] | null;
         const isValid = validateCategoricalOption(existing.result_type_snapshot, rawText, options);
         if (!isValid) {
           return {
@@ -1346,7 +1348,7 @@ export async function updateDraftResults(
       sessionUpdateData.quantity_value = payload.quantity_value !== null ? new Prisma.Decimal(effectiveQty!.toFixed(2)) : null;
     }
     if (normalizedDraftUnit !== undefined) {
-      sessionUpdateData.quantity_unit = normalizedDraftUnit as any;
+      sessionUpdateData.quantity_unit = normalizedDraftUnit as QuantityUnit;
     }
     if (payload.remarks !== undefined) {
       sessionUpdateData.remarks = payload.remarks ? payload.remarks.trim() : null;
@@ -1500,7 +1502,7 @@ export async function completeSession(
   reqOrUser: Request | User,
   sessionIdParam: string | number | bigint,
   payload: CompleteSessionPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'COMPLETE_SESSION');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1716,7 +1718,7 @@ export async function completeSession(
     } else if (['QUALITATIVE', 'BOOLEAN', 'OK_NOT_OK', 'POSITIVE_NEGATIVE'].includes(resType)) {
       if (submitted.text_value && submitted.text_value.trim()) {
         const rawText = submitted.text_value.trim().toUpperCase();
-        const options = snap.result_options_snapshot as any[];
+        const options = snap.result_options_snapshot as LabTestResultOption[] | null;
         const isValid = validateCategoricalOption(snap.result_type_snapshot, rawText, options);
         if (!isValid) {
           return { status: 400, error: `Invalid option "${submitted.text_value}" for test ${snap.test_code_snapshot}.` };
@@ -1888,7 +1890,7 @@ export async function completeSession(
             evaluation_status: evalResult.evaluationStatus,
             applied_rule_id: evalResult.appliedRuleId,
             applied_rule_version: evalResult.appliedRuleVersion,
-            evaluation_snapshot: evalResult.evaluationSnapshot as any,
+            evaluation_snapshot: toJsonInput(evalResult.evaluationSnapshot),
             recorded_at: new Date(),
           },
         });
@@ -1954,7 +1956,7 @@ export async function completeSession(
           remarks: remarks ? remarks.trim() : null,
           completion_client_event_id: clientEventId,
           quantity_value: new Prisma.Decimal(quantityNum.toFixed(2)),
-          quantity_unit: quantityUnitNorm as any,
+          quantity_unit: quantityUnitNorm as QuantityUnit,
           density: new Prisma.Decimal(metrics.density.toFixed(4)),
           gross_liters: new Prisma.Decimal(metrics.grossLiters.toFixed(2)),
           snf: new Prisma.Decimal(metrics.snf.toFixed(2)),
@@ -2229,7 +2231,7 @@ export async function correctCompletedSession(
   reqOrUser: Request | User,
   sessionIdParam: string | number | bigint,
   payload: CorrectSessionPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'CORRECT_SESSION');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -2354,9 +2356,9 @@ export async function correctCompletedSession(
       },
       orderBy: { id: 'desc' },
     });
-    if (priorAudit && (priorAudit.new_values as any)?.idempotency_key === idempotencyKey) {
-      const priorDecision = (priorAudit.new_values as any)?.decision || (priorAudit.new_values as any)?.requested_manager_decision;
-      const priorReason = (priorAudit.new_values as any)?.reason || (priorAudit.new_values as any)?.correction_reason;
+    if (priorAudit && jsonRecord(priorAudit.new_values).idempotency_key === idempotencyKey) {
+      const priorDecision = jsonRecord(priorAudit.new_values).decision || jsonRecord(priorAudit.new_values).requested_manager_decision;
+      const priorReason = jsonRecord(priorAudit.new_values).reason || jsonRecord(priorAudit.new_values).correction_reason;
       if ((decision && priorDecision && priorDecision !== decision) || (priorReason && priorReason !== reasonTrimmed)) {
         return { status: 409, error: 'Conflict: Idempotency key reused with different decision or reason.' };
       }
@@ -2568,7 +2570,7 @@ export async function correctCompletedSession(
       } else if (['QUALITATIVE', 'BOOLEAN', 'OK_NOT_OK', 'POSITIVE_NEGATIVE'].includes(resType)) {
         if (item.text_value && item.text_value.trim()) {
           const rawText = item.text_value.trim().toUpperCase();
-          const options = snap.result_options_snapshot as any[];
+          const options = snap.result_options_snapshot as LabTestResultOption[] | null;
           const isValid = validateCategoricalOption(snap.result_type_snapshot, rawText, options);
           if (!isValid) {
             return { status: 400, error: `Invalid option "${item.text_value}" for test ${snap.test_code_snapshot}.` };
@@ -2751,7 +2753,7 @@ export async function correctCompletedSession(
           numericValue: numVal !== null ? Number(numVal) : null,
           textValue: txtVal,
           resultType: snap.result_type_snapshot,
-          resultOptions: snap.result_options_snapshot as any,
+          resultOptions: snap.result_options_snapshot as LabTestResultOption[] | null,
         });
 
         allEvaluations.push({
@@ -2774,7 +2776,7 @@ export async function correctCompletedSession(
               evaluation_status: evalResult.evaluationStatus,
               applied_rule_id: evalResult.appliedRuleId,
               applied_rule_version: evalResult.appliedRuleVersion,
-              evaluation_snapshot: evalResult.evaluationSnapshot as any,
+              evaluation_snapshot: toJsonInput(evalResult.evaluationSnapshot),
               recorded_at: correctionTimestamp,
             },
           });
@@ -2940,7 +2942,7 @@ export async function correctCompletedSession(
           where: { id: receiptRow.id },
           data: {
             quantity_value: effectiveQty !== null ? new Prisma.Decimal(effectiveQty.toFixed(2)) : undefined,
-            quantity_unit: (effectiveUnit as any) || undefined,
+            quantity_unit: (effectiveUnit as QuantityUnit | null) || undefined,
             density: newDensity || undefined,
             gross_liters: newGrossLiters || undefined,
             lr: resolvedCoreAfter.success ? new Prisma.Decimal(resolvedCoreAfter.lr.toFixed(2)) : undefined,
@@ -3057,7 +3059,7 @@ export async function correctCompletedSession(
           rejection_reason: effectiveRejectionReason,
           remarks: normalizedRemarks,
           quantity_value: effectiveQty !== null ? new Prisma.Decimal(effectiveQty.toFixed(2)) : null,
-          quantity_unit: effectiveUnit as any,
+          quantity_unit: effectiveUnit as QuantityUnit,
           density: newDensity,
           gross_liters: newGrossLiters,
           snf: newSnf,
@@ -3172,7 +3174,7 @@ export interface LabHistoryQuery {
 export async function getLabHistory(
   reqOrUser: Request | User,
   query: LabHistoryQuery = {}
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccLabAuth(reqOrUser, 'READ_LAB');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };

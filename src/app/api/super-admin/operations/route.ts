@@ -5,6 +5,7 @@ import { calculatePhysicalLiters } from '@/backend/utils/milkFormulas';
 import { isPlantLrTest } from '@/backend/services/vehicleQuantityService';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
 import { getErrorMessage } from '@/lib/errors';
+import { Prisma } from '@prisma/client';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -19,7 +20,7 @@ export async function GET(req: Request) {
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get('pageSize')) || 20));
     const skip = (page - 1) * pageSize;
 
-    const where: any = {};
+    const where: Prisma.VehicleVisitWhereInput = {};
     if (query) {
       where.OR = [
         { vehicle_number: { contains: query, mode: 'insensitive' } },

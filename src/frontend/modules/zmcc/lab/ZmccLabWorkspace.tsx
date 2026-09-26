@@ -26,6 +26,7 @@ import { Modal } from '@/components/ui/modal';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
+import type { LabTestResultOption } from '@/lib/validations/labTest';
 
 interface ZmccLabWorkspaceProps {
   currentUser: User | null;
@@ -978,7 +979,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                       const current = draftValues[testId] || { numeric_value: '', text_value: '' };
                       const isCalculated = res.result_type_snapshot === 'CALCULATED';
                       const isNumeric = res.result_type_snapshot === 'NUMERIC';
-                      const options = res.result_options_snapshot as any[];
+                      const options = res.result_options_snapshot as LabTestResultOption[] | null;
 
                       return (
                         <tr key={testId} className="hover:bg-slate-50/60">

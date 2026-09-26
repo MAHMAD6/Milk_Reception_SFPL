@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { getErrorMessage } from '@/lib/errors';
+import { Prisma } from '@prisma/client';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -17,7 +18,7 @@ export async function GET(req: Request) {
     const pageSize = Math.min(100, Math.max(1, Number(searchParams.get('pageSize')) || 20));
     const skip = (page - 1) * pageSize;
 
-    const where: any = {};
+    const where: Prisma.AuditLogWhereInput = {};
     if (tableName) {
       where.table_name = tableName;
     }

@@ -3,6 +3,7 @@ import { normalizePakistaniCnic, normalizePakistaniMobile } from '@/lib/pakistan
 import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
+import { Prisma } from '@prisma/client';
 
 export interface ZmccAuthContext {
   user: User;
@@ -13,6 +14,14 @@ export interface ZmccAuthContext {
   isPheOperator: boolean;
   isFinanceAccounts?: boolean;
   effectiveZmccId: bigint | null;
+}
+
+/** Non-admin reads are always ZMCC-scoped; fail closed if the scope is somehow missing. */
+function requireZmccScope(auth: { effectiveZmccId: bigint | null }): bigint {
+  if (auth.effectiveZmccId == null) {
+    throw new Error('ZMCC scope is required for non-admin access.');
+  }
+  return auth.effectiveZmccId;
 }
 
 export type RequiredMasterDataAction =
@@ -206,14 +215,14 @@ export async function listRoutes(
   auth: ZmccAuthContext,
   filters?: { zmcc_id?: string; is_active?: string; search?: string }
 ) {
-  const where: any = {};
+  const where: Prisma.ZmccRouteWhereInput = {};
 
   if (auth.isSuperAdmin) {
     if (filters?.zmcc_id) {
       where.zmcc_id = BigInt(filters.zmcc_id);
     }
   } else {
-    where.zmcc_id = auth.effectiveZmccId;
+    where.zmcc_id = requireZmccScope(auth);
   }
 
   // PHE requires routes only as active selectable dropdown options
@@ -323,7 +332,7 @@ export async function createRoute(
     destination: string;
     zmcc_id?: string;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const route_code = body.route_code?.trim();
   const name = body.name?.trim();
   const origin = body.origin?.trim();
@@ -429,7 +438,7 @@ export async function updateRoute(
     destination?: string;
     is_active?: boolean;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const existing = await prisma.zmccRoute.findUnique({
     where: { id: routeId },
     include: { zmcc: true },
@@ -554,14 +563,14 @@ export async function listAreas(
   auth: ZmccAuthContext,
   filters?: { route_id?: string; is_active?: string; search?: string; zmcc_id?: string }
 ) {
-  const where: any = {};
+  const where: Prisma.ZmccAreaWhereInput = {};
 
   if (auth.isSuperAdmin) {
     if (filters?.zmcc_id) {
       where.zmcc_id = BigInt(filters.zmcc_id);
     }
   } else {
-    where.zmcc_id = auth.effectiveZmccId;
+    where.zmcc_id = requireZmccScope(auth);
   }
 
   if (filters?.route_id) {
@@ -669,7 +678,7 @@ export async function createArea(
     name: string;
     route_id: string;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const area_code = body.area_code?.trim();
   const name = body.name?.trim();
 
@@ -776,7 +785,7 @@ export async function updateArea(
     name?: string;
     is_active?: boolean;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const existing = await prisma.zmccArea.findUnique({
     where: { id: areaId },
     include: { route: { include: { zmcc: true } } },
@@ -882,14 +891,14 @@ export async function listMilkSources(
   auth: ZmccAuthContext,
   filters?: { is_active?: string; search?: string; zmcc_id?: string }
 ) {
-  const where: any = {};
+  const where: Prisma.ZmccMilkSourceWhereInput = {};
 
   if (auth.isSuperAdmin) {
     if (filters?.zmcc_id) {
       where.zmcc_id = BigInt(filters.zmcc_id);
     }
   } else {
-    where.zmcc_id = auth.effectiveZmccId;
+    where.zmcc_id = requireZmccScope(auth);
   }
 
   // PHE requires milk sources only as active selectable dropdown options
@@ -991,7 +1000,7 @@ export async function createMilkSource(
     name: string;
     zmcc_id?: string;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const erp_code = body.erp_code?.trim();
   const name = body.name?.trim();
 
@@ -1077,7 +1086,7 @@ export async function updateMilkSource(
     name?: string;
     is_active?: boolean;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const existing = await prisma.zmccMilkSource.findUnique({
     where: { id: sourceId },
     include: { zmcc: true },
@@ -1178,7 +1187,7 @@ export async function listChillerOwnerships(
   auth: ZmccAuthContext,
   filters?: { is_active?: string; search?: string }
 ) {
-  const where: any = {};
+  const where: Prisma.ChillerOwnershipWhereInput = {};
 
   // For non-Super Admin (ZMCC_MANAGER, PHE_OPERATOR), return active options only for shop details
   if (!auth.isSuperAdmin) {
@@ -1255,7 +1264,7 @@ export async function getChillerOwnershipById(auth: ZmccAuthContext, id: bigint)
 export async function createChillerOwnership(
   auth: ZmccAuthContext,
   body: { ownership_code: string; name: string }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   if (!auth.isSuperAdmin) {
     return { status: 403, error: 'Forbidden. Only Super Admin may create Chiller Ownership options.' };
   }
@@ -1319,7 +1328,7 @@ export async function updateChillerOwnership(
   auth: ZmccAuthContext,
   id: bigint,
   body: { name?: string; is_active?: boolean }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   if (!auth.isSuperAdmin) {
     return { status: 403, error: 'Forbidden. Only Super Admin may modify Chiller Ownership options.' };
   }
@@ -1418,14 +1427,14 @@ export async function listShops(
     zmcc_id?: string;
   }
 ) {
-  const where: any = {};
+  const where: Prisma.ZmccShopWhereInput = {};
 
   if (auth.isSuperAdmin) {
     if (filters?.zmcc_id) {
       where.zmcc_id = BigInt(filters.zmcc_id);
     }
   } else {
-    where.zmcc_id = auth.effectiveZmccId;
+    where.zmcc_id = requireZmccScope(auth);
   }
 
   if (filters?.route_id) {
@@ -1598,7 +1607,7 @@ export async function createShop(
     latitude?: number | null;
     longitude?: number | null;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const shop_code = body.shop_code?.trim();
   const shop_name = body.shop_name?.trim();
   const owner_name = body.owner_name?.trim();
@@ -1789,7 +1798,7 @@ export async function updateShop(
     longitude?: number | null;
     is_active?: boolean;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const existing = await prisma.zmccShop.findUnique({
     where: { id: shopId },
     include: {

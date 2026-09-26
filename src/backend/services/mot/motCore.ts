@@ -321,7 +321,7 @@ export async function listMotProfiles(
 export async function getMotProfileById(
   auth: MotAuthContext,
   idStr: string
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   let id: bigint;
   try {
     id = BigInt(idStr);
@@ -451,7 +451,7 @@ export async function createMotProfile(
     zmcc_id?: string;
     user_id?: string | null;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   if (auth.isPheOperator) {
     return { status: 403, error: 'Forbidden. PHE Operators cannot create MOT profiles.' };
   }
@@ -595,7 +595,7 @@ export async function updateMotProfile(
     user_id?: string | null;
     is_active?: boolean;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   if (auth.isPheOperator) {
     return { status: 403, error: 'Forbidden. PHE Operators cannot update MOT profiles.' };
   }
@@ -880,7 +880,7 @@ export async function listMotVehicles(
 export async function getMotVehicleById(
   auth: MotAuthContext,
   idStr: string
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   let id: bigint;
   try {
     id = BigInt(idStr);
@@ -1060,7 +1060,7 @@ export async function updateMotVehicle(
     zmcc_id?: string;
     is_active?: boolean;
   }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   if (auth.isPheOperator) {
     return { status: 403, error: 'Forbidden. PHE Operators cannot update MOT vehicles.' };
   }
@@ -1220,7 +1220,7 @@ export interface AssignAndDispatchPayload {
 export async function assignAndDispatchJourney(
   auth: MotAuthContext,
   payload: AssignAndDispatchPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   // 1. Authorize: Only SUPER_ADMIN, ZMCC_MANAGER, PHE_OPERATOR
   if (!auth.isSuperAdmin && !auth.isZmccManager && !auth.isPheOperator) {
     return { status: 403, error: 'Forbidden. You do not have permission to assign & dispatch MOT journeys.' };
@@ -1683,7 +1683,7 @@ export async function cancelMotJourney(
   auth: MotAuthContext,
   journeyIdStr: string,
   reason: string
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   // Only SUPER_ADMIN and same-ZMCC ZMCC_MANAGER can cancel
   if (!auth.isSuperAdmin && !auth.isZmccManager) {
     return {
@@ -1925,7 +1925,7 @@ export async function listMotJourneys(
 export async function getMotJourneyById(
   auth: MotAuthContext,
   idStr: string
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   let id: bigint;
   try {
     id = BigInt(idStr);
@@ -1970,7 +1970,7 @@ export async function getMotJourneyById(
 // MOT CURRENT ACTIVE JOURNEY (FOR MOT DRIVER)
 // =============================================================
 
-export async function getCurrentMotJourney(auth: MotAuthContext): Promise<ServiceResult<any>> {
+export async function getCurrentMotJourney(auth: MotAuthContext): Promise<ServiceResult<{ journey: ReturnType<typeof serializeJourney> | null; message?: string }>> {
   // Find MOT Profile linked to this user
   const motProfile = await prisma.motProfile.findUnique({
     where: { user_id: auth.actorUserId },
@@ -2280,7 +2280,7 @@ function resolveCollectionIdempotencyMatch(
     shopRmrNumber?: string | null;
     hasExplicitTimestamp?: boolean;
   }
-): ServiceResult<any> {
+): ServiceResult<Record<string, unknown>> {
   // Cross-ZMCC: Never return another ZMCC's collection
   if (existingCollection.zmcc_id !== auth.effectiveZmccId!) {
     return {
@@ -2310,7 +2310,7 @@ function resolveCollectionIdempotencyMatch(
 export async function submitShopCollection(
   reqOrUser: Request | User,
   payload: SubmitCollectionPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<Record<string, unknown>>> {
   const { auth, errorResponse } = await resolveMotAuth(reqOrUser, 'SUBMIT_COLLECTION');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -2875,7 +2875,7 @@ export interface GpsLocationItem {
 export async function recordGpsBatch(
   reqOrUser: Request | User,
   payload: { locations: GpsLocationItem[]; journey_id?: string | number | bigint }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveMotAuth(reqOrUser, 'UPLOAD_GPS');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -3142,7 +3142,7 @@ export async function recordGpsBatch(
 export async function getJourneyMapData(
   reqOrUser: Request | User,
   journeyIdParam: string | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveMotAuth(reqOrUser, 'READ_MAP');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -3323,7 +3323,7 @@ export async function getJourneyMapData(
 export async function getJourneyCollections(
   reqOrUser: Request | User,
   journeyIdParam: string | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveMotAuth(reqOrUser, 'READ_COLLECTIONS');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -3380,7 +3380,7 @@ export async function getJourneyCollections(
 export async function getSmsOutbox(
   reqOrUser: Request | User,
   filterParams?: { journey_id?: string; status?: string; limit?: number; offset?: number }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveMotAuth(reqOrUser, 'READ_SMS_OUTBOX');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -3486,7 +3486,7 @@ export async function correctShopCollection(
   reqOrUser: Request | User,
   collectionIdParam: string | number | bigint,
   payload: CorrectShopCollectionPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveMotAuth(reqOrUser, 'CORRECT_COLLECTION');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };

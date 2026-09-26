@@ -21,7 +21,7 @@ export async function PATCH(
   }
   const siloId = BigInt(siloIdStr.trim());
 
-  let body: any;
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch (_err) {
@@ -75,6 +75,11 @@ export async function PATCH(
     }
   }
 
+  // Validated above; narrowed here for the transaction below.
+  const siloNameInput = typeof body.siloName === 'string' ? body.siloName : undefined;
+  const capacityLitersInput = typeof body.capacityLiters === 'number' ? body.capacityLiters : undefined;
+  const isActiveInput = typeof body.isActive === 'boolean' ? body.isActive : undefined;
+
   try {
     if (!authUser.id || !/^\d+$/.test(authUser.id.trim())) {
       return NextResponse.json({ error: 'Unauthorized. Invalid authentication session.' }, { status: 401 });
@@ -104,8 +109,8 @@ export async function PATCH(
 
       // 4. Validate Capacity Mutation
       let newCapacity = Number(targetSilo.capacity_liters);
-      if (body.capacityLiters !== undefined) {
-        newCapacity = body.capacityLiters;
+      if (capacityLitersInput !== undefined) {
+        newCapacity = capacityLitersInput;
         if (newCapacity < currentStockLiters) {
           return {
             status: 409,
@@ -124,8 +129,8 @@ export async function PATCH(
       let newActive = targetSilo.is_active;
       let action = 'SILO_UPDATED';
 
-      if (body.isActive !== undefined) {
-        newActive = body.isActive;
+      if (isActiveInput !== undefined) {
+        newActive = isActiveInput;
 
         if (!newActive && targetSilo.is_active) {
           // Rule 4: Block deactivation if stock > 0
@@ -196,8 +201,8 @@ export async function PATCH(
       }
 
       let newName = targetSilo.silo_name;
-      if (body.siloName !== undefined) {
-        newName = body.siloName.trim();
+      if (siloNameInput !== undefined) {
+        newName = siloNameInput.trim();
       }
 
       // 6. Perform Database Mutation

@@ -13,7 +13,7 @@ export interface ValidationResult<T = number> {
 /**
  * Validates that a numeric input is a finite decimal strictly greater than zero.
  */
-export function validatePositiveDecimal(input: any, fieldName: string = 'Value'): ValidationResult<number> {
+export function validatePositiveDecimal(input: unknown, fieldName: string = 'Value'): ValidationResult<number> {
   if (input === null || input === undefined || input === '') {
     return { isValid: false, error: `${fieldName} is required.` };
   }
@@ -34,7 +34,7 @@ export function validatePositiveDecimal(input: any, fieldName: string = 'Value')
 /**
  * Validates that a numeric lab test input is a valid non-negative decimal (>= 0).
  */
-export function validateNonNegativeDecimal(input: any, fieldName: string = 'Measurement'): ValidationResult<number> {
+export function validateNonNegativeDecimal(input: unknown, fieldName: string = 'Measurement'): ValidationResult<number> {
   if (input === null || input === undefined || input === '') {
     return { isValid: false, error: `${fieldName} is required.` };
   }
@@ -71,7 +71,7 @@ export function calculateSnfFatRatio(snf: number | null, fat: number | null): nu
 /**
  * Validates string input (trims, enforces non-empty, and checks max length).
  */
-export function validateRequiredString(input: any, fieldName: string = 'Field', maxLength: number = 255): ValidationResult<string> {
+export function validateRequiredString(input: unknown, fieldName: string = 'Field', maxLength: number = 255): ValidationResult<string> {
   if (typeof input !== 'string') {
     return { isValid: false, error: `${fieldName} must be a string.` };
   }

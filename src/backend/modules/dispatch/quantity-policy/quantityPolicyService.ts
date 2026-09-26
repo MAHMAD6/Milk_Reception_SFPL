@@ -5,6 +5,7 @@ import {
   DEFAULT_DISPATCH_QUANTITY_POLICY,
 } from './types';
 import { validateQuantityPolicy } from './validation';
+import { toJsonInput } from '@/lib/json';
 
 type DbClient = PrismaClient | Prisma.TransactionClient;
 
@@ -123,7 +124,7 @@ export async function getOrFreezeDispatchQuantityPolicy(
       visit_id: parsedVisitId,
       source_id: parsedSourceId,
       policy_version: currentPolicy.version,
-      policy_snapshot: currentPolicy as any,
+      policy_snapshot: toJsonInput(currentPolicy),
     },
   });
 
@@ -160,7 +161,7 @@ export async function updateSourceQuantityPolicy(
   await db.procurementSource.update({
     where: { id: parsedSourceId },
     data: {
-      dispatch_quantity_policy: validated as any,
+      dispatch_quantity_policy: toJsonInput(validated),
     },
   });
 

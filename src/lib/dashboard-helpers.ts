@@ -22,7 +22,7 @@ export type CanonicalVehicleStatus = (typeof CANONICAL_VEHICLE_STATUSES)[number]
 
 export function isCanonicalVehicleStatus(status: string | null | undefined): status is CanonicalVehicleStatus {
   if (!status) return false;
-  return CANONICAL_VEHICLE_STATUSES.includes(status as any);
+  return (CANONICAL_VEHICLE_STATUSES as readonly string[]).includes(status);
 }
 
 /**

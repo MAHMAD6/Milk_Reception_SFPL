@@ -1,5 +1,7 @@
+import type { Prisma } from '@prisma/client';
+
 export interface PortionQuantityInput {
-  dispatch_quantity_value?: number | string | any | null;
+  dispatch_quantity_value?: number | string | Prisma.Decimal | null;
   dispatch_quantity_unit?: string | null;
 }
 

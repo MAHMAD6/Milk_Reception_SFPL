@@ -8,6 +8,7 @@ import { validateOperationalTimestamp } from '@/backend/services/chronology-vali
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
 import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
+import type { LabTestResultOption } from '@/lib/validations/labTest';
 
 class RouteError extends Error {
   statusCode: number;
@@ -124,7 +125,7 @@ export async function POST(
         }
 
         // Validate value formats
-        const options = (reqTest.result_options_snapshot as any[]) || null;
+        const options = (reqTest.result_options_snapshot as LabTestResultOption[] | null) || null;
         if (Array.isArray(options) && options.length > 0) {
           const val = (res.textValue || '').trim().toUpperCase();
           const match = options.find((opt: any) => opt.value.trim().toUpperCase() === val);

@@ -3,6 +3,7 @@ import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { z } from 'zod';
 import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
+import { jsonRecord } from '@/lib/json';
 
 const correctDecisionSchema = z.object({
   decision: z.enum(['APPROVE', 'REJECT'] as const),
@@ -157,9 +158,9 @@ export async function POST(
           orderBy: { id: 'desc' },
         });
 
-        if (priorAudit && (priorAudit.new_values as any)?.idempotency_key === validated.idempotency_key) {
-          const priorDecision = (priorAudit.new_values as any)?.decision;
-          const priorReason = (priorAudit.new_values as any)?.reason;
+        if (priorAudit && jsonRecord(priorAudit.new_values).idempotency_key === validated.idempotency_key) {
+          const priorDecision = jsonRecord(priorAudit.new_values).decision;
+          const priorReason = jsonRecord(priorAudit.new_values).reason;
           if (priorDecision !== validated.decision || priorReason !== validated.reason) {
             throw new Error('IDEMPOTENCY_CONFLICT:Conflict: Idempotency key reused with different decision or reason.');
           }

@@ -97,7 +97,7 @@ function isIndexedDbSupported(): boolean {
 }
 
 function getIdb(): IDBFactory {
-  return typeof window !== 'undefined' ? window.indexedDB : (globalThis as any).indexedDB;
+  return typeof window !== 'undefined' ? window.indexedDB : globalThis.indexedDB;
 }
 
 export function openMotDb(): Promise<IDBDatabase> {

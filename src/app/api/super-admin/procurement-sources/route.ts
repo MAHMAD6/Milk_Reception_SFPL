@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    let body: any;
+    let body: Record<string, unknown>;
     try {
       body = await req.json();
     } catch {

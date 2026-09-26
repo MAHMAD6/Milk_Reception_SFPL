@@ -8,6 +8,7 @@ import { computeCanonicalMilkMetrics, calculateDensity, calculateGrossLiters } f
 import { calculateDualReconciliation } from '@/backend/services/reconciliationService';
 import { getTankPhysicalStock } from '@/backend/services/zmccTankService';
 import { getErrorCode, getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
+import { jsonRecord, toJsonInput } from '@/lib/json';
 
 const correctDispatchSchema = z.object({
   reason: z.string().trim().min(3, 'A substantive correction reason of at least 3 characters is required.'),
@@ -80,11 +81,11 @@ export async function PATCH(
       });
 
       const matching = pastAudits.find(
-        (a) => (a.new_values as any)?.idempotency_key === clientKey
+        (a) => jsonRecord(a.new_values).idempotency_key === clientKey
       );
 
       if (matching) {
-        const rec = matching.new_values as any;
+        const rec = jsonRecord(matching.new_values);
         const notePayload = validated.raw_milk_dispatch_note_number !== undefined
           ? validated.raw_milk_dispatch_note_number
           : validated.rawMilkDispatchNoteNumber;
@@ -268,7 +269,7 @@ export async function PATCH(
             const hasCommercialDelta = Math.abs(deltaAt13) >= 0.01;
 
             if (hasPhysicalDelta) {
-              const lockedTankRows: Array<{ id: bigint; capacity_liters: any }> = await tx.$queryRaw`
+              const lockedTankRows: Array<{ id: bigint; capacity_liters: Prisma.Decimal }> = await tx.$queryRaw`
                 SELECT id, capacity_liters FROM zmcc_tank WHERE id = ${existingIssue.tank_id} FOR UPDATE
               `;
               if (!lockedTankRows || lockedTankRows.length === 0) {
@@ -386,11 +387,11 @@ export async function PATCH(
         data: visitUpdateData,
       });
 
-      const oldAuditValues: Record<string, any> = {
+      const oldAuditValues: Record<string, unknown> = {
         correction_count: currentTotalCount,
         manager_correction_count: currentManagerCount,
       };
-      const newAuditValues: Record<string, any> = {
+      const newAuditValues: Record<string, unknown> = {
         correction_count: nextCorrectionCount,
         manager_correction_count: nextManagerCount,
         reason: validated.reason,
@@ -423,8 +424,8 @@ export async function PATCH(
           table_name: 'vehicle_visit',
           record_id: visit.id,
           action: 'VEHICLE_DISPATCH_CORRECTED',
-          old_values: oldAuditValues,
-          new_values: newAuditValues,
+          old_values: toJsonInput(oldAuditValues),
+          new_values: toJsonInput(newAuditValues),
           user_id: dbUser.id,
         },
       });

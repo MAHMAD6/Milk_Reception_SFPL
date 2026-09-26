@@ -6,6 +6,7 @@
  * - Regex: standard email regex (/^[^\s@]+@[^\s@]+\.[^\s@]+$/).
  * - Normalization: trimmed and lowercased (trim().toLowerCase()).
  */
+import { getErrorMessage, getErrorMeta } from '@/lib/errors';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export const MAX_EMAIL_LENGTH = 254;
@@ -79,17 +80,17 @@ export function validateAndNormalizeEmail(
  * between duplicate email index violations, duplicate username violations,
  * and unknown/generic unique conflicts.
  */
-export function classifyUniqueError(err: any): 'EMAIL' | 'USERNAME' | 'UNKNOWN' {
+export function classifyUniqueError(err: unknown): 'EMAIL' | 'USERNAME' | 'UNKNOWN' {
   if (!err) return 'UNKNOWN';
 
-  const target = err?.meta?.target;
+  const target = getErrorMeta(err)?.target;
   const targetArray: string[] = Array.isArray(target)
     ? target.map((t) => String(t).toLowerCase())
     : typeof target === 'string'
     ? [target.toLowerCase()]
     : [];
 
-  const message = typeof err?.message === 'string' ? err.message.toLowerCase() : '';
+  const message = getErrorMessage(err).toLowerCase();
 
   // Check email targets first
   if (

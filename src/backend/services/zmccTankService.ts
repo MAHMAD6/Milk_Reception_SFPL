@@ -3,7 +3,7 @@ import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { Prisma } from '@prisma/client';
 import { resolveCoreMilkTestResults } from '@/backend/utils/milkTestResolvers';
-import { getErrorCode, getErrorMessage } from '@/lib/errors';
+import { getErrorCode, getErrorMessage, getErrorMeta } from '@/lib/errors';
 
 export interface ServiceResult<T> {
   status: number;
@@ -364,7 +364,7 @@ export async function listZmccTanks(
 export async function getZmccTankById(
   reqOrUser: Request | User,
   tankIdParam: string | number | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccTankAuth(reqOrUser, 'READ');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -405,9 +405,9 @@ export interface CreateTankPayload {
   is_active?: boolean;
 }
 
-function parseZmccTankUniqueViolation(err: any): { isCodeConflict: boolean; isActiveTankConflict: boolean } {
-  const target = err?.meta?.target;
-  const msg = String(err?.message || '');
+function parseZmccTankUniqueViolation(err: unknown): { isCodeConflict: boolean; isActiveTankConflict: boolean } {
+  const target = getErrorMeta(err)?.target;
+  const msg = getErrorMessage(err);
 
   // 1. Check for partial unique index: zmcc_tank_one_active_per_zmcc_idx
   if (
@@ -437,7 +437,7 @@ function parseZmccTankUniqueViolation(err: any): { isCodeConflict: boolean; isAc
 export async function createZmccTank(
   reqOrUser: Request | User,
   payload: CreateTankPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccTankAuth(reqOrUser, 'MUTATE_MASTER');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -593,7 +593,7 @@ export async function updateZmccTank(
   reqOrUser: Request | User,
   tankIdParam: string | number | bigint,
   payload: UpdateTankPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccTankAuth(reqOrUser, 'MUTATE_MASTER');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -723,7 +723,7 @@ export async function toggleZmccTankActive(
   reqOrUser: Request | User,
   tankIdParam: string | number | bigint,
   isActive: boolean
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccTankAuth(reqOrUser, 'MUTATE_MASTER');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -822,7 +822,7 @@ export async function receiveHistoricalSession(
   reqOrUser: Request | User,
   sessionIdParam: string | number | bigint,
   payload?: { tank_id?: string | number | bigint }
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccTankAuth(reqOrUser, 'RECEIVE_HISTORICAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };

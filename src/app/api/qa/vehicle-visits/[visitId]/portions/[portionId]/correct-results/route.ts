@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { QualityRuleService } from '@/backend/services/qualityRuleService';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
 import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
+import { toJsonInput } from '@/lib/json';
 
 const correctResultItemSchema = z.object({
   test_id: z.string().or(z.number()),
@@ -209,7 +210,7 @@ export async function POST(
             not_performed_reason: item.performance_status === 'NOT_PERFORMED' ? (item.not_performed_reason || 'Not performed') : null,
             is_passed: evalRes.isPassed,
             evaluation_status: evalRes.evaluationStatus,
-            evaluation_snapshot: evalRes.evaluationSnapshot as any,
+            evaluation_snapshot: toJsonInput(evalRes.evaluationSnapshot),
             result_timestamp: authoritativeTs,
             applied_rule_id: evalRes.appliedRuleId ?? null,
             applied_rule_version: evalRes.appliedRuleVersion ?? null,

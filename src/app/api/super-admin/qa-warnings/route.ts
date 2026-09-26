@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { getErrorMessage } from '@/lib/errors';
+import { Prisma } from '@prisma/client';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -14,7 +15,7 @@ export async function GET(req: Request) {
     const sourceId = searchParams.get('sourceId');
     const yearMonth = searchParams.get('yearMonth'); // e.g. "2026-08"
 
-    const where: any = {};
+    const where: Prisma.QAWarningWhereInput = {};
     if (sourceId) {
       where.procurement_source_id = BigInt(sourceId);
     }

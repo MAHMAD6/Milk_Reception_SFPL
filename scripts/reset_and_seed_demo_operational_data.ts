@@ -236,7 +236,7 @@ async function resetAndSeedWithValidation() {
 
   // 10. Silo Integrity Assertion
   const silos = await prisma.silo.findMany({ where: { is_active: true } });
-  const negativeSilos: any[] = [];
+  const negativeSilos: typeof silos = [];
   for (const s of silos) {
     const sumRes = await prisma.siloInventoryTransaction.aggregate({
       where: { silo_id: s.id },

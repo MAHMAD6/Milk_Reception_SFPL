@@ -4,6 +4,8 @@
  * from lab test snapshots or active LabTest definitions.
  */
 
+import type { Prisma } from '@prisma/client';
+
 export interface TestSnapshotLike {
   test_id?: string | bigint | number;
   testId?: string | bigint | number;
@@ -13,8 +15,8 @@ export interface TestSnapshotLike {
   testName?: string | null;
   result_type_snapshot?: string | null;
   resultType?: string | null;
-  numeric_value?: number | string | null | any;
-  numericValue?: number | string | null | any;
+  numeric_value?: number | string | Prisma.Decimal | null;
+  numericValue?: number | string | Prisma.Decimal | null;
 }
 
 /**
@@ -103,7 +105,7 @@ export function isFatTestCandidate(
   return false;
 }
 
-export type ResolveCoreMilkTestResult<T = any> =
+export type ResolveCoreMilkTestResult<T = unknown> =
   | {
       success: true;
       lr: number;
@@ -126,7 +128,7 @@ export type ResolveCoreMilkTestResult<T = any> =
  * 2. Multiple candidates -> FAIL CLOSED (400, Ambiguous).
  * 3. Non-numeric or invalid value -> FAIL CLOSED (400).
  */
-export type ValidateCoreMilkTestCandidatesResult<T = any> =
+export type ValidateCoreMilkTestCandidatesResult<T = unknown> =
   | {
       valid: true;
       lrCandidate: T;

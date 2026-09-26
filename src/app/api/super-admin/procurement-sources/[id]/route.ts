@@ -47,7 +47,7 @@ export async function PATCH(
   }
 
   try {
-    let body: any;
+    let body: Record<string, unknown>;
     try {
       body = await req.json();
     } catch {
@@ -97,6 +97,9 @@ export async function PATCH(
       }
     }
 
+    // Validated above; narrowed for use in the transaction.
+    const isActiveInput = typeof body.isActive === 'boolean' ? body.isActive : undefined;
+
     const adminUser = await prisma.user.findFirst({ where: { username: authUser.username } });
 
     // 5. Execute lock, re-read, immutability check, blocker checks, mutation, and audit in a single atomic transaction
@@ -129,7 +132,7 @@ export async function PATCH(
       }
 
       const newName = trimmedName !== undefined ? trimmedName : targetSource.name;
-      const newIsActive = hasIsActive ? body.isActive : targetSource.is_active;
+      const newIsActive = isActiveInput ?? targetSource.is_active;
 
       // 4 & 5. Deactivation Safety Checks inside the transaction
       const isDeactivating = hasIsActive && body.isActive === false && targetSource.is_active === true;

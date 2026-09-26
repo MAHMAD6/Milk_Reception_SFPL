@@ -17,6 +17,7 @@ import { PaperReferenceService, PaperValidationError } from '@/backend/services/
 import { PaperReferenceType } from '@prisma/client';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
 import { getErrorCode, getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
+import type { LabTestResultOption } from '@/lib/validations/labTest';
 
 function serializeDispatch(visit: any) {
   const portions = visit.portions || [];
@@ -544,7 +545,7 @@ export async function POST(req: Request) {
           }
 
           // Genuine Result Validation
-          const snapshotOptions = (reqTest.result_options_snapshot as any[]) || null;
+          const snapshotOptions = (reqTest.result_options_snapshot as LabTestResultOption[] | null) || null;
           if (Array.isArray(snapshotOptions) && snapshotOptions.length > 0) {
             const val = (submitted.textValue || '').trim().toUpperCase();
             const match = snapshotOptions.find((opt: any) => opt.value.trim().toUpperCase() === val);
@@ -933,7 +934,7 @@ export async function POST(req: Request) {
             textVal = perfStatus === 'PERFORMED' ? submittedRes.textValue ?? null : null;
           }
 
-          const testSnapshotOptions = (testDef.result_options_snapshot as any[]) || null;
+          const testSnapshotOptions = (testDef.result_options_snapshot as LabTestResultOption[] | null) || null;
           const evalRes = perfStatus === 'PERFORMED'
             ? evaluateLabResult(testDef.test_code_snapshot, numVal, textVal, testDef.result_type_snapshot, testSnapshotOptions)
             : { isPassed: null };

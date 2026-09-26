@@ -222,7 +222,7 @@ export async function getLocalSuppliers(
 export async function getLocalSupplierById(
   reqOrUser: Request | User,
   idParam: string | number | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccAuth(reqOrUser as Request, 'READ');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -271,7 +271,7 @@ export async function getIncompleteLocalSuppliers(reqOrUser?: Request | User): P
 export async function createLocalSupplier(
   reqOrUser: Request | User,
   payload: CreateLocalSupplierPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccAuth(reqOrUser as Request, 'READ');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -453,7 +453,7 @@ export async function updateLocalSupplier(
   reqOrUser: Request | User,
   idParam: string | number | bigint,
   payload: UpdateLocalSupplierPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccAuth(reqOrUser as Request, 'READ');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };

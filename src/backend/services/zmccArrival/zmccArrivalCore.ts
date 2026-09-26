@@ -646,7 +646,7 @@ export function serializeLocalSupplierArrival(arrival: any) {
 export async function submitMotArrival(
   reqOrUser: Request | User,
   payload: SubmitMotArrivalPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'SUBMIT_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1047,7 +1047,7 @@ export async function correctMotArrival(
   reqOrUser: Request | User,
   arrivalIdParam: string | number | bigint,
   payload: CorrectMotArrivalPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'CORRECT_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1348,7 +1348,7 @@ export async function correctMotArrival(
 export async function submitContractorArrival(
   _reqOrUser?: Request | User,
   _payload?: SubmitContractorArrivalPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   return {
     status: 410,
     error: 'CONTRACTOR_ARRIVAL_RETIRED',
@@ -1360,7 +1360,7 @@ export async function correctContractorArrival(
   reqOrUser: Request | User,
   arrivalIdParam: string | number | bigint,
   payload: CorrectContractorArrivalPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'CORRECT_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1550,7 +1550,7 @@ export async function listMotArrivals(
     page?: number;
     pageSize?: number;
   } = {}
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1627,7 +1627,7 @@ export async function listMotArrivals(
 export async function getMotArrivalById(
   reqOrUser: Request | User,
   arrivalIdParam: string | number | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1679,7 +1679,7 @@ export async function listContractorArrivals(
     page?: number;
     pageSize?: number;
   } = {}
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1752,7 +1752,7 @@ export async function listContractorArrivals(
 export async function getContractorArrivalById(
   reqOrUser: Request | User,
   arrivalIdParam: string | number | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1789,7 +1789,7 @@ export async function getContractorArrivalById(
 
 export async function getActiveContractors(
   reqOrUser: Request | User
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1823,7 +1823,7 @@ export async function getActiveContractors(
 
 export async function getArrivingMotJourneys(
   reqOrUser: Request | User
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -1898,7 +1898,7 @@ export async function getArrivingMotJourneys(
 export async function submitLocalSupplierArrival(
   reqOrUser: Request | User,
   payload: SubmitLocalSupplierArrivalPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'SUBMIT_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -2218,7 +2218,7 @@ export async function correctLocalSupplierArrival(
   reqOrUser: Request | User,
   arrivalIdParam: string | number | bigint,
   payload: CorrectLocalSupplierArrivalPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'CORRECT_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -2501,7 +2501,7 @@ export async function listLocalSupplierArrivals(
     page?: number;
     pageSize?: number;
   } = {}
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -2575,7 +2575,7 @@ export async function listLocalSupplierArrivals(
 export async function getLocalSupplierArrivalById(
   reqOrUser: Request | User,
   arrivalIdParam: string | number | bigint
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<unknown>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -2615,7 +2615,7 @@ export async function recordGateExit(
   arrivalType: 'MOT' | 'LOCAL_SUPPLIER',
   arrivalIdParam: string | number | bigint,
   payload: RecordGateExitPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<Record<string, unknown>>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'RECORD_EXIT');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -2975,7 +2975,7 @@ export async function correctGateExit(
   arrivalType: 'MOT' | 'LOCAL_SUPPLIER',
   arrivalIdParam: string | number | bigint,
   payload: CorrectGateExitPayload
-): Promise<ServiceResult<any>> {
+): Promise<ServiceResult<Record<string, unknown>>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'CORRECT_EXIT');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
