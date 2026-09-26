@@ -3,6 +3,7 @@ import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { Prisma } from '@prisma/client';
 import { resolveCoreMilkTestResults } from '@/backend/utils/milkTestResolvers';
+import { getErrorCode, getErrorMessage } from '@/lib/errors';
 
 export interface ServiceResult<T> {
   status: number;
@@ -554,7 +555,7 @@ export async function createZmccTank(
     });
 
     return { status: 201, data: { tank: serializeTank(createdTank, 0) } };
-  } catch (err: any) {
+  } catch (err) {
     const violation = parseZmccTankUniqueViolation(err);
     if (violation.isActiveTankConflict) {
       return {
@@ -568,7 +569,7 @@ export async function createZmccTank(
         error: `Tank code "${codeTrimmed}" already exists in this ZMCC.`,
       };
     }
-    if (err?.code === 'P2002') {
+    if (getErrorCode(err) === 'P2002') {
       return {
         status: 400,
         error: 'A tank with these unique properties already exists in this ZMCC.',
@@ -793,7 +794,7 @@ export async function toggleZmccTankActive(
 
     const stock = await getTankPhysicalStock(updatedTank.id);
     return { status: 200, data: { tank: serializeTank(updatedTank, stock) } };
-  } catch (err: any) {
+  } catch (err) {
     const violation = parseZmccTankUniqueViolation(err);
     if (violation.isActiveTankConflict) {
       return {
@@ -801,7 +802,7 @@ export async function toggleZmccTankActive(
         error: 'Cannot activate tank. An active tank already exists for this ZMCC. Only one active tank is permitted per ZMCC.',
       };
     }
-    if (err?.code === 'P2002') {
+    if (getErrorCode(err) === 'P2002') {
       return {
         status: 400,
         error: 'Cannot update tank status due to a unique constraint conflict.',
@@ -1049,22 +1050,22 @@ export async function receiveHistoricalSession(
     });
 
     return { status: 201, data: { tank_receipt: serializeTankReceipt(receipt) } };
-  } catch (err: any) {
-    if (err.message && err.message.startsWith('INSUFFICIENT_CAPACITY:')) {
-      const msg = err.message.replace('INSUFFICIENT_CAPACITY:', '');
+  } catch (err) {
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('INSUFFICIENT_CAPACITY:')) {
+      const msg = getErrorMessage(err).replace('INSUFFICIENT_CAPACITY:', '');
       return { status: 400, error: msg };
     }
-    if (err.message && err.message.startsWith('TANK_INACTIVE:')) {
-      const msg = err.message.replace('TANK_INACTIVE:', '');
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('TANK_INACTIVE:')) {
+      const msg = getErrorMessage(err).replace('TANK_INACTIVE:', '');
       return { status: 400, error: msg };
     }
-    if (err.message === 'TANK_WRONG_ZMCC') {
+    if (getErrorMessage(err) === 'TANK_WRONG_ZMCC') {
       return { status: 403, error: 'Forbidden. Selected tank belongs to another ZMCC.' };
     }
-    if (err.message === 'TANK_NOT_FOUND') {
+    if (getErrorMessage(err) === 'TANK_NOT_FOUND') {
       return { status: 404, error: 'Selected destination tank not found.' };
     }
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && getErrorCode(err) === 'P2002') {
       const existing = await prisma.zmccTankReceipt.findUnique({
         where: { lab_session_id: sessionId },
         include: { tank: true, receiver: true },

@@ -74,7 +74,7 @@ export async function POST(
     });
 
     return NextResponse.json({ success: true, message: `Password reset successfully for user "${targetUser.username}".` });
-  } catch (err: any) {
+  } catch (err) {
     console.error('[API_SUPER_ADMIN_USERS_RESET_PASSWORD_ERROR]', err);
     return NextResponse.json({ error: 'Failed to reset password.' }, { status: 500 });
   }

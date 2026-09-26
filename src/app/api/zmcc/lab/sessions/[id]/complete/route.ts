@@ -17,7 +17,7 @@ export async function POST(
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/zmcc/lab/sessions/[id]/complete error:', err);
     return NextResponse.json({ error: 'Failed to complete lab session.' }, { status: 500 });
   }

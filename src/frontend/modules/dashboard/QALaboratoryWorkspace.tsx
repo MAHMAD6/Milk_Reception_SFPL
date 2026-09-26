@@ -24,6 +24,7 @@ import {
 import { QADecisionModals } from './qa/QADecisionModals';
 import { PageHeader } from '@/components/ui/page-header';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { getErrorMessage } from '@/lib/errors';
 
 export type {
   WaitingVisit,
@@ -203,7 +204,7 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
           return onHold.length > 0 ? onHold[0].id : null;
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to fetch QA queues', err);
     } finally {
       if (isInitial && isInitialQueuesFetch.current) {
@@ -224,8 +225,8 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
       if (data.visit?.portions && data.visit.portions.length > activePortionIndex) {
         populateInputsForPortion(data.visit.portions[activePortionIndex], data.visit.active_plant_tests || []);
       }
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
     } finally {
       setIsLoadingVisit(false);
     }
@@ -333,8 +334,8 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
       setActiveTab('IN_TESTING');
       setSelectedTestingVisitId(targetVisitId);
       await fetchQueues();
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
     } finally {
       setIsSubmitting(false);
     }
@@ -366,8 +367,8 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
       setActiveTab('IN_TESTING');
       setSelectedTestingVisitId(targetVisitId);
       await fetchQueues();
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
     } finally {
       setIsSubmitting(false);
     }
@@ -409,8 +410,8 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
       setActiveActionModal(null);
       await fetchVisitDetail(visitDetail.id);
       await fetchQueues();
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
     } finally {
       setIsSubmitting(false);
     }
@@ -472,8 +473,8 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
       setRejectionRemarks('');
       await fetchVisitDetail(visitDetail.id);
       await fetchQueues();
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
     } finally {
       setIsSubmitting(false);
     }
@@ -511,8 +512,8 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
       setActiveTab('ON_HOLD');
       setSelectedHeldVisitId(heldVisitId);
       await fetchQueues();
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
     } finally {
       setIsSubmitting(false);
     }

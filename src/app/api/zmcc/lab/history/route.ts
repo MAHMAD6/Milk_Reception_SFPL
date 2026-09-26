@@ -20,7 +20,7 @@ export async function GET(req: Request) {
         'Cache-Control': 'private, no-store, max-age=0',
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/zmcc/lab/history error:', err);
     return NextResponse.json({ error: 'Failed to fetch lab history.' }, { status: 500 });
   }

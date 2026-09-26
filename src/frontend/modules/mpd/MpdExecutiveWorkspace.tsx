@@ -24,6 +24,7 @@ import type { User } from '@core/types';
 import { PageHeader } from '@/components/ui/page-header';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { Button } from '@/components/ui/button';
+import { getErrorMessage } from '@/lib/errors';
 
 interface MpdExecutiveWorkspaceProps {
   currentUser?: User | null;
@@ -50,8 +51,8 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
       } else {
         setError(json.error || 'Failed to load MPD Executive Telemetry.');
       }
-    } catch (err: any) {
-      setError(err?.message || 'Network error fetching telemetry.');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Network error fetching telemetry.');
     } finally {
       setLoading(false);
       if (isManual) setIsRefreshing(false);
@@ -92,8 +93,8 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
       } else {
         toast.error(json.error || 'Failed to submit audit decision.');
       }
-    } catch (err: any) {
-      toast.error(err.message || 'Network error during audit.');
+    } catch (err) {
+      toast.error(getErrorMessage(err) || 'Network error during audit.');
     }
   };
 

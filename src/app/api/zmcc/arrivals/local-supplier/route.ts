@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/zmcc/arrivals/local-supplier error:', err);
     return NextResponse.json({ error: 'Failed to fetch local supplier arrivals.' }, { status: 500 });
   }
@@ -44,7 +44,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/zmcc/arrivals/local-supplier error:', err);
     return NextResponse.json({ error: 'Failed to submit local supplier arrival.' }, { status: 500 });
   }

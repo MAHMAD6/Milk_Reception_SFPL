@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { QualityRuleService } from '@/backend/services/qualityRuleService';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const correctResultItemSchema = z.object({
   test_id: z.string().or(z.number()),
@@ -307,21 +308,21 @@ export async function POST(
     });
 
     return NextResponse.json(result, { status: 200 });
-  } catch (err: any) {
-    if (err.message?.startsWith('NOT_FOUND:')) {
-      return NextResponse.json({ error: err.message.replace('NOT_FOUND:', '') }, { status: 404 });
+  } catch (err) {
+    if (getErrorMessage(err).startsWith('NOT_FOUND:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('NOT_FOUND:', '') }, { status: 404 });
     }
-    if (err.message?.startsWith('MAX_CORRECTIONS_EXCEEDED:')) {
-      return NextResponse.json({ error: 'MAX_CORRECTIONS_EXCEEDED', message: err.message.replace('MAX_CORRECTIONS_EXCEEDED:', '') }, { status: 400 });
+    if (getErrorMessage(err).startsWith('MAX_CORRECTIONS_EXCEEDED:')) {
+      return NextResponse.json({ error: 'MAX_CORRECTIONS_EXCEEDED', message: getErrorMessage(err).replace('MAX_CORRECTIONS_EXCEEDED:', '') }, { status: 400 });
     }
-    if (err.message?.startsWith('BAD_REQUEST:')) {
-      return NextResponse.json({ error: err.message.replace('BAD_REQUEST:', '') }, { status: 400 });
+    if (getErrorMessage(err).startsWith('BAD_REQUEST:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('BAD_REQUEST:', '') }, { status: 400 });
     }
-    if (err.name === 'ZodError') {
-      return NextResponse.json({ error: err.issues?.[0]?.message || 'Validation error' }, { status: 400 });
+    if (getErrorName(err) === 'ZodError') {
+      return NextResponse.json({ error: getErrorIssues(err)?.[0]?.message || 'Validation error' }, { status: 400 });
     }
     console.error('POST /api/qa/vehicle-visits/[visitId]/portions/[portionId]/correct-results error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to correct QA test results.' }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(err) || 'Failed to correct QA test results.' }, { status: 500 });
   }
 }
 

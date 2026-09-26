@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ZmccLabResultItem {
   id: string;
@@ -163,8 +164,8 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
       }
       const data = await res.json();
       setLabSessions(data.items || []);
-    } catch (err: any) {
-      setLabError(err.message || 'Failed to fetch ZMCC lab sessions.');
+    } catch (err) {
+      setLabError(getErrorMessage(err) || 'Failed to fetch ZMCC lab sessions.');
     } finally {
       setLabLoading(false);
     }
@@ -268,8 +269,8 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
       setReviewModalSession(null);
       setReviewReason('');
       fetchLabSessions();
-    } catch (err: any) {
-      setReviewError(err.message || 'Failed to submit manager decision.');
+    } catch (err) {
+      setReviewError(getErrorMessage(err) || 'Failed to submit manager decision.');
     } finally {
       setReviewSubmitting(false);
     }

@@ -17,7 +17,7 @@ export async function GET(
         'Cache-Control': 'private, no-store, max-age=0',
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/zmcc/lab/sessions/[id] error:', err);
     return NextResponse.json({ error: 'Failed to fetch lab session.' }, { status: 500 });
   }
@@ -39,7 +39,7 @@ export async function PATCH(
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('PATCH /api/zmcc/lab/sessions/[id] error:', err);
     return NextResponse.json({ error: 'Failed to update draft results.' }, { status: 500 });
   }

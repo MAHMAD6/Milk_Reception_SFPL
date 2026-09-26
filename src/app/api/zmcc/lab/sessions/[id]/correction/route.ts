@@ -17,7 +17,7 @@ export async function PATCH(
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('PATCH /api/zmcc/lab/sessions/[id]/correction error:', err);
     return NextResponse.json({ error: 'Failed to correct lab session.' }, { status: 500 });
   }

@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import bcrypt from 'bcryptjs';
 import { getRoleAssignmentPolicy } from '@/lib/user-assignment-policy';
 import { validateAndNormalizeEmail, classifyUniqueError } from '@/lib/email-validator';
+import { getErrorCode, getErrorMessage } from '@/lib/errors';
 
 // Fixed documented PostgreSQL transaction-level advisory lock key used across
 // all user creation (POST) and mutation (PATCH) transactions to serialize
@@ -49,7 +50,7 @@ export async function GET(req: Request) {
     }));
 
     return NextResponse.json({ users: serialized });
-  } catch (err: any) {
+  } catch (err) {
     console.error('[API_SUPER_ADMIN_USERS_GET_ERROR]', err);
     return NextResponse.json({ error: 'Failed to retrieve users.' }, { status: 500 });
   }
@@ -286,12 +287,12 @@ export async function POST(req: Request) {
         procurementSourceId: newUser.procurement_source_id ? newUser.procurement_source_id.toString() : null,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ValidationError) {
-      return NextResponse.json({ error: err.message }, { status: 400 });
+      return NextResponse.json({ error: getErrorMessage(err) }, { status: 400 });
     }
     if (err instanceof NotFoundError) {
-      return NextResponse.json({ error: err.message }, { status: 404 });
+      return NextResponse.json({ error: getErrorMessage(err) }, { status: 404 });
     }
     const uniqueType = classifyUniqueError(err);
     if (uniqueType === 'EMAIL') {
@@ -306,7 +307,7 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    if (err?.code === 'P2002') {
+    if (getErrorCode(err) === 'P2002') {
       return NextResponse.json(
         { error: 'A record with this identifier already exists.' },
         { status: 400 }

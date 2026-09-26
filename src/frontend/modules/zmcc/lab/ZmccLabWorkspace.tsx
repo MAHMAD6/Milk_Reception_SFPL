@@ -25,6 +25,7 @@ import { resolveCoreMilkTestResults } from '@/backend/utils/milkTestResolvers';
 import { Modal } from '@/components/ui/modal';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ZmccLabWorkspaceProps {
   currentUser: User | null;
@@ -525,7 +526,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
       if (!res.ok) throw new Error(data.error || 'Failed to issue Local Supplier RMR.');
       toast.showSuccess(`Local Supplier RMR issued: ${data.printable_reference}`);
       setRmrSession(null); fetchHistory();
-    } catch (error: any) { toast.showError(error.message || 'Failed to issue Local Supplier RMR.'); }
+    } catch (error) { toast.showError(getErrorMessage(error) || 'Failed to issue Local Supplier RMR.'); }
     finally { setIssuingRmr(false); }
   };
 

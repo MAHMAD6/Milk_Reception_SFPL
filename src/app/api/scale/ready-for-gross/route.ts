@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
+import { getErrorMessage } from '@/lib/errors';
 
 const WEIGHBRIDGE_SCOPE = { kind: 'DEPARTMENT', departmentId: 'Production & Weighbridge' } as const;
 
@@ -117,7 +118,7 @@ export async function GET(req: Request) {
     const eligibleVisits = formatted.filter((v) => v.accepted_portion_count > 0);
 
     return NextResponse.json({ visits: eligibleVisits });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch visits ready for gross weight' }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to fetch visits ready for gross weight' }, { status: 500 });
   }
 }

@@ -16,6 +16,7 @@ import { getTankPhysicalStock } from '@/backend/services/zmccTankService';
 import { PaperReferenceService, PaperValidationError } from '@/backend/services/paperReferenceService';
 import { PaperReferenceType } from '@prisma/client';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
+import { getErrorCode, getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 function serializeDispatch(visit: any) {
   const portions = visit.portions || [];
@@ -317,8 +318,8 @@ export async function GET(req: Request) {
         totalPages,
       },
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch dispatches' }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to fetch dispatches' }, { status: 500 });
   }
 }
 
@@ -441,8 +442,8 @@ export async function POST(req: Request) {
           scopeEntityId: resolvedSourceId,
         }
       );
-    } catch (err: any) {
-      return NextResponse.json({ error: err.message || 'Invalid Raw Milk Dispatch Note number.' }, { status: 400 });
+    } catch (err) {
+      return NextResponse.json({ error: getErrorMessage(err) || 'Invalid Raw Milk Dispatch Note number.' }, { status: 400 });
     }
 
     const sourceType = sourceRecord.source_type || 'ZMCC';
@@ -959,29 +960,29 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, visitId: result.id.toString(), visitNumber: result.visit_number }, { status: 201 });
-  } catch (error: any) {
-    if (error instanceof PaperValidationError || error?.name === 'PaperValidationError') {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+  } catch (error) {
+    if (error instanceof PaperValidationError || getErrorName(error) === 'PaperValidationError') {
+      return NextResponse.json({ error: getErrorMessage(error) }, { status: 400 });
     }
-    if (error instanceof QuantityMeasurementError || error?.name === 'QuantityMeasurementError' || error?.code?.startsWith('QUANTITY_') || error?.code?.startsWith('MISSING_') || error?.code === 'ZERO_PORTIONS_PROHIBITED') {
-      return NextResponse.json({ error: error.message, code: error.code || 'QUANTITY_ERROR' }, { status: 400 });
+    if (error instanceof QuantityMeasurementError || getErrorName(error) === 'QuantityMeasurementError' || getErrorCode(error)?.startsWith('QUANTITY_') || getErrorCode(error)?.startsWith('MISSING_') || getErrorCode(error) === 'ZERO_PORTIONS_PROHIBITED') {
+      return NextResponse.json({ error: getErrorMessage(error), code: getErrorCode(error) || 'QUANTITY_ERROR' }, { status: 400 });
     }
     if (
-      error?.message?.startsWith('INSUFFICIENT_TANK_STOCK') ||
-      error?.message?.startsWith('ZMCC_TANK_CONFIGURATION_ERROR') ||
-      error?.message?.startsWith('MISSING_AUTHORITATIVE_VEHICLE_LR') ||
-      error?.message?.startsWith('INVALID_GROSS_LITERS') ||
-      error?.message?.startsWith('ZMCC_TANK_INACTIVE') ||
-      error?.message?.startsWith('ZMCC_TANK_NOT_FOUND') ||
-      error?.message?.startsWith('INVALID_DISPATCH_QUANTITY')
+      getErrorMessage(error).startsWith('INSUFFICIENT_TANK_STOCK') ||
+      getErrorMessage(error).startsWith('ZMCC_TANK_CONFIGURATION_ERROR') ||
+      getErrorMessage(error).startsWith('MISSING_AUTHORITATIVE_VEHICLE_LR') ||
+      getErrorMessage(error).startsWith('INVALID_GROSS_LITERS') ||
+      getErrorMessage(error).startsWith('ZMCC_TANK_INACTIVE') ||
+      getErrorMessage(error).startsWith('ZMCC_TANK_NOT_FOUND') ||
+      getErrorMessage(error).startsWith('INVALID_DISPATCH_QUANTITY')
     ) {
-      const code = error.message.split(':')[0].trim();
-      return NextResponse.json({ error: error.message, code }, { status: 400 });
+      const code = getErrorMessage(error).split(':')[0].trim();
+      return NextResponse.json({ error: getErrorMessage(error), code }, { status: 400 });
     }
-    if (error?.name === 'ZodError' || Array.isArray(error?.issues)) {
-      const firstMsg = error.issues?.[0]?.message || error.errors?.[0]?.message || 'Validation failed';
+    if (getErrorName(error) === 'ZodError' || Array.isArray(getErrorIssues(error))) {
+      const firstMsg = getErrorIssues(error)?.[0]?.message || 'Validation failed';
       return NextResponse.json({ error: firstMsg }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to create vehicle dispatch' }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to create vehicle dispatch' }, { status: 500 });
   }
 }

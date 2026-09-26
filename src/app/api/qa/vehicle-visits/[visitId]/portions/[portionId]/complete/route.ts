@@ -7,6 +7,7 @@ import { validateNonNegativeDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 class RouteError extends Error {
   statusCode: number;
@@ -583,13 +584,13 @@ export async function POST(
           ? `Portion #${lockedPortionRecord?.portion_number ?? portion.portion_number} submitted. Escalated to QA Manager because the attendant decision differs from the system result.`
           : `Portion #${lockedPortionRecord?.portion_number ?? portion.portion_number} testing completed. Decision: ${finalPlantDecision}.`,
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError' || error?.issues) {
-      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || error.message || 'Validation failed';
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError' || getErrorIssues(error)) {
+      const msg = getErrorIssues(error)?.[0]?.message || getErrorMessage(error) || 'Validation failed';
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     if (error instanceof RouteError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+      return NextResponse.json({ error: getErrorMessage(error) }, { status: error.statusCode });
     }
     console.error('Unexpected error in QA complete route:', error);
     return NextResponse.json({ error: 'Failed to complete QA test' }, { status: 500 });

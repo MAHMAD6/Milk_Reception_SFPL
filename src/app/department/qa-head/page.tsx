@@ -9,6 +9,7 @@ import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface LabTest {
   id: string;
@@ -157,8 +158,8 @@ export default function QAHeadDepartmentPage() {
       setFormDecisionConsequence('');
       setFormReason('');
       await loadData();
-    } catch (err: any) {
-      setFormError(err.message || 'Error creating rule.');
+    } catch (err) {
+      setFormError(getErrorMessage(err) || 'Error creating rule.');
     } finally {
       setSubmitting(false);
     }

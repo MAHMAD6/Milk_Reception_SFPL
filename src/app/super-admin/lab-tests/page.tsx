@@ -5,6 +5,7 @@ import { Edit2, ShieldAlert, CheckCircle2, Lock, Plus, Trash2, X, AlertTriangle 
 import { mapScopeCheckboxes } from '@/lib/validations/labTest';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface LabTestResultOption {
   value: string;
@@ -84,8 +85,8 @@ export default function SuperAdminLabTestsPage() {
       const data = await res.json();
       if (res.ok) setLabTests(data.labTests || []);
       else setError(data.error || 'Failed to load lab tests');
-    } catch (err: any) {
-      setError(err.message || 'Network error loading lab tests');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Network error loading lab tests');
     } finally {
       setLoading(false);
     }
@@ -161,8 +162,8 @@ export default function SuperAdminLabTestsPage() {
     let testScope: string;
     try {
       testScope = mapScopeCheckboxes(createScopeDispatch, createScopePlantQA, createScopeZmcc, createScopeMotShop);
-    } catch (err: any) {
-      setCreateModalError(err.message || 'Please select at least one scope (Dispatch, Plant QA, ZMCC Lab, or MOT Shop).');
+    } catch (err) {
+      setCreateModalError(getErrorMessage(err) || 'Please select at least one scope (Dispatch, Plant QA, ZMCC Lab, or MOT Shop).');
       return;
     }
 
@@ -198,8 +199,8 @@ export default function SuperAdminLabTestsPage() {
       setSuccessMsg(`Lab Test "${data.labTest.testCode}" (${data.labTest.testName}) created successfully.`);
       closeCreateModal();
       loadLabTests();
-    } catch (err: any) {
-      setCreateModalError(err.message || 'Failed to create lab test');
+    } catch (err) {
+      setCreateModalError(getErrorMessage(err) || 'Failed to create lab test');
     } finally {
       setIsSubmittingCreate(false);
     }
@@ -221,8 +222,8 @@ export default function SuperAdminLabTestsPage() {
     let testScope: string;
     try {
       testScope = mapScopeCheckboxes(editScopeDispatch, editScopePlantQA, editScopeZmcc, editScopeMotShop);
-    } catch (err: any) {
-      setEditModalError(err.message || 'Please select at least one scope (Dispatch, Plant QA, ZMCC Lab, or MOT Shop).');
+    } catch (err) {
+      setEditModalError(getErrorMessage(err) || 'Please select at least one scope (Dispatch, Plant QA, ZMCC Lab, or MOT Shop).');
       return;
     }
 
@@ -257,8 +258,8 @@ export default function SuperAdminLabTestsPage() {
       setSuccessMsg(`Lab Test "${showEditModal.testCode}" updated successfully.`);
       closeEditModal();
       loadLabTests();
-    } catch (err: any) {
-      setEditModalError(err.message || 'Failed to update lab test');
+    } catch (err) {
+      setEditModalError(getErrorMessage(err) || 'Failed to update lab test');
     } finally {
       setIsSubmittingEdit(false);
     }
@@ -287,8 +288,8 @@ export default function SuperAdminLabTestsPage() {
       setSuccessMsg(`Lab Test "${test.testCode}" ${newStatus ? 'activated' : 'deactivated'} successfully.`);
       closeConfirmModal();
       loadLabTests();
-    } catch (err: any) {
-      setConfirmModalError(err.message || 'Failed to update test status');
+    } catch (err) {
+      setConfirmModalError(getErrorMessage(err) || 'Failed to update test status');
     } finally {
       setIsSubmittingToggle(false);
     }

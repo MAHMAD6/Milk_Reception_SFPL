@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, ShieldAlert, CheckCircle2, Edit2, AlertTriangle, X } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface Silo {
   id: string;
@@ -64,8 +65,8 @@ export default function SuperAdminSilosPage() {
       const data = await res.json();
       if (res.ok) setSilos(data.silos || []);
       else setError(data.error);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -118,8 +119,8 @@ export default function SuperAdminSilosPage() {
       setSiloName('');
       setCapacityLiters(100000);
       loadSilos();
-    } catch (err: any) {
-      setModalError(err.message);
+    } catch (err) {
+      setModalError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -160,8 +161,8 @@ export default function SuperAdminSilosPage() {
       setSuccessMsg(`Silo "${showEditModal.siloCode}" updated successfully.`);
       setShowEditModal(null);
       loadSilos();
-    } catch (err: any) {
-      setModalError(err.message);
+    } catch (err) {
+      setModalError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -188,8 +189,8 @@ export default function SuperAdminSilosPage() {
       setSuccessMsg(`Silo "${deactivatingSilo.siloCode}" deactivated successfully.`);
       setDeactivatingSilo(null);
       loadSilos();
-    } catch (err: any) {
-      setModalError(err.message);
+    } catch (err) {
+      setModalError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
@@ -213,8 +214,8 @@ export default function SuperAdminSilosPage() {
 
       setSuccessMsg(`Silo "${silo.siloCode}" reactivated successfully.`);
       loadSilos();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }

@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
 import { MilkTestPolicyService } from '@/backend/services/milkTestPolicyService';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(
   req: Request,
@@ -133,7 +134,7 @@ export async function GET(
     };
 
     return NextResponse.json({ visit: formattedVisit });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch vehicle visit details' }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to fetch vehicle visit details' }, { status: 500 });
   }
 }

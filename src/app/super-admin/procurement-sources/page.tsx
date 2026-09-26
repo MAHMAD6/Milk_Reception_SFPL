@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Plus, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface Source {
   id: string;
@@ -57,8 +58,8 @@ export default function SuperAdminProcurementSourcesPage() {
       } else {
         setError(data.error || 'Failed to load procurement sources');
       }
-    } catch (err: any) {
-      setError(err.message || 'Network error loading procurement sources');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Network error loading procurement sources');
     } finally {
       setLoading(false);
     }
@@ -146,8 +147,8 @@ export default function SuperAdminProcurementSourcesPage() {
       setSuccessMsg(`Procurement source "${trimmedName}" (${normalizedCode}) created successfully.`);
       closeCreateModal();
       await loadSources();
-    } catch (err: any) {
-      setCreateModalError(err.message || 'Failed to create procurement source');
+    } catch (err) {
+      setCreateModalError(getErrorMessage(err) || 'Failed to create procurement source');
     } finally {
       setIsSubmittingCreate(false);
     }
@@ -189,8 +190,8 @@ export default function SuperAdminProcurementSourcesPage() {
       setSuccessMsg(`Procurement source "${trimmedName}" updated successfully.`);
       closeEditModal();
       await loadSources();
-    } catch (err: any) {
-      setEditModalError(err.message || 'Failed to update procurement source');
+    } catch (err) {
+      setEditModalError(getErrorMessage(err) || 'Failed to update procurement source');
     } finally {
       setIsSubmittingEdit(false);
     }
@@ -231,8 +232,8 @@ export default function SuperAdminProcurementSourcesPage() {
       );
       closeConfirmModal();
       await loadSources();
-    } catch (err: any) {
-      setConfirmModalError(err.message || 'Failed to update procurement source status');
+    } catch (err) {
+      setConfirmModalError(getErrorMessage(err) || 'Failed to update procurement source status');
     } finally {
       setIsSubmittingConfirm(false);
     }

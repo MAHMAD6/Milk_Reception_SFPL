@@ -22,6 +22,7 @@ import { Modal } from '@/components/ui/modal';
 import { onActivateKey } from '@/lib/a11y';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 export type MainTab = 'MOT_ARRIVAL' | 'LOCAL_SUPPLIER_ARRIVAL' | 'INSIDE_ZMCC' | 'HISTORY';
 
@@ -346,8 +347,8 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
       closeExitModal();
       fetchInsideVehicles();
       fetchHistory();
-    } catch (err: any) {
-      setExitError(err.message || 'An unexpected error occurred while recording gate exit.');
+    } catch (err) {
+      setExitError(getErrorMessage(err) || 'An unexpected error occurred while recording gate exit.');
     } finally {
       setExitSubmitting(false);
     }
@@ -425,8 +426,8 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
         fetchInsideVehicles();
         fetchHistory();
       }
-    } catch (err: any) {
-      setMotError(err.message || 'An unexpected error occurred.');
+    } catch (err) {
+      setMotError(getErrorMessage(err) || 'An unexpected error occurred.');
     } finally {
       setMotSubmitting(false);
     }
@@ -467,8 +468,8 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
         setLocalSuppliers((prev) => [supplier, ...prev]);
         setSelectedLocalSupplierId(supplier.id);
       }
-    } catch (err: any) {
-      setAddSupplierError(err.message || 'An unexpected error occurred.');
+    } catch (err) {
+      setAddSupplierError(getErrorMessage(err) || 'An unexpected error occurred.');
     } finally {
       setAddSupplierSubmitting(false);
     }
@@ -514,8 +515,8 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
         fetchInsideVehicles();
         fetchHistory();
       }
-    } catch (err: any) {
-      setLocalSupplierError(err.message || 'An unexpected error occurred.');
+    } catch (err) {
+      setLocalSupplierError(getErrorMessage(err) || 'An unexpected error occurred.');
     } finally {
       setLocalSupplierSubmitting(false);
     }
@@ -602,8 +603,8 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
         setCorrectionTarget(null);
         fetchHistory();
       }
-    } catch (err: any) {
-      setCorrError(err.message || 'An unexpected error occurred.');
+    } catch (err) {
+      setCorrError(getErrorMessage(err) || 'An unexpected error occurred.');
     } finally {
       setCorrSubmitting(false);
     }

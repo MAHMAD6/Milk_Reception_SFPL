@@ -10,6 +10,7 @@ import {
 import { PaperReferenceService, PaperValidationError } from '@/backend/services/paperReferenceService';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
 import { normalizePakistaniCnic, normalizePakistaniMobile } from '@/lib/pakistani-identity';
+import { getErrorCode, getErrorMessage, getErrorName } from '@/lib/errors';
 
 export interface ZmccArrivalAuthContext {
   user: User;
@@ -818,7 +819,7 @@ export async function submitMotArrival(
       payload.raw_milk_token_number,
       { scopeEntityId: journey.zmcc_id }
     );
-  } catch (err: any) {
+  } catch (err) {
     if (clientEventId) {
       const existingAfterCollision = await prisma.zmccMotArrival.findUnique({
         where: { client_event_id: clientEventId },
@@ -852,7 +853,7 @@ export async function submitMotArrival(
         }
       }
     }
-    return { status: 400, error: err.message || 'Invalid Raw Milk Token number.' };
+    return { status: 400, error: getErrorMessage(err) || 'Invalid Raw Milk Token number.' };
   }
 
   try {
@@ -994,7 +995,7 @@ export async function submitMotArrival(
       status: 201,
       data: serializeMotArrival(createdArrival),
     };
-  } catch (err: any) {
+  } catch (err) {
     if (clientEventId) {
       const existingAfterCollision = await prisma.zmccMotArrival.findUnique({
         where: { client_event_id: clientEventId },
@@ -1028,10 +1029,10 @@ export async function submitMotArrival(
         }
       }
     }
-    if (err instanceof PaperValidationError || err.name === 'PaperValidationError') {
-      return { status: 400, error: err.message };
+    if (err instanceof PaperValidationError || getErrorName(err) === 'PaperValidationError') {
+      return { status: 400, error: getErrorMessage(err) };
     }
-    if (err.message === 'JOURNEY_ALREADY_COMPLETED' || err.code === 'P2002') {
+    if (getErrorMessage(err) === 'JOURNEY_ALREADY_COMPLETED' || getErrorCode(err) === 'P2002') {
       return {
         status: 409,
         error: 'Conflict: Journey has already been completed or an arrival was recorded concurrently.',
@@ -1134,8 +1135,8 @@ export async function correctMotArrival(
         newValues.raw_milk_token_number = cleanRawMilkToken;
         updateData.raw_milk_token_number = cleanRawMilkToken;
       }
-    } catch (err: any) {
-      return { status: 400, error: err.message || 'Invalid Raw Milk Token number.' };
+    } catch (err) {
+      return { status: 400, error: getErrorMessage(err) || 'Invalid Raw Milk Token number.' };
     }
   }
 
@@ -1326,17 +1327,17 @@ export async function correctMotArrival(
       status: 200,
       data: serializeMotArrival(updated),
     };
-  } catch (err: any) {
-    if (err instanceof PaperValidationError || err.name === 'PaperValidationError') {
-      return { status: 400, error: err.message };
+  } catch (err) {
+    if (err instanceof PaperValidationError || getErrorName(err) === 'PaperValidationError') {
+      return { status: 400, error: getErrorMessage(err) };
     }
-    if (err.message === 'MAX_CORRECTIONS_REACHED') {
+    if (getErrorMessage(err) === 'MAX_CORRECTIONS_REACHED') {
       return {
         status: 409,
         error: 'Conflict: Maximum number of corrections (5) has been reached or another correction was committed concurrently.',
       };
     }
-    if (err.message === 'ARRIVAL_NOT_FOUND') {
+    if (getErrorMessage(err) === 'ARRIVAL_NOT_FOUND') {
       return { status: 404, error: 'MOT Arrival record not found.' };
     }
     console.error('correctMotArrival error:', err);
@@ -1525,14 +1526,14 @@ export async function correctContractorArrival(
       status: 200,
       data: serializeContractorArrival(updated),
     };
-  } catch (err: any) {
-    if (err.message === 'MAX_CORRECTIONS_REACHED') {
+  } catch (err) {
+    if (getErrorMessage(err) === 'MAX_CORRECTIONS_REACHED') {
       return {
         status: 409,
         error: 'Conflict: Maximum number of corrections (2) has been reached or another correction was committed concurrently.',
       };
     }
-    if (err.message === 'ARRIVAL_NOT_FOUND') {
+    if (getErrorMessage(err) === 'ARRIVAL_NOT_FOUND') {
       return { status: 404, error: 'Contractor Arrival record not found.' };
     }
     console.error('correctContractorArrival error:', err);
@@ -2063,7 +2064,7 @@ export async function submitLocalSupplierArrival(
       rawMilkTokenInput,
       { scopeEntityId: targetZmccId }
     );
-  } catch (err: any) {
+  } catch (err) {
     if (clientEventId) {
       const existingAfterCollision = await prisma.zmccLocalSupplierArrival.findUnique({
         where: { client_event_id: clientEventId },
@@ -2090,7 +2091,7 @@ export async function submitLocalSupplierArrival(
         }
       }
     }
-    return { status: 400, error: err.message || 'Invalid Raw Milk Token number.' };
+    return { status: 400, error: getErrorMessage(err) || 'Invalid Raw Milk Token number.' };
   }
 
   const pktDateStr = getPakistanCalendarDate(arrivalDate);
@@ -2172,7 +2173,7 @@ export async function submitLocalSupplierArrival(
       status: 201,
       data: serializeLocalSupplierArrival(createdArrival),
     };
-  } catch (err: any) {
+  } catch (err) {
     if (clientEventId) {
       const existingAfterCollision = await prisma.zmccLocalSupplierArrival.findUnique({
         where: { client_event_id: clientEventId },
@@ -2199,10 +2200,10 @@ export async function submitLocalSupplierArrival(
         }
       }
     }
-    if (err instanceof PaperValidationError || err.name === 'PaperValidationError') {
-      return { status: 400, error: err.message };
+    if (err instanceof PaperValidationError || getErrorName(err) === 'PaperValidationError') {
+      return { status: 400, error: getErrorMessage(err) };
     }
-    if (err.code === 'P2002') {
+    if (getErrorCode(err) === 'P2002') {
       return {
         status: 409,
         error: 'Conflict: Duplicate client_event_id collision on local supplier arrival.',
@@ -2322,8 +2323,8 @@ export async function correctLocalSupplierArrival(
         newValues.raw_milk_token_number = cleanRawMilkToken;
         updateData.raw_milk_token_number = cleanRawMilkToken;
       }
-    } catch (err: any) {
-      return { status: 400, error: err.message || 'Invalid Raw Milk Token number.' };
+    } catch (err) {
+      return { status: 400, error: getErrorMessage(err) || 'Invalid Raw Milk Token number.' };
     }
   }
 
@@ -2472,17 +2473,17 @@ export async function correctLocalSupplierArrival(
       status: 200,
       data: serializeLocalSupplierArrival(updated),
     };
-  } catch (err: any) {
-    if (err instanceof PaperValidationError || err.name === 'PaperValidationError') {
-      return { status: 400, error: err.message };
+  } catch (err) {
+    if (err instanceof PaperValidationError || getErrorName(err) === 'PaperValidationError') {
+      return { status: 400, error: getErrorMessage(err) };
     }
-    if (err.message === 'MAX_CORRECTIONS_REACHED') {
+    if (getErrorMessage(err) === 'MAX_CORRECTIONS_REACHED') {
       return {
         status: 409,
         error: 'Conflict: Maximum number of corrections (5) has been reached or another correction was committed concurrently.',
       };
     }
-    if (err.message === 'ARRIVAL_NOT_FOUND') {
+    if (getErrorMessage(err) === 'ARRIVAL_NOT_FOUND') {
       return { status: 404, error: 'Local Supplier Arrival record not found.' };
     }
     console.error('correctLocalSupplierArrival error:', err);
@@ -2914,8 +2915,8 @@ export async function recordGateExit(
     });
 
     return result;
-  } catch (err: any) {
-    if (err.code === 'P2002') {
+  } catch (err) {
+    if (getErrorCode(err) === 'P2002') {
       const conflictRecord = arrivalType === 'MOT'
         ? await prisma.zmccMotArrival.findUnique({
             where: { exit_client_event_id: clientEventId },
@@ -3206,7 +3207,7 @@ export async function correctGateExit(
       status: 200,
       data: arrivalType === 'MOT' ? serializeMotArrival(updated) : serializeLocalSupplierArrival(updated),
     };
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof ExitCorrectionError) {
       return err.errorPayload;
     }

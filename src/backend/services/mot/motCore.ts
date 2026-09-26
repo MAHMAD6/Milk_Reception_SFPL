@@ -15,6 +15,7 @@ import { paperLinkedIdentity } from '@/backend/modules/paper-references';
 import { QualityRuleService } from '@/backend/services/qualityRuleService';
 import { isLrTestCandidate, isFatTestCandidate } from '@/backend/utils/milkTestResolvers';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
+import { getErrorCode, getErrorMessage, getErrorMetaTarget } from '@/lib/errors';
 
 export interface MotAuthContext {
   user: User;
@@ -1602,11 +1603,9 @@ export async function assignAndDispatchJourney(
     });
 
     return { status: 201, data: serializeJourney(fullJourney!) };
-  } catch (err: any) {
-    if (err.code === 'P2002') {
-      const target = Array.isArray(err.meta?.target)
-        ? err.meta.target.join(',')
-        : String(err.meta?.target || '');
+  } catch (err) {
+    if (getErrorCode(err) === 'P2002') {
+      const target = getErrorMetaTarget(err);
 
       // 1. Idempotency Key collision (e.g. concurrent identical request won race)
       const existingAfterCollision = await findFullJourneyByIdempotencyKey(idempotencyKey);
@@ -1799,12 +1798,12 @@ export async function cancelMotJourney(
     });
 
     return { status: 200, data: serializeJourney(updated!) };
-  } catch (err: any) {
-    if (err.message === 'JOURNEY_NOT_FOUND') {
+  } catch (err) {
+    if (getErrorMessage(err) === 'JOURNEY_NOT_FOUND') {
       return { status: 404, error: 'Journey not found.' };
     }
-    if (err.message?.startsWith('CONFLICT:')) {
-      return { status: 400, error: err.message.replace('CONFLICT: ', '') };
+    if (getErrorMessage(err)?.startsWith('CONFLICT:')) {
+      return { status: 400, error: getErrorMessage(err).replace('CONFLICT: ', '') };
     }
     throw err;
   }
@@ -2485,16 +2484,16 @@ export async function submitShopCollection(
       payload.shop_rmr_number,
       { scopeEntityId: stop.journey.zmcc_id }
     );
-  } catch (err: any) {
-    return { status: 400, error: err.message || 'Invalid Shop RMR number.' };
+  } catch (err) {
+    return { status: 400, error: getErrorMessage(err) || 'Invalid Shop RMR number.' };
   }
 
   // 6. Recalculate ALL derived milk metrics on server using canonical formulas
   let metrics;
   try {
     metrics = computeCanonicalMilkMetrics(quantityValue, quantityUnit, lr, fat);
-  } catch (err: any) {
-    return { status: 400, error: err.message || 'Failed to compute milk quality metrics.' };
+  } catch (err) {
+    return { status: 400, error: getErrorMessage(err) || 'Failed to compute milk quality metrics.' };
   }
 
   // 6b. Evaluate Quality Acceptance Rules for MOT_SHOP
@@ -2797,17 +2796,17 @@ export async function submitShopCollection(
     });
 
     return { status: 201, data: serializeCollection(result) };
-  } catch (err: any) {
-    if (err.message === 'COLLECTION_PREDATES_JOURNEY_START') {
+  } catch (err) {
+    if (getErrorMessage(err) === 'COLLECTION_PREDATES_JOURNEY_START') {
       return { status: 400, error: 'Collection time cannot predate journey start time.' };
     }
-    if (err.message === 'COLLECTION_EXCEEDS_JOURNEY_END') {
+    if (getErrorMessage(err) === 'COLLECTION_EXCEEDS_JOURNEY_END') {
       return { status: 400, error: 'Collection time cannot be later than journey ended_at.' };
     }
-    if (err.message === 'COLLECTION_EXCEEDS_JOURNEY_CANCEL') {
+    if (getErrorMessage(err) === 'COLLECTION_EXCEEDS_JOURNEY_CANCEL') {
       return { status: 400, error: 'Collection time cannot be later than journey cancelled_at.' };
     }
-    if (err.message === 'STOP_ALREADY_VISITED' || err.code === 'P2002') {
+    if (getErrorMessage(err) === 'STOP_ALREADY_VISITED' || getErrorCode(err) === 'P2002') {
       const existingAfterCollision = await prisma.motShopCollection.findUnique({
         where: { client_event_id: clientEventId },
         include: { sms_outbox: true },
@@ -2827,16 +2826,14 @@ export async function submitShopCollection(
         });
       }
 
-      if (err.message === 'STOP_ALREADY_VISITED') {
+      if (getErrorMessage(err) === 'STOP_ALREADY_VISITED') {
         return {
           status: 409,
           error: `Journey stop #${stop.planned_sequence} has already been visited or recorded.`,
         };
       }
 
-      const target = Array.isArray(err.meta?.target)
-        ? err.meta.target.join(',')
-        : String(err.meta?.target || '');
+      const target = getErrorMetaTarget(err);
 
       if (target.includes('journey_stop_id')) {
         return {
@@ -3090,8 +3087,8 @@ export async function recordGpsBatch(
 
       results.push({ client_location_id: locId, status: 'ACCEPTED' });
       acceptedCount++;
-    } catch (err: any) {
-      if (err.code === 'P2002') {
+    } catch (err) {
+      if (getErrorCode(err) === 'P2002') {
         const existingAfterCollision = await prisma.motJourneyLocation.findUnique({
           where: { idempotency_key: locId },
         });
@@ -3119,7 +3116,7 @@ export async function recordGpsBatch(
           results.push({ client_location_id: locId, status: 'CONFLICT', reason: 'Concurrent insert conflict' });
         }
       } else {
-        results.push({ client_location_id: locId, status: 'REJECTED', reason: err.message });
+        results.push({ client_location_id: locId, status: 'REJECTED', reason: getErrorMessage(err) });
       }
     }
   }
@@ -3544,8 +3541,8 @@ export async function correctShopCollection(
         payload.shop_rmr_number,
         { excludeEntityId: collection.id, scopeEntityId: collection.zmcc_id }
       );
-    } catch (err: any) {
-      return { status: 400, error: err.message || 'Invalid Shop RMR number.' };
+    } catch (err) {
+      return { status: 400, error: getErrorMessage(err) || 'Invalid Shop RMR number.' };
     }
   }
 
@@ -3594,8 +3591,8 @@ export async function correctShopCollection(
   if (isMeasurementProvided) {
     try {
       metrics = computeCanonicalMilkMetrics(newQty, newUnit, newLr, newFat);
-    } catch (err: any) {
-      return { status: 400, error: err.message || 'Failed to compute milk quality metrics.' };
+    } catch (err) {
+      return { status: 400, error: getErrorMessage(err) || 'Failed to compute milk quality metrics.' };
     }
   }
 
@@ -3739,17 +3736,17 @@ export async function correctShopCollection(
     });
 
     return { status: 200, data: serializeCollection(updatedCollection) };
-  } catch (err: any) {
-    if (err.message === 'MAX_CORRECTIONS_REACHED') {
+  } catch (err) {
+    if (getErrorMessage(err) === 'MAX_CORRECTIONS_REACHED') {
       return {
         status: 409,
         error: 'Conflict: Maximum number of corrections (5) has been reached or another correction was committed concurrently.',
       };
     }
-    if (err.message === 'COLLECTION_NOT_FOUND') {
+    if (getErrorMessage(err) === 'COLLECTION_NOT_FOUND') {
       return { status: 404, error: 'Shop collection not found.' };
     }
-    return { status: 500, error: err.message || 'Failed to correct shop collection.' };
+    return { status: 500, error: getErrorMessage(err) || 'Failed to correct shop collection.' };
   }
 }
 

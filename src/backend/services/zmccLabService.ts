@@ -11,6 +11,7 @@ import { QualityRuleService } from '@/backend/services/qualityRuleService';
 import { TestingPoint } from '@/types/milk-test-policy';
 import { getTankPhysicalStock, serializeTankReceipt } from '@/backend/services/zmccTankService';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
+import { getErrorCode, getErrorMessage } from '@/lib/errors';
 
 export interface ZmccLabAuthContext {
   user: User;
@@ -206,7 +207,7 @@ export async function issueLocalSupplierRmr(
   try {
     series = normal(payload?.series, 'Series', 30); bookNumber = normal(payload?.book_number, 'Book number', 50);
     receiptNumber = normal(payload?.receipt_number, 'Receipt number', 50); idempotencyKey = normal(payload?.idempotency_key, 'Idempotency key', 255);
-  } catch (error: any) { return { status: 400, error: error.message }; }
+  } catch (error) { return { status: 400, error: getErrorMessage(error) }; }
   try {
     const issuance = await prisma.$transaction(async (tx) => {
       const arrival = await tx.zmccLocalSupplierArrival.findUnique({
@@ -238,14 +239,14 @@ export async function issueLocalSupplierRmr(
       return created;
     });
     return { status: 201, data: serializeLocalSupplierRmr(issuance) };
-  } catch (error: any) {
+  } catch (error) {
     const messages: Record<string, [number, string]> = {
       ARRIVAL_NOT_FOUND: [404, 'Local Supplier arrival not found.'], FORBIDDEN_SOURCE: [403, 'Forbidden. Arrival belongs to another ZMCC.'],
       NOT_FINALLY_ACCEPTED: [400, 'RMR can only be issued after final acceptance and successful tank receipt.'], RMR_ALREADY_ISSUED: [409, 'A Local Supplier RMR is already issued for this arrival.'],
       IDEMPOTENCY_CONFLICT: [409, 'Idempotency key was already used for a different RMR command.'], PAPER_NUMBER_CONFLICT: [409, 'This RMR paper number is already used in this ZMCC annual series.'],
     };
-    if (messages[error.message]) return { status: messages[error.message][0], error: messages[error.message][1] };
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') return { status: 409, error: 'RMR issuance conflicted with an existing paper identity or arrival.' };
+    if (messages[getErrorMessage(error)]) return { status: messages[getErrorMessage(error)][0], error: messages[getErrorMessage(error)][1] };
+    if (error instanceof Prisma.PrismaClientKnownRequestError && getErrorCode(error) === 'P2002') return { status: 409, error: 'RMR issuance conflicted with an existing paper identity or arrival.' };
     console.error('issueLocalSupplierRmr error:', error); return { status: 500, error: 'Failed to issue Local Supplier RMR.' };
   }
 }
@@ -1015,9 +1016,9 @@ export async function startOrResumeSession(
       status: 201,
       data: serializeLabSession(session),
     };
-  } catch (err: any) {
+  } catch (err) {
     // Check if unique constraint violated (concurrent start)
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && getErrorCode(err) === 'P2002') {
       const existing = await prisma.zmccLabSession.findFirst({
         where: arrival_type === 'MOT'
           ? { mot_arrival_id: arrivalIdBigInt }
@@ -1748,8 +1749,8 @@ export async function completeSession(
       resolvedCore.lr,
       resolvedCore.fat
     );
-  } catch (err: any) {
-    return { status: 400, error: err.message || 'Failed to compute canonical milk metrics.' };
+  } catch (err) {
+    return { status: 400, error: getErrorMessage(err) || 'Failed to compute canonical milk metrics.' };
   }
 
   // An acceptance needs the one active destination tank. An exception is still
@@ -2069,29 +2070,29 @@ export async function completeSession(
       status: 200,
       data: serializeLabSession(completedSession),
     };
-  } catch (err: any) {
-    if (err.message && err.message.startsWith('ATTENDANT_EXCEPTION_REASON_REQUIRED:')) {
-      return { status: 400, error: err.message.replace('ATTENDANT_EXCEPTION_REASON_REQUIRED:', '') };
+  } catch (err) {
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('ATTENDANT_EXCEPTION_REASON_REQUIRED:')) {
+      return { status: 400, error: getErrorMessage(err).replace('ATTENDANT_EXCEPTION_REASON_REQUIRED:', '') };
     }
-    if (err.message && err.message.startsWith('RULE_CONFIGURATION_ERROR:')) {
-      const msg = err.message.replace('RULE_CONFIGURATION_ERROR:', '');
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('RULE_CONFIGURATION_ERROR:')) {
+      const msg = getErrorMessage(err).replace('RULE_CONFIGURATION_ERROR:', '');
       return { status: 400, error: msg };
     }
-    if (err.message && err.message.startsWith('INSUFFICIENT_CAPACITY:')) {
-      const msg = err.message.replace('INSUFFICIENT_CAPACITY:', '');
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('INSUFFICIENT_CAPACITY:')) {
+      const msg = getErrorMessage(err).replace('INSUFFICIENT_CAPACITY:', '');
       return { status: 400, error: msg };
     }
-    if (err.message && err.message.startsWith('TANK_INACTIVE:')) {
-      const msg = err.message.replace('TANK_INACTIVE:', '');
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('TANK_INACTIVE:')) {
+      const msg = getErrorMessage(err).replace('TANK_INACTIVE:', '');
       return { status: 400, error: msg };
     }
-    if (err.message === 'TANK_WRONG_ZMCC') {
+    if (getErrorMessage(err) === 'TANK_WRONG_ZMCC') {
       return { status: 403, error: 'Forbidden. Selected tank belongs to another ZMCC.' };
     }
-    if (err.message === 'TANK_NOT_FOUND') {
+    if (getErrorMessage(err) === 'TANK_NOT_FOUND') {
       return { status: 404, error: 'Selected destination tank not found.' };
     }
-    if (err.message === 'REPLAY_MATCH_CHECK' || err.message === 'SESSION_ALREADY_COMPLETED') {
+    if (getErrorMessage(err) === 'REPLAY_MATCH_CHECK' || getErrorMessage(err) === 'SESSION_ALREADY_COMPLETED') {
       const completedExisting = await prisma.zmccLabSession.findUnique({
         where: { id: sessionId },
         include: {
@@ -2147,7 +2148,7 @@ export async function completeSession(
       }
       return { status: 409, error: 'ZMCC Lab session is already completed.' };
     }
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && getErrorCode(err) === 'P2002') {
       const owningSession = await prisma.zmccLabSession.findUnique({
         where: { completion_client_event_id: clientEventId },
         include: {
@@ -3129,30 +3130,30 @@ export async function correctCompletedSession(
       status: 200,
       data: serializeLabSession(correctedSession),
     };
-  } catch (err: any) {
-    if (err.message && err.message.startsWith('RULE_CONFIGURATION_ERROR:')) {
-      return { status: 422, error: err.message.replace('RULE_CONFIGURATION_ERROR:', '') };
+  } catch (err) {
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('RULE_CONFIGURATION_ERROR:')) {
+      return { status: 422, error: getErrorMessage(err).replace('RULE_CONFIGURATION_ERROR:', '') };
     }
-    if (err.message && err.message.startsWith('NO_ACTIVE_RULE:')) {
-      return { status: 422, error: err.message.replace('NO_ACTIVE_RULE:', '') };
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('NO_ACTIVE_RULE:')) {
+      return { status: 422, error: getErrorMessage(err).replace('NO_ACTIVE_RULE:', '') };
     }
-    if (err.message && err.message.startsWith('NO_ACTIVE_TANK:')) {
-      return { status: 400, error: err.message.replace('NO_ACTIVE_TANK:', '') };
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('NO_ACTIVE_TANK:')) {
+      return { status: 400, error: getErrorMessage(err).replace('NO_ACTIVE_TANK:', '') };
     }
-    if (err.message && err.message.startsWith('MULTIPLE_ACTIVE_TANKS:')) {
-      return { status: 400, error: err.message.replace('MULTIPLE_ACTIVE_TANKS:', '') };
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('MULTIPLE_ACTIVE_TANKS:')) {
+      return { status: 400, error: getErrorMessage(err).replace('MULTIPLE_ACTIVE_TANKS:', '') };
     }
-    if (err.message && err.message.startsWith('MISSING_CORE_TESTS:')) {
-      return { status: 400, error: err.message.replace('MISSING_CORE_TESTS:', '') };
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('MISSING_CORE_TESTS:')) {
+      return { status: 400, error: getErrorMessage(err).replace('MISSING_CORE_TESTS:', '') };
     }
-    if (err.message && err.message.startsWith('INSUFFICIENT_CAPACITY:')) {
-      const msg = err.message.replace('INSUFFICIENT_CAPACITY:', '');
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('INSUFFICIENT_CAPACITY:')) {
+      const msg = getErrorMessage(err).replace('INSUFFICIENT_CAPACITY:', '');
       return { status: 400, error: msg };
     }
-    if (err.message && err.message.startsWith('NEGATIVE_STOCK:')) {
-      return { status: 400, error: err.message };
+    if (getErrorMessage(err) && getErrorMessage(err).startsWith('NEGATIVE_STOCK:')) {
+      return { status: 400, error: getErrorMessage(err) };
     }
-    if (err.message === 'MAX_CORRECTIONS_REACHED') {
+    if (getErrorMessage(err) === 'MAX_CORRECTIONS_REACHED') {
       return { status: 400, error: 'Maximum correction limit (5) reached for this lab session.' };
     }
     console.error('correctCompletedSession error:', err);

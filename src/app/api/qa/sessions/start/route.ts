@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { z } from 'zod';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const startSessionSchema = z.object({
   visitId: z.string().min(1, 'Visit ID is required'),
@@ -112,10 +113,10 @@ export async function POST(req: Request) {
       startedAt: result.session.started_at.toISOString(),
       message: `QA testing session started for Visit #${validated.visitId}`,
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError') {
-      return NextResponse.json({ error: error.errors[0]?.message || 'Validation failed' }, { status: 400 });
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError') {
+      return NextResponse.json({ error: getErrorIssues(error)?.[0]?.message || 'Validation failed' }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to start QA session' }, { status: 400 });
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to start QA session' }, { status: 400 });
   }
 }

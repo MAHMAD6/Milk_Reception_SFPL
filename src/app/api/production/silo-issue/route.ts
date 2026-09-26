@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { recordSiloIssueTransaction } from '@/backend/services/siloInventoryService';
 import { validatePositiveDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function POST(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -80,8 +81,8 @@ export async function POST(req: Request) {
       alreadyProcessed: result.alreadyProcessed,
       message: `Successfully issued ${Math.round(quantityLiters).toLocaleString()} L of milk for "${purpose}". Remaining stock: ${Math.round(result.stockAfter).toLocaleString()} L.`,
     });
-  } catch (error: any) {
-    const status = error?.message?.includes('INACTIVE') ? 409 : 400;
-    return NextResponse.json({ error: error?.message || 'Failed to record silo milk issue' }, { status });
+  } catch (error) {
+    const status = getErrorMessage(error)?.includes('INACTIVE') ? 409 : 400;
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to record silo milk issue' }, { status });
   }
 }

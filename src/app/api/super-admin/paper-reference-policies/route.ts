@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { z } from 'zod';
 import { PaperReferenceService } from '@/backend/services/paperReferenceService';
 import { PaperReferenceType, PaperPolicyMode } from '@prisma/client';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const updatePolicySchema = z.object({
   referenceType: z.enum(['SHOP_RMR', 'RAW_MILK_TOKEN', 'RAW_MILK_DISPATCH_NOTE']),
@@ -48,7 +49,7 @@ export async function GET(req: Request) {
       success: true,
       policies: serialized,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching paper reference policies:', error);
     return NextResponse.json({ error: 'Failed to fetch paper reference policies' }, { status: 500 });
   }
@@ -102,12 +103,12 @@ export async function PUT(req: Request) {
         updatedAt: updated.updated_at.toISOString(),
       },
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError' || error?.issues) {
-      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || error.message || 'Validation failed';
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError' || getErrorIssues(error)) {
+      const msg = getErrorIssues(error)?.[0]?.message || getErrorMessage(error) || 'Validation failed';
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     console.error('Error updating paper reference policy:', error);
-    return NextResponse.json({ error: error.message || 'Failed to update paper reference policy' }, { status: 400 });
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to update paper reference policy' }, { status: 400 });
   }
 }

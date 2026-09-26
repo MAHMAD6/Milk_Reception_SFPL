@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { getOrAssignDispatchTests, serializeAssignment } from '@/backend/services/labTestAssignmentService';
 import { getOrFreezeDispatchQuantityPolicy } from '@/backend/modules/dispatch/quantity-policy/quantityPolicyService';
 import { getPakistanCalendarDate } from '@/backend/core/business-day';
+import { getErrorCode, getErrorMessage } from '@/lib/errors';
 
 
 
@@ -206,8 +207,8 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
-    if (error?.code === 'DISPATCH_QUANTITY_POLICY_INVALID') {
+  } catch (error) {
+    if (getErrorCode(error) === 'DISPATCH_QUANTITY_POLICY_INVALID') {
       return NextResponse.json(
         {
           error: 'Configured dispatch quantity policy for this procurement source is invalid.',
@@ -216,16 +217,16 @@ export async function POST(req: Request) {
         { status: 400 }
       );
     }
-    if (error?.code === 'SNAPSHOT_SOURCE_MISMATCH' || error?.code === 'VISIT_SOURCE_MISMATCH') {
+    if (getErrorCode(error) === 'SNAPSHOT_SOURCE_MISMATCH' || getErrorCode(error) === 'VISIT_SOURCE_MISMATCH') {
       return NextResponse.json(
         {
-          error: error.message || 'Procurement source mismatch.',
-          code: error.code,
+          error: getErrorMessage(error) || 'Procurement source mismatch.',
+          code: getErrorCode(error),
         },
         { status: 400 }
       );
     }
-    return NextResponse.json({ error: error?.message || 'Failed to start dispatch work item' }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to start dispatch work item' }, { status: 500 });
   }
 }
 

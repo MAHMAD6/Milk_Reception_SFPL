@@ -38,7 +38,7 @@ export async function GET(req: Request) {
       success: true,
       policies: serialized,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error fetching paper reference policies:', error);
     return NextResponse.json({ error: 'Failed to fetch paper reference policies' }, { status: 500 });
   }

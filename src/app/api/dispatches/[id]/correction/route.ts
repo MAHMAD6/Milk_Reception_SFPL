@@ -7,6 +7,7 @@ import { PaperReferenceService, PaperValidationError } from '@/backend/services/
 import { computeCanonicalMilkMetrics, calculateDensity, calculateGrossLiters } from '@/backend/utils/milkFormulas';
 import { calculateDualReconciliation } from '@/backend/services/reconciliationService';
 import { getTankPhysicalStock } from '@/backend/services/zmccTankService';
+import { getErrorCode, getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const correctDispatchSchema = z.object({
   reason: z.string().trim().min(3, 'A substantive correction reason of at least 3 characters is required.'),
@@ -432,42 +433,42 @@ export async function PATCH(
     });
 
     return NextResponse.json(result, { status: 200 });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof PaperValidationError) {
-      if (err.message.includes('already in use') || err.message.includes('duplicate')) {
-        return NextResponse.json({ error: err.message }, { status: 409 });
+      if (getErrorMessage(err).includes('already in use') || getErrorMessage(err).includes('duplicate')) {
+        return NextResponse.json({ error: getErrorMessage(err) }, { status: 409 });
       }
-      return NextResponse.json({ error: err.message }, { status: 400 });
+      return NextResponse.json({ error: getErrorMessage(err) }, { status: 400 });
     }
-    if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+    if (err instanceof Prisma.PrismaClientKnownRequestError && getErrorCode(err) === 'P2002') {
       return NextResponse.json({ error: 'Conflict: Duplicate paper reference number already in use.' }, { status: 409 });
     }
-    if (err.code === 'P2002') {
+    if (getErrorCode(err) === 'P2002') {
       return NextResponse.json({ error: 'Conflict: Duplicate paper reference number already in use.' }, { status: 409 });
     }
-    if (err.message?.startsWith('MAX_CORRECTIONS_REACHED:')) {
-      return NextResponse.json({ error: err.message.replace('MAX_CORRECTIONS_REACHED:', '') }, { status: 400 });
+    if (getErrorMessage(err).startsWith('MAX_CORRECTIONS_REACHED:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('MAX_CORRECTIONS_REACHED:', '') }, { status: 400 });
     }
-    if (err.message?.startsWith('NOT_FOUND:')) {
-      return NextResponse.json({ error: err.message.replace('NOT_FOUND:', '') }, { status: 404 });
+    if (getErrorMessage(err).startsWith('NOT_FOUND:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('NOT_FOUND:', '') }, { status: 404 });
     }
-    if (err.message?.startsWith('FORBIDDEN:')) {
-      return NextResponse.json({ error: err.message.replace('FORBIDDEN:', '') }, { status: 403 });
+    if (getErrorMessage(err).startsWith('FORBIDDEN:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('FORBIDDEN:', '') }, { status: 403 });
     }
-    if (err.message?.startsWith('NO_CHANGES:')) {
-      return NextResponse.json({ error: err.message.replace('NO_CHANGES:', '') }, { status: 400 });
+    if (getErrorMessage(err).startsWith('NO_CHANGES:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('NO_CHANGES:', '') }, { status: 400 });
     }
-    if (err.message?.startsWith('NEGATIVE_STOCK:')) {
-      return NextResponse.json({ error: err.message.replace('NEGATIVE_STOCK:', '') }, { status: 400 });
+    if (getErrorMessage(err).startsWith('NEGATIVE_STOCK:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('NEGATIVE_STOCK:', '') }, { status: 400 });
     }
-    if (err.message?.startsWith('INSUFFICIENT_CAPACITY:')) {
-      return NextResponse.json({ error: err.message.replace('INSUFFICIENT_CAPACITY:', '') }, { status: 400 });
+    if (getErrorMessage(err).startsWith('INSUFFICIENT_CAPACITY:')) {
+      return NextResponse.json({ error: getErrorMessage(err).replace('INSUFFICIENT_CAPACITY:', '') }, { status: 400 });
     }
-    if (err.name === 'ZodError') {
-      return NextResponse.json({ error: err.issues?.[0]?.message || 'Validation error' }, { status: 400 });
+    if (getErrorName(err) === 'ZodError') {
+      return NextResponse.json({ error: getErrorIssues(err)?.[0]?.message || 'Validation error' }, { status: 400 });
     }
     console.error('PATCH /api/dispatches/[id]/correction error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to correct dispatch.' }, { status: 500 });
+    return NextResponse.json({ error: getErrorMessage(err) || 'Failed to correct dispatch.' }, { status: 500 });
   }
 }
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
+import { getErrorMessage } from '@/lib/errors';
 
 function serializeLabTest(test: any) {
   return {
@@ -59,9 +60,9 @@ export async function GET(req: Request) {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch lab tests' },
+      { error: getErrorMessage(error) || 'Failed to fetch lab tests' },
       {
         status: 500,
         headers: {

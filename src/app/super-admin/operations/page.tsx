@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Search, ShieldAlert, Truck } from 'lucide-react';
 
 import { formatDispatchQuantity } from '@/backend/modules/dispatch/quantity/dispatchQuantityService';
+import { getErrorMessage } from '@/lib/errors';
 
 interface Portion {
   id: string;
@@ -72,8 +73,8 @@ export default function SuperAdminOperationsPage() {
       } else {
         setError(data.error);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

@@ -22,6 +22,7 @@ import {
 import { Modal } from '@/components/ui/modal';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 export type MasterDataTab = 'LOCAL_SUPPLIERS' | 'ROUTES' | 'AREAS' | 'MILK_SOURCES' | 'SHOPS' | 'CHILLER_OWNERSHIP' | 'TANKS';
 
@@ -327,8 +328,8 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
         }
         setTanks(tankList);
       }
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Error loading data.');
+    } catch (err) {
+      setErrorMsg(getErrorMessage(err) || 'Error loading data.');
     } finally {
       setLoading(false);
     }

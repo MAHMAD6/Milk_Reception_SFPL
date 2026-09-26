@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { ShieldAlert } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 interface AuditLogItem {
   id: string;
@@ -40,8 +41,8 @@ export default function SuperAdminAuditPage() {
       } else {
         setError(data.error);
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }

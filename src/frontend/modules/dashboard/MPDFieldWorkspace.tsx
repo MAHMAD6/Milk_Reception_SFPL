@@ -5,6 +5,7 @@ import { User } from '@core/types';
 import { ChevronLeft, ChevronRight, RefreshCw, Truck } from 'lucide-react';
 import { DynamicDispatchForm } from '@modules/forms/DynamicDispatchForm';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { getErrorMessage } from '@/lib/errors';
 
 interface DispatchRecord {
   id: string;
@@ -117,9 +118,9 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
       if (data.pagination) {
         setPagination(data.pagination);
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to fetch dispatches', err);
-      setDateError(err.message || 'Failed to fetch dispatches');
+      setDateError(getErrorMessage(err) || 'Failed to fetch dispatches');
     } finally {
       setIsLoading(false);
     }

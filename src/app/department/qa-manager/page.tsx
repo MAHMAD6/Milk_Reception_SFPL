@@ -20,6 +20,7 @@ import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface LabResultItem {
   id: string;
@@ -128,8 +129,8 @@ export default function QAManagerDepartmentPage() {
       setActionType(null);
       setReason('');
       await loadQueue();
-    } catch (err: any) {
-      setSubmitError(err.message || 'Error submitting decision.');
+    } catch (err) {
+      setSubmitError(getErrorMessage(err) || 'Error submitting decision.');
     } finally {
       setSubmitting(false);
     }

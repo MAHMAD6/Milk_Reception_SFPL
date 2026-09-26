@@ -5,6 +5,7 @@ import { validateOperationalTimestamp } from '@/backend/services/chronology-vali
 import { getOperationalBusinessDate } from '@/backend/core/business-day';
 import { parseStrictDateOnly } from '@/lib/datetime-utils';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const SECURITY_SCOPE = { kind: 'DEPARTMENT', departmentId: 'Security' } as const;
 
@@ -167,10 +168,10 @@ export async function POST(req: Request) {
       isAllRejected: result.isAllRejected,
       message: `Gate exit confirmed for Vehicle ${result.updatedVisit.vehicle_number} (${result.isAllRejected ? 'QA Rejected Load' : 'Processing Complete'}). Vehicle status: COMPLETED.`,
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError') {
-      return NextResponse.json({ error: error.errors[0]?.message || 'Validation failed' }, { status: 400 });
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError') {
+      return NextResponse.json({ error: getErrorIssues(error)?.[0]?.message || 'Validation failed' }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to record gate exit' }, { status: 400 });
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to record gate exit' }, { status: 400 });
   }
 }

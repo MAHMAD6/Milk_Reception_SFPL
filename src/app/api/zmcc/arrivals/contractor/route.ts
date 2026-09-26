@@ -26,7 +26,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/zmcc/arrivals/contractor error:', err);
     return NextResponse.json({ error: 'Failed to fetch contractor arrivals.' }, { status: 500 });
   }

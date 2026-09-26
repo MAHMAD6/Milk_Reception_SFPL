@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react';
 import { onActivateKey } from '@/lib/a11y';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ManagerJourneyMapProps {
   currentUser: User | null;
@@ -126,8 +127,8 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
         throw new Error(json.error || 'Failed to load journey map data.');
       }
       setMapData(json);
-    } catch (err: any) {
-      setError(err.message || 'Error loading map data.');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error loading map data.');
     } finally {
       setLoading(false);
     }

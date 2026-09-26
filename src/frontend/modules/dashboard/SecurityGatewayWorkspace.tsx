@@ -10,6 +10,7 @@ import { formatDispatchQuantity } from '@/backend/modules/dispatch/quantity/disp
 import { PageHeader } from '@/components/ui/page-header';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { onActivateKey } from '@/lib/a11y';
+import { getErrorMessage } from '@/lib/errors';
 
 interface DispatchedVisit {
   id: string;
@@ -133,7 +134,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
           setSelectedExitVisitId(exitData.visits[0].id);
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error('Failed to fetch security data', err);
     } finally {
       setIsLoading(false);
@@ -189,9 +190,9 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
       setTokenNumber(`TK-${Math.floor(1000 + Math.random() * 9000)}`);
       setSelectedEntryVisitId(null);
       fetchSecurityData();
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
-      toast.showError(err.message || 'Failed to record gate entry', 'Gate Entry Error');
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
+      toast.showError(getErrorMessage(err) || 'Failed to record gate entry', 'Gate Entry Error');
     } finally {
       setIsSubmitting(false);
     }
@@ -222,9 +223,9 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
       setSelectedExitVisitId(null);
       setExitOpTimestamp(toDatetimeLocalInput(new Date()));
       fetchSecurityData();
-    } catch (err: any) {
-      setMsg({ text: err.message, isError: true });
-      toast.showError(err.message || 'Failed to record gate exit', 'Gate Exit Error');
+    } catch (err) {
+      setMsg({ text: getErrorMessage(err), isError: true });
+      toast.showError(getErrorMessage(err) || 'Failed to record gate exit', 'Gate Exit Error');
     } finally {
       setIsSubmitting(false);
     }

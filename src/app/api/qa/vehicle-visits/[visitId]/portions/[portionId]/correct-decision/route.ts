@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { z } from 'zod';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const correctDecisionSchema = z.object({
   decision: z.enum(['APPROVE', 'REJECT'] as const),
@@ -353,18 +354,18 @@ export async function POST(
       reviewOnly: !!result.reviewOnly,
       newVisitStatus: result.newVisitStatus,
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError' || error?.issues) {
-      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || error.message || 'Validation failed';
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError' || getErrorIssues(error)) {
+      const msg = getErrorIssues(error)?.[0]?.message || getErrorMessage(error) || 'Validation failed';
       return NextResponse.json({ error: msg }, { status: 400 });
     }
-    if (error.message?.startsWith('IDEMPOTENCY_CONFLICT:')) {
-      return NextResponse.json({ error: error.message.replace('IDEMPOTENCY_CONFLICT:', '') }, { status: 409 });
+    if (getErrorMessage(error).startsWith('IDEMPOTENCY_CONFLICT:')) {
+      return NextResponse.json({ error: getErrorMessage(error).replace('IDEMPOTENCY_CONFLICT:', '') }, { status: 409 });
     }
-    if (error.message?.startsWith('CONFIG_ERROR:') || error.message?.startsWith('NO_ACTIVE_RULE:')) {
-      return NextResponse.json({ error: error.message.split(':')[1] }, { status: 422 });
+    if (getErrorMessage(error).startsWith('CONFIG_ERROR:') || getErrorMessage(error).startsWith('NO_ACTIVE_RULE:')) {
+      return NextResponse.json({ error: getErrorMessage(error).split(':')[1] }, { status: 422 });
     }
-    const statusCode = error.message?.includes('VEHICLE_ALREADY_EXITED_REVIEW_ONLY') ? 409 : 400;
-    return NextResponse.json({ error: error.message || 'Failed to process QA Manager decision' }, { status: statusCode });
+    const statusCode = getErrorMessage(error).includes('VEHICLE_ALREADY_EXITED_REVIEW_ONLY') ? 409 : 400;
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to process QA Manager decision' }, { status: statusCode });
   }
 }

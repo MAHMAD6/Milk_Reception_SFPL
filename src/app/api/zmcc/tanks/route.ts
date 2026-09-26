@@ -12,7 +12,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/zmcc/tanks error:', err);
     return NextResponse.json({ error: 'Failed to fetch ZMCC tanks.' }, { status: 500 });
   }
@@ -30,7 +30,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/zmcc/tanks error:', err);
     return NextResponse.json({ error: 'Failed to create ZMCC tank.' }, { status: 500 });
   }

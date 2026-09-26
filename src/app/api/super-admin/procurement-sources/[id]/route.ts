@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
+import { getErrorMessage } from '@/lib/errors';
 
 class DeactivationConflictError extends Error {
   statusCode = 409;
@@ -202,15 +203,15 @@ export async function PATCH(
         isActive: updatedSource.is_active,
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     if (err instanceof DeactivationConflictError) {
-      return NextResponse.json({ error: err.message }, { status: 409 });
+      return NextResponse.json({ error: getErrorMessage(err) }, { status: 409 });
     }
     if (err instanceof ValidationError) {
-      return NextResponse.json({ error: err.message }, { status: 400 });
+      return NextResponse.json({ error: getErrorMessage(err) }, { status: 400 });
     }
     if (err instanceof NotFoundError) {
-      return NextResponse.json({ error: err.message }, { status: 404 });
+      return NextResponse.json({ error: getErrorMessage(err) }, { status: 404 });
     }
 
     console.error('Unexpected error in PATCH /api/super-admin/procurement-sources/[id]:', err);

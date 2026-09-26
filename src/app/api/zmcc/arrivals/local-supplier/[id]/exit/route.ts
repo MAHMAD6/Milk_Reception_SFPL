@@ -20,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: result.error, message: result.message || result.error }, { status: result.status });
     }
     return NextResponse.json({ arrival: result.data, ...result.data }, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/zmcc/arrivals/local-supplier/[id]/exit error:', err);
     return NextResponse.json({ error: 'Failed to record local supplier gate exit.', message: 'Failed to record local supplier gate exit.' }, { status: 500 });
   }
@@ -42,7 +42,7 @@ export async function PATCH(
       return NextResponse.json({ error: result.error, message: result.message || result.error }, { status: result.status });
     }
     return NextResponse.json({ arrival: result.data, ...result.data }, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('PATCH /api/zmcc/arrivals/local-supplier/[id]/exit error:', err);
     return NextResponse.json({ error: 'Failed to correct local supplier gate exit.' }, { status: 500 });
   }

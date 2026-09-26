@@ -35,6 +35,7 @@ import {
   PortionFormState,
 } from './components/DispatchPortionEditor';
 import { DispatchSummaryPanel } from './components/DispatchSummaryPanel';
+import { getErrorMessage } from '@/lib/errors';
 
 export type { QuantityUnitType, MeasurementBasisType, QuantityState, LabTestDef, TestResultState, PortionFormState };
 
@@ -237,9 +238,9 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
           }
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       if (initSeqRef.current === currentSeq) {
-        toast.showError(err.message || 'Failed to initialize dispatch test catalog', 'Load Error');
+        toast.showError(getErrorMessage(err) || 'Failed to initialize dispatch test catalog', 'Load Error');
       }
     } finally {
       if (inFlightInitRef.current?.userId === currentUser.id && inFlightInitRef.current?.sourceId === targetSourceId) {
@@ -954,8 +955,8 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
       if (effectiveSourceId) {
         initializeDispatchWorkItem(effectiveSourceId, true);
       }
-    } catch (err: any) {
-      toast.showError(err.message || 'An error occurred while submitting dispatch', 'Submission Error');
+    } catch (err) {
+      toast.showError(getErrorMessage(err) || 'An error occurred while submitting dispatch', 'Submission Error');
     } finally {
       setIsSubmitting(false);
     }

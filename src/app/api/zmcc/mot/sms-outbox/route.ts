@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getSmsOutbox } from '@/backend/services/motService';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: Request) {
   try {
@@ -14,9 +15,9 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     return NextResponse.json(
-      { error: err?.message || 'An unexpected error occurred while fetching SMS outbox.' },
+      { error: getErrorMessage(err) || 'An unexpected error occurred while fetching SMS outbox.' },
       { status: 500 }
     );
   }

@@ -22,6 +22,7 @@ import { SmsOutboxView } from './SmsOutboxView';
 import { Modal } from '@/components/ui/modal';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 export type MotWorkspaceTab =
   | 'DISPATCH'
@@ -345,8 +346,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
         const data = await res.json();
         setVehicles(data.vehicles || []);
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to load MOT data.');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Failed to load MOT data.');
     } finally {
       setLoading(false);
     }
@@ -408,8 +409,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       setDispatchVehicleId('');
       // Switch to active journeys
       setActiveTab('ACTIVE_JOURNEYS');
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setActionLoading(false);
     }
@@ -443,8 +444,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       setCancelModalJourney(null);
       setCancelReason('');
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setActionLoading(false);
     }
@@ -519,8 +520,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       );
       setProfileModalOpen(false);
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setActionLoading(false);
     }
@@ -541,8 +542,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setActionLoading(false);
     }
@@ -596,8 +597,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       );
       setVehicleModalOpen(false);
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setActionLoading(false);
     }
@@ -618,8 +619,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       loadData();
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setActionLoading(false);
     }

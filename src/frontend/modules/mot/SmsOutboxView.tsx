@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { User } from '@core/types';
 import { Phone, RotateCw, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 interface SmsOutboxViewProps {
   currentUser: User | null;
@@ -46,8 +47,8 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = () => {
         throw new Error(json.error || 'Failed to fetch SMS outbox.');
       }
       setItems(json.items || []);
-    } catch (err: any) {
-      setError(err.message || 'Error loading SMS outbox.');
+    } catch (err) {
+      setError(getErrorMessage(err) || 'Error loading SMS outbox.');
     } finally {
       setLoading(false);
     }

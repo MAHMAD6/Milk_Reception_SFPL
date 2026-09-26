@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { calculatePhysicalLiters } from '@/backend/utils/milkFormulas';
 import { isPlantLrTest } from '@/backend/services/vehicleQuantityService';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -134,7 +135,7 @@ export async function GET(req: Request) {
         totalPages,
       },
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 });
   }
 }

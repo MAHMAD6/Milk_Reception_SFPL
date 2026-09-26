@@ -104,7 +104,7 @@ export async function GET(
     };
 
     return NextResponse.json({ visit: formatted });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error fetching vehicle visit details:', err);
     return NextResponse.json({ error: 'Failed to fetch vehicle visit details' }, { status: 500 });
   }

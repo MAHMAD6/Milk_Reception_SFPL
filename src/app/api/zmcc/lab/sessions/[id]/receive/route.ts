@@ -19,7 +19,7 @@ export async function POST(
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/zmcc/lab/sessions/[id]/receive error:', err);
     return NextResponse.json({ error: 'Failed to receive historical session into ZMCC tank.' }, { status: 500 });
   }

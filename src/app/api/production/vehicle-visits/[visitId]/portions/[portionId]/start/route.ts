@@ -5,6 +5,7 @@ import { getSiloProvisionalAvailableCapacity } from '@/backend/services/siloInve
 import { calculatePhysicalLiters } from '@/backend/utils/milkFormulas';
 import { isPlantLrTest } from '@/backend/services/vehicleQuantityService';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function POST(
   req: NextRequest,
@@ -250,9 +251,9 @@ export async function POST(
       visitId: visitIdStr,
       opTimestamp: opTimestamp.toISOString(),
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error starting unloading:', err);
-    const status = err.message?.includes('INACTIVE') ? 409 : 400;
-    return NextResponse.json({ error: err.message || 'Failed to start unloading' }, { status });
+    const status = getErrorMessage(err)?.includes('INACTIVE') ? 409 : 400;
+    return NextResponse.json({ error: getErrorMessage(err) || 'Failed to start unloading' }, { status });
   }
 }

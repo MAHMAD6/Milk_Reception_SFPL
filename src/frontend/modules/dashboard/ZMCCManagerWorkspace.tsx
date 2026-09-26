@@ -22,6 +22,7 @@ import { ZmccMasterDataWorkspace } from '@/frontend/modules/zmcc/ZmccMasterDataW
 import { ZmccArrivalsWorkspace } from '@/frontend/modules/zmcc/arrivals/ZmccArrivalsWorkspace';
 import { ZmccLabWorkspace } from '@/frontend/modules/zmcc/lab/ZmccLabWorkspace';
 import { PageTransition } from '@/components/motion/page-transition';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ZMCCManagerWorkspaceProps {
   currentUser: User | null;
@@ -186,9 +187,9 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
       }
 
       if (data.serverBusinessDate) setServerBusinessDate(data.serverBusinessDate);
-    } catch (err: any) {
+    } catch (err) {
       setLiveActiveInPlantCount(null);
-      setLiveError(err.message || 'Failed to load live pipeline logs');
+      setLiveError(getErrorMessage(err) || 'Failed to load live pipeline logs');
     } finally {
       setLiveLoading(false);
     }
@@ -228,8 +229,8 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
         }
         if (data.serverBusinessDate) setServerBusinessDate(data.serverBusinessDate);
         if (data.serverCalendarDate) setServerCalendarDate(data.serverCalendarDate);
-      } catch (err: any) {
-        setReportingError(err.message || 'Failed to load reporting logs');
+      } catch (err) {
+        setReportingError(getErrorMessage(err) || 'Failed to load reporting logs');
       } finally {
         setReportingLoading(false);
       }

@@ -3,6 +3,7 @@ import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { z } from 'zod';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const resumeSessionSchema = z.object({
   visitId: z.string().min(1, 'Visit ID is required'),
@@ -122,12 +123,12 @@ export async function POST(req: Request) {
       sessionId: result.id.toString(),
       message: 'QA testing session resumed successfully.',
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError') {
-      return NextResponse.json({ error: error.errors[0]?.message || 'Validation failed' }, { status: 400 });
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError') {
+      return NextResponse.json({ error: getErrorIssues(error)?.[0]?.message || 'Validation failed' }, { status: 400 });
     }
     if (error instanceof RouteError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+      return NextResponse.json({ error: getErrorMessage(error) }, { status: error.statusCode });
     }
     console.error('Unexpected error in QA resume route:', error);
     return NextResponse.json({ error: 'Failed to resume QA session' }, { status: 500 });

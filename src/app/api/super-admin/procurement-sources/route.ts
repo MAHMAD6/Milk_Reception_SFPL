@@ -30,7 +30,7 @@ export async function GET(req: Request) {
     }));
 
     return NextResponse.json({ sources: serialized }, { headers: NO_STORE_HEADERS });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Unexpected error in GET /api/super-admin/procurement-sources:', err);
     return NextResponse.json(
       { error: 'Failed to fetch procurement sources.' },
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (err: any) {
+  } catch (err) {
     console.error('Unexpected error in POST /api/super-admin/procurement-sources:', err);
     return NextResponse.json({ error: 'Failed to create procurement source.' }, { status: 500 });
   }

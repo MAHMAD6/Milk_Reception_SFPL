@@ -3,6 +3,7 @@ import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
+import { getErrorMessage } from '@/lib/errors';
 
 class RouteError extends Error {
   statusCode: number;
@@ -152,9 +153,9 @@ export async function POST(
       plantDecision: 'HOLD',
       message: `Portion #${portion.portion_number} placed on HOLD.`,
     });
-  } catch (error: any) {
+  } catch (error) {
     if (error instanceof RouteError) {
-      return NextResponse.json({ error: error.message }, { status: error.statusCode });
+      return NextResponse.json({ error: getErrorMessage(error) }, { status: error.statusCode });
     }
     console.error('Unexpected error in QA hold route:', error);
     return NextResponse.json({ error: 'Failed to place portion on hold' }, { status: 500 });

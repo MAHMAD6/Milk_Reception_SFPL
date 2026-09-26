@@ -20,6 +20,7 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
+import { getErrorMessage } from '@/lib/errors';
 
 interface PlantContractorManagerWorkspaceProps {
   currentUser: User | null;
@@ -98,8 +99,8 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
         if (data.serverBusinessDate) {
           setServerBusinessDate(data.serverBusinessDate);
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load contractor operational logs');
+      } catch (err) {
+        setError(getErrorMessage(err) || 'Failed to load contractor operational logs');
       } finally {
         setLoading(false);
       }

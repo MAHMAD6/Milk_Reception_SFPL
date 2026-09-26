@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/backend/core/auth';
 import { prisma } from '@/backend/core/db';
+import { getErrorMessage } from '@/lib/errors';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,9 +40,9 @@ export async function GET(req: Request) {
         },
       ],
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch governance exceptions.' },
+      { error: getErrorMessage(error) || 'Failed to fetch governance exceptions.' },
       { status: 500 }
     );
   }
@@ -80,9 +81,9 @@ export async function POST(req: Request) {
       auditedAt: new Date().toISOString(),
       remarks: remarks || '',
     });
-  } catch (error: any) {
+  } catch (error) {
     return NextResponse.json(
-      { error: error?.message || 'Failed to audit governance exception.' },
+      { error: getErrorMessage(error) || 'Failed to audit governance exception.' },
       { status: 500 }
     );
   }

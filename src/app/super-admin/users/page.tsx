@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface Source {
   id: string;
@@ -105,8 +106,8 @@ export default function SuperAdminUsersPage() {
       else setError(uData.error);
 
       if (sRes.ok) setSources(sData.sources || []);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err) {
+      setError(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -295,8 +296,8 @@ export default function SuperAdminUsersPage() {
       setSuccessMsg(`User "${trimmedUsername}" created successfully.`);
       closeCreateModal();
       loadData();
-    } catch (err: any) {
-      setCreateModalError(err.message || 'Failed to create user');
+    } catch (err) {
+      setCreateModalError(getErrorMessage(err) || 'Failed to create user');
     } finally {
       setIsSubmittingCreate(false);
     }
@@ -342,8 +343,8 @@ export default function SuperAdminUsersPage() {
       setSuccessMsg(`User "${showEditModal.username}" updated successfully.`);
       closeEditModal();
       loadData();
-    } catch (err: any) {
-      setEditModalError(err.message || 'Failed to update user');
+    } catch (err) {
+      setEditModalError(getErrorMessage(err) || 'Failed to update user');
     } finally {
       setIsSubmittingEdit(false);
     }
@@ -374,8 +375,8 @@ export default function SuperAdminUsersPage() {
       setSuccessMsg(`User "${user.username}" ${targetStatus ? 'activated' : 'deactivated'} successfully.`);
       closeConfirmModal();
       loadData();
-    } catch (err: any) {
-      setConfirmModalError(err.message || 'Failed to update user status');
+    } catch (err) {
+      setConfirmModalError(getErrorMessage(err) || 'Failed to update user status');
     } finally {
       setIsSubmittingConfirm(false);
     }
@@ -414,8 +415,8 @@ export default function SuperAdminUsersPage() {
 
       setSuccessMsg(data.message || `Password for "${showResetModal.username}" reset successfully.`);
       closeResetModal();
-    } catch (err: any) {
-      setResetModalError(err.message || 'Failed to reset password');
+    } catch (err) {
+      setResetModalError(getErrorMessage(err) || 'Failed to reset password');
     } finally {
       setIsSubmittingReset(false);
     }

@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/zmcc/arrivals/mot/[id] error:', err);
     return NextResponse.json({ error: 'Failed to fetch MOT arrival details.' }, { status: 500 });
   }
@@ -37,7 +37,7 @@ export async function PATCH(
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('PATCH /api/zmcc/arrivals/mot/[id] error:', err);
     return NextResponse.json({ error: 'Failed to correct MOT arrival.' }, { status: 500 });
   }

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ error: 'Missing path or tag parameter' }, { status: 400 });
-  } catch (error: any) {
-    return NextResponse.json({ error: 'Failed to revalidate cache', details: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to revalidate cache', details: getErrorMessage(error) }, { status: 500 });
   }
 }

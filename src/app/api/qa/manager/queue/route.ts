@@ -112,7 +112,7 @@ export async function GET(req: Request) {
       portions: serialized,
       queue: serialized,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error in QA Manager queue route:', error);
     return NextResponse.json({ error: 'Failed to fetch manager review queue' }, { status: 500 });
   }

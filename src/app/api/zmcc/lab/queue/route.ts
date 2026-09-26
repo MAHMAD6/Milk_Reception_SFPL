@@ -13,7 +13,7 @@ export async function GET(req: Request) {
         'Cache-Control': 'private, no-store, max-age=0',
       },
     });
-  } catch (err: any) {
+  } catch (err) {
     console.error('GET /api/zmcc/lab/queue error:', err);
     return NextResponse.json({ error: 'Failed to fetch arrivals queue.' }, { status: 500 });
   }

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
+import { getErrorMessage } from '@/lib/errors';
 
 // This route should be pinged by a Vercel Cron Job or AWS EventBridge every minute
 export async function GET(_req: Request) {
@@ -44,12 +45,12 @@ export async function GET(_req: Request) {
         } else {
           throw new Error('Provider API rejected the message.');
         }
-      } catch (error: any) {
+      } catch (error) {
         await prisma.motCollectionSmsOutbox.update({
           where: { id: msg.id },
           data: {
             status: msg.attempt_count >= 2 ? 'FAILED' : 'PENDING',
-            last_error: error.message,
+            last_error: getErrorMessage(error),
             attempt_count: { increment: 1 },
           },
         });
@@ -62,7 +63,7 @@ export async function GET(_req: Request) {
       processed: processedIds.length,
       failed: failedIds.length,
     });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) }, { status: 500 });
   }
 }

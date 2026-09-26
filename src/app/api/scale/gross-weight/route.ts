@@ -3,6 +3,7 @@ import { prisma } from '@core/db';
 import { validatePositiveDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const WEIGHBRIDGE_SCOPE = {
   kind: 'DEPARTMENT',
@@ -231,10 +232,10 @@ export async function POST(req: Request) {
       grossWeightKg: Number(result.ticket.gross_weight_kg),
       message: `First Weight (Gross: ${grossWeightKg} kg) recorded successfully. Vehicle is ready for unloading.`,
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError') {
-      return NextResponse.json({ error: error.errors[0]?.message || 'Validation failed' }, { status: 400 });
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError') {
+      return NextResponse.json({ error: getErrorIssues(error)?.[0]?.message || 'Validation failed' }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to record Scale 1 gross weight' }, { status: 400 });
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to record Scale 1 gross weight' }, { status: 400 });
   }
 }

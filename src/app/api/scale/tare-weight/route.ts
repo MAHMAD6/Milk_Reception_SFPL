@@ -5,6 +5,7 @@ import { finalizeSiloReceiptForVisit } from '@/backend/services/siloInventorySer
 import { validatePositiveDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
+import { getErrorMessage } from '@/lib/errors';
 
 const WEIGHBRIDGE_SCOPE = {
   kind: 'DEPARTMENT',
@@ -236,8 +237,8 @@ export async function POST(req: Request) {
       reason: result.finalizeRes.reason || null,
       message: msg,
     });
-  } catch (error: any) {
-    const errorMsg = error?.message || 'Failed to record tare weight';
+  } catch (error) {
+    const errorMsg = getErrorMessage(error) || 'Failed to record tare weight';
     const status = errorMsg.includes('INACTIVE') ? 409 : 400;
     return NextResponse.json({ error: errorMsg }, { status });
   }

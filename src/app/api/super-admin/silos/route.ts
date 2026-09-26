@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { getSiloCurrentStockLiters, getSiloActiveReservedLiters } from '@/backend/services/siloInventoryService';
+import { getErrorCode, getErrorName } from '@/lib/errors';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -169,8 +170,8 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (err: any) {
-    if (err?.code === 'P2002' || (err?.name === 'PrismaClientKnownRequestError' && err?.code === 'P2002')) {
+  } catch (err) {
+    if (getErrorCode(err) === 'P2002' || (getErrorName(err) === 'PrismaClientKnownRequestError' && getErrorCode(err) === 'P2002')) {
       return NextResponse.json(
         { error: `Silo with code "${siloCode}" already exists.` },
         { status: 409 }

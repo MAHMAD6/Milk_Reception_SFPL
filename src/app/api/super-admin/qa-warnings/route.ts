@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -87,7 +88,7 @@ export async function GET(req: Request) {
       warnings: serializedWarnings,
       monthlySummary,
     });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err) {
+    return NextResponse.json({ error: getErrorMessage(err) }, { status: 500 });
   }
 }

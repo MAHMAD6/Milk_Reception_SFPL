@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/backend/core/auth';
 import { prisma } from '@/backend/core/db';
 import { getMpdExecutiveTelemetry } from '@/backend/services/mpdExecutiveService';
+import { getErrorMessage } from '@/lib/errors';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,10 +56,10 @@ export async function GET(req: Request) {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error('Error loading MPD Executive telemetry:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to load MPD Executive telemetry.' },
+      { error: getErrorMessage(error) || 'Failed to load MPD Executive telemetry.' },
       { status: 500 }
     );
   }

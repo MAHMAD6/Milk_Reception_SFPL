@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { SiloTransactionType } from '@prisma/client';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser();
@@ -50,7 +51,7 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json({ issues: formatted });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch silo issue history' }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to fetch silo issue history' }, { status: 500 });
   }
 }

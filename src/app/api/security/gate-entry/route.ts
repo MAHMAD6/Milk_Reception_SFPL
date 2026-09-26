@@ -4,6 +4,7 @@ import { gateEntrySchema } from '@/lib/validations/security';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
+import { getErrorIssues, getErrorMessage, getErrorName } from '@/lib/errors';
 
 const SECURITY_SCOPE = { kind: 'DEPARTMENT', departmentId: 'Security' } as const;
 
@@ -133,10 +134,10 @@ export async function POST(req: Request) {
       ),
       message: `Token ${result.updatedVisit.token_number} issued. Vehicle ${result.updatedVisit.vehicle_number} entered gate.`,
     });
-  } catch (error: any) {
-    if (error?.name === 'ZodError') {
-      return NextResponse.json({ error: error.errors[0]?.message || 'Validation failed' }, { status: 400 });
+  } catch (error) {
+    if (getErrorName(error) === 'ZodError') {
+      return NextResponse.json({ error: getErrorIssues(error)?.[0]?.message || 'Validation failed' }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to record gate entry' }, { status: 400 });
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to record gate entry' }, { status: 400 });
   }
 }

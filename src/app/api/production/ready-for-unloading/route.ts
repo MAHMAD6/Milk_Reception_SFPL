@@ -236,7 +236,7 @@ export async function GET(req: NextRequest) {
     );
 
     return NextResponse.json({ visits: formattedVisits, silos: activeSilos });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error fetching ready-for-unloading visits:', err);
     return NextResponse.json({ error: 'Failed to fetch vehicles ready for unloading' }, { status: 500 });
   }

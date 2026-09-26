@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { AlertTriangle, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 interface WarningItem {
   id: string;
@@ -46,8 +47,8 @@ export default function SuperAdminQaWarningsPage() {
         } else {
           setError(data.error);
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }

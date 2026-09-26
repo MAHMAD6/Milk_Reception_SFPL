@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   ShieldCheck,
 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 interface ContractorHistoryReportsProps {
   initialLogs: MilkProcessLog[];
@@ -70,8 +71,8 @@ export const ContractorHistoryReports: React.FC<ContractorHistoryReportsProps> =
           setTotalPages(data.pagination.totalPages);
           setTotalRecords(data.pagination.totalRecords);
         }
-      } catch (err: any) {
-        setError(err.message || 'Failed to load historical contractor records');
+      } catch (err) {
+        setError(getErrorMessage(err) || 'Failed to load historical contractor records');
       } finally {
         setLoading(false);
       }

@@ -1,3 +1,4 @@
+import { getErrorMessage } from '@/lib/errors';
 /**
  * MOT Offline Storage & Sync Engine
  * Uses IndexedDB for reliable offline collection queuing, draft saving, and GPS buffering.
@@ -680,11 +681,11 @@ export async function syncPendingCollections(): Promise<{
         );
         failed++;
       }
-    } catch (err: any) {
+    } catch (err) {
       await updateCollectionQueueStatus(
         item.client_event_id,
         'FAILED_RETRYABLE',
-        err?.message || 'Network unreachable'
+        getErrorMessage(err) || 'Network unreachable'
       );
       failed++;
     }
@@ -830,9 +831,9 @@ export async function syncPendingGps(): Promise<{
           }
           hadNetworkOrServerFailure = true;
         }
-      } catch (err: any) {
+      } catch (err) {
         // Network unreachable / fetch exception -> FAILED_RETRYABLE
-        const errorMsg = err?.message || 'Network unreachable';
+        const errorMsg = getErrorMessage(err) || 'Network unreachable';
         const updates = journeyPoints
           .filter((p): p is QueuedGpsPoint & { id: number } => typeof p.id === 'number')
           .map((p) => ({

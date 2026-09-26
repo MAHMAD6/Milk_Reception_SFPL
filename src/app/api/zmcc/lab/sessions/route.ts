@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
     return NextResponse.json(result.data, { status: result.status });
-  } catch (err: any) {
+  } catch (err) {
     console.error('POST /api/zmcc/lab/sessions error:', err);
     return NextResponse.json({ error: 'Failed to start or resume lab session.' }, { status: 500 });
   }

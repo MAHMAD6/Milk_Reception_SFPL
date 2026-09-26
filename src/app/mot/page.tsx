@@ -34,6 +34,7 @@ import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
+import { getErrorMessage } from '@/lib/errors';
 
 interface StopDetail {
   id: string;
@@ -279,7 +280,7 @@ export default function MotDriverPage() {
           setJourneyError('Offline preparation is missing or expired. Reconnect and prepare the active journey again.');
         }
       }
-    } catch (err: any) {
+    } catch (err) {
       // Fallback to cache on error
       try {
         const cached = await getCachedJourney();
@@ -287,10 +288,10 @@ export default function MotDriverPage() {
         if (cached && preparation && preparation.journeyId === cached.id && new Date(preparation.expiresAt).getTime() > Date.now()) {
           setJourney(cached as any);
         } else {
-          setJourneyError(err.message || 'Unable to connect and no cached journey available.');
+          setJourneyError(getErrorMessage(err) || 'Unable to connect and no cached journey available.');
         }
       } catch {
-        setJourneyError(err.message || 'Failed to load journey.');
+        setJourneyError(getErrorMessage(err) || 'Failed to load journey.');
       }
     } finally {
       setLoadingJourney(false);
@@ -402,8 +403,8 @@ export default function MotDriverPage() {
       });
       setActiveStop(null);
       setSyncFeedback('Draft saved locally.');
-    } catch (err: any) {
-      setFormError('Failed to save draft: ' + err.message);
+    } catch (err) {
+      setFormError('Failed to save draft: ' + getErrorMessage(err));
     }
   };
 
@@ -495,8 +496,8 @@ export default function MotDriverPage() {
       if (navigator.onLine) {
         triggerSync();
       }
-    } catch (err: any) {
-      setFormError(err.message || 'Failed to queue collection event.');
+    } catch (err) {
+      setFormError(getErrorMessage(err) || 'Failed to queue collection event.');
     } finally {
       setSubmittingCollection(false);
     }

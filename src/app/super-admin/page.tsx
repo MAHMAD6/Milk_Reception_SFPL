@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { Users, Truck, Database, FlaskConical, AlertCircle } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatCard } from '@/components/ui/stat-card';
+import { getErrorMessage } from '@/lib/errors';
 
 interface OverviewMetrics {
   totalUsers: number;
@@ -45,8 +46,8 @@ export default function SuperAdminOverviewPage() {
         } else {
           setError(data.error || 'Failed to load overview data.');
         }
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err) {
+        setError(getErrorMessage(err));
       } finally {
         setLoading(false);
       }

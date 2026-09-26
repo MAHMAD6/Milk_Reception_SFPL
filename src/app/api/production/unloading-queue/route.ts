@@ -209,7 +209,7 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.json({ visits: formattedVisits });
-  } catch (err: any) {
+  } catch (err) {
     console.error('Error fetching unloading visits:', err);
     return NextResponse.json({ error: 'Failed to fetch ongoing unloading visits' }, { status: 500 });
   }

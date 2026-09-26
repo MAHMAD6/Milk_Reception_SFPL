@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/backend/core/auth';
 import { prisma } from '@/backend/core/db';
 import type { ManagementFilters, ManagementScope } from '@/backend/modules/management-reporting';
 import { getZmccAreaReconciliation } from '@/backend/services/zmccReconciliationReadModelService';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: Request) {
   const current = await getCurrentUser(req);
@@ -19,5 +20,5 @@ export async function GET(req: Request) {
     page: params.get('page') ? Number(params.get('page')) : undefined, pageSize: params.get('pageSize') ? Number(params.get('pageSize')) : undefined,
   };
   try { return NextResponse.json({ ...(await getZmccAreaReconciliation(scope, filters)), scope: scope.kind, filters }, { headers: { 'Cache-Control': 'private, no-store' } }); }
-  catch (error: any) { return NextResponse.json({ error: error.message || 'Unable to load reconciliation report.' }, { status: 400 }); }
+  catch (error) { return NextResponse.json({ error: getErrorMessage(error) || 'Unable to load reconciliation report.' }, { status: 400 }); }
 }

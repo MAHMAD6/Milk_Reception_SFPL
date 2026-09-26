@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
+import { getErrorMessage } from '@/lib/errors';
 
 export async function GET(req: Request) {
   const user = await getCurrentUser();
@@ -70,7 +71,7 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json({ visits: formatted });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to search vehicle visits' }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to search vehicle visits' }, { status: 500 });
   }
 }

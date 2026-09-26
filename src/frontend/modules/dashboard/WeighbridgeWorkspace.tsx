@@ -70,6 +70,7 @@ import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
 import { PageHeader } from '@/components/ui/page-header';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { onActivateKey } from '@/lib/a11y';
+import { getErrorMessage } from '@/lib/errors';
 
 // Helper to format Date instance or string into "YYYY-MM-DDTHH:mm" for datetime-local input
 function toLocalDatetimeInput(dateInput?: Date | string | number | null): string {
@@ -277,9 +278,9 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
       );
       setGrossInputKg('');
       await refreshAllQueues();
-    } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to record first weight.' });
-      toast.showError(err.message || 'Failed to record first weight', 'Weighbridge Error');
+    } catch (err) {
+      setStatusMsg({ type: 'error', text: getErrorMessage(err) || 'Failed to record first weight.' });
+      toast.showError(getErrorMessage(err) || 'Failed to record first weight', 'Weighbridge Error');
     } finally {
       setIsSubmitting(false);
     }
@@ -366,9 +367,9 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
 
       setTareInputKg('');
       await refreshAllQueues();
-    } catch (err: any) {
-      setStatusMsg({ type: 'error', text: err.message || 'Failed to record second weight.' });
-      toast.showError(err.message || 'Failed to record second weight', 'Weighbridge Error');
+    } catch (err) {
+      setStatusMsg({ type: 'error', text: getErrorMessage(err) || 'Failed to record second weight.' });
+      toast.showError(getErrorMessage(err) || 'Failed to record second weight', 'Weighbridge Error');
     } finally {
       setIsSubmitting(false);
     }

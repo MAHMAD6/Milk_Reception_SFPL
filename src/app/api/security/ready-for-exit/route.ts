@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
+import { getErrorMessage } from '@/lib/errors';
 
 const SECURITY_SCOPE = { kind: 'DEPARTMENT', departmentId: 'Security' } as const;
 
@@ -74,7 +75,7 @@ export async function GET(req: Request) {
     });
 
     return NextResponse.json({ visits: formatted });
-  } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch ready-for-exit visits' }, { status: 500 });
+  } catch (error) {
+    return NextResponse.json({ error: getErrorMessage(error) || 'Failed to fetch ready-for-exit visits' }, { status: 500 });
   }
 }
