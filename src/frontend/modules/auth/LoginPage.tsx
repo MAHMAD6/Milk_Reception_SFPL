@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
 import { cn } from '@/lib/utils';
 import { BrandMark } from '@/frontend/modules/shared/navigation/NavPanel';
-import { useRouter } from 'next/navigation';
 import { resolveRoleHome } from '@/lib/role-routing';
 
 interface DevItem {
@@ -71,7 +70,6 @@ const STATIC_DEV_PROFILES: DevGroup[] = [
 ];
 
 export const LoginPage: React.FC = () => {
-  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -80,15 +78,6 @@ export const LoginPage: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedUser, setSelectedUser] = useState<string | null>(null);
   const [devGroups] = useState<DevGroup[]>(STATIC_DEV_PROFILES);
-
-  const handleCardSelect = (item: DevItem) => {
-    setUsername(item.username);
-    if (item.password) {
-      setPassword(item.password);
-    }
-    setSelectedUser(item.username);
-    setErrorMsg(null);
-  };
 
   const handleDirectLogin = async (item: DevItem) => {
     setUsername(item.username);

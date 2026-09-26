@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Clock, Database, Play, CheckCheck, RefreshCw, Radio, MinusCircle } from 'lucide-react';
+import { Search, Clock, Play, CheckCheck, RefreshCw, MinusCircle } from 'lucide-react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
 import { User } from '@core/types';
@@ -108,7 +108,6 @@ interface ProductionUnloadingWorkspaceProps {
 }
 
 export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspaceProps> = ({
-  currentUser,
   activeTab: controlledTab,
   onTabChange,
 }) => {

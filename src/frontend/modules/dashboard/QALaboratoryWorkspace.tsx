@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { FlaskConical, Clock, PauseCircle, Radio } from 'lucide-react';
+import { FlaskConical, Clock, PauseCircle } from 'lucide-react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
 import { User } from '@core/types';
@@ -47,7 +47,6 @@ interface QALaboratoryWorkspaceProps {
 }
 
 export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
-  currentUser,
   activeTab: controlledTab,
   onTabChange,
 }) => {
@@ -107,11 +106,6 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
   const selectedWaitingVisit = useMemo(
     () => waitingVisits.find((v) => v.id === selectedWaitingVisitId) || null,
     [waitingVisits, selectedWaitingVisitId]
-  );
-
-  const selectedTestingVisit = useMemo(
-    () => inTestingVisits.find((v) => v.id === selectedTestingVisitId) || null,
-    [inTestingVisits, selectedTestingVisitId]
   );
 
   const selectedHeldVisit = useMemo(

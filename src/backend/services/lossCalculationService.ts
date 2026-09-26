@@ -365,13 +365,12 @@ export async function getSupplyChainLossHierarchy(filters: {
   summary: SupplyChainLossSummary;
   details: LossReconciliationDetailRow[];
 }> {
-  const { startDate, endDate, label: periodLabel } = resolvePeriodDateRange(
+  const { startDate, endDate } = resolvePeriodDateRange(
     filters.period || 'today',
     filters.from,
     filters.to
   );
 
-  const zmccFilter = filters.zmccId ? { id: BigInt(String(filters.zmccId)) } : {};
   const zmccIdBigInt = filters.zmccId ? BigInt(String(filters.zmccId)) : undefined;
 
   // 1. Query Tier 1 Journeys (MOT Route Collections vs ZMCC Arrival)
@@ -703,12 +702,6 @@ export async function generateLossReconciliationExcel(data: {
     fgColor: { argb: 'FFF1F5F9' },
   };
 
-  const subHeaderFont: Partial<ExcelJS.Font> = {
-    name: 'Segoe UI',
-    size: 11,
-    bold: true,
-    color: { argb: 'FF0F172A' },
-  };
 
   // ---------------------------------------------------------
   // SHEET 1: Supply Chain Loss Summary

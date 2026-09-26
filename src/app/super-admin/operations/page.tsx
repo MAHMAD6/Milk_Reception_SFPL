@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Activity, Search, ShieldAlert, Truck, ChevronRight } from 'lucide-react';
+import { Search, ShieldAlert, Truck } from 'lucide-react';
 
 import { formatDispatchQuantity } from '@/backend/modules/dispatch/quantity/dispatchQuantityService';
 

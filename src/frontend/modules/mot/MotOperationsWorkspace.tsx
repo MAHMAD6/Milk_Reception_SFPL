@@ -6,20 +6,14 @@ import {
   Send,
   Navigation,
   MapPin,
-  Store,
   Clock,
   AlertTriangle,
   CheckCircle2,
-  XCircle,
   RotateCw,
-  Search,
   Plus,
-  Edit2,
   Ban,
   User as UserIcon,
   Phone,
-  CreditCard,
-  Building2,
   X,
 } from 'lucide-react';
 import { User } from '@core/types';
@@ -221,7 +215,6 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   // Search & Filter
-  const [searchQuery, setSearchQuery] = useState('');
   const [historyStatusFilter, setHistoryStatusFilter] = useState('all');
 
   // Dispatch Form State

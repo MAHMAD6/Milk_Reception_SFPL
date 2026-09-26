@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   TrendingDown,
-  TrendingUp,
   Download,
   RefreshCw,
   AlertTriangle,

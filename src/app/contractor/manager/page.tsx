@@ -73,7 +73,7 @@ function PlantContractorManagerContent() {
     <div className="min-h-screen bg-background text-foreground flex flex-col w-full max-w-full overflow-x-hidden">
       <Header
         currentUser={user}
-        title="Plant Contractor"
+        title={subpageTitle}
         showBranding={true}
         showMenuButton={true}
         onMenuClick={openDrawer}

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User } from '@core/types';
-import { Phone, Mail, RotateCw, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
+import { Phone, RotateCw, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 
 interface SmsOutboxViewProps {
   currentUser: User | null;
@@ -27,7 +27,7 @@ interface SmsOutboxItem {
   } | null;
 }
 
-export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => {
+export const SmsOutboxView: React.FC<SmsOutboxViewProps> = () => {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<SmsOutboxItem[]>([]);
   const [error, setError] = useState<string | null>(null);

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { Users, Plus, KeyRound, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X, MoreHorizontal, UserX, UserCheck } from 'lucide-react';
+import { Plus, KeyRound, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X, MoreHorizontal, UserX, UserCheck } from 'lucide-react';
 import {
   CREATABLE_ROLES,
   CreatableRole,

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { User } from '@core/types';
-import { Search, RefreshCw, CheckCircle2, Clock, Radio } from 'lucide-react';
+import { Search, RefreshCw, CheckCircle2, Clock } from 'lucide-react';
 
 import { formatAcceptedQuantitySummary } from '@/backend/modules/dispatch/quantity/dispatchQuantityService';
 
@@ -92,7 +92,6 @@ function formatDuration(minutes: number): string {
 }
 
 export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
-  currentUser,
   activeTab: controlledTab,
   onTabChange,
 }) => {

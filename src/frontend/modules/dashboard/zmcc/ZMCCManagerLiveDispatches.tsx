@@ -2,21 +2,14 @@
 
 import React, { useState, useMemo } from 'react';
 import { MilkProcessLog } from '@backend/core/types';
-import { VehicleVisitGroup } from './zmccManagerTypes';
 import { buildVehicleVisitGroups } from './zmccManagerHelpers';
 import { ManagerLifecycleTracker } from './ManagerLifecycleTracker';
 import {
   Truck,
   Search,
-  Filter,
   Eye,
   Clock,
-  CheckCircle2,
   AlertTriangle,
-  Scale,
-  FlaskConical,
-  Factory,
-  ShieldCheck,
   RefreshCw,
 } from 'lucide-react';
 

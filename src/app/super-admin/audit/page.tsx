@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { History, Search, ShieldAlert, FileText } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 
 interface AuditLogItem {
   id: string;

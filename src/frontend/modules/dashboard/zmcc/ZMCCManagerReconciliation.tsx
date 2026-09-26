@@ -12,14 +12,10 @@ import {
   Search,
   RefreshCw,
   AlertTriangle,
-  Scale,
   FlaskConical,
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  CheckCircle2,
-  Clock,
-  XCircle,
   Warehouse,
 } from 'lucide-react';
 

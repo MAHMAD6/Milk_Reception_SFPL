@@ -1,7 +1,7 @@
 import { prisma } from '../core/db';
 import { MilkProcessLog, User, ProcessStatus, PortionLabTestResult } from '../core/types';
 import { vehicleVisitPaperIdentity } from '../modules/paper-references';
-import { PLANT_TIMEZONE, isValidDateOnly, parseStrictDateOnly } from '@/lib/datetime-utils';
+import { PLANT_TIMEZONE, isValidDateOnly } from '@/lib/datetime-utils';
 import { getOperationalBusinessDate, getPakistanCalendarDate } from '../core/business-day';
 import {
   calculateDensity,

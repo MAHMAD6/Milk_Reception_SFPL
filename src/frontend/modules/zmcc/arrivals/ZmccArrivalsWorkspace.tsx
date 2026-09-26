@@ -10,12 +10,7 @@ import {
   MapPin,
   RefreshCw,
   Search,
-  FileText,
-  Calendar,
-  Building2,
-  Edit3,
   X,
-  ShieldAlert,
   Users,
   UserPlus,
   Plus,
@@ -1222,12 +1217,12 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                       </select>
                       {localSuppliers.length === 0 && !loadingLocalSuppliers && (
                         <p className="text-xs text-amber-700 mt-1">
-                          No suppliers in directory yet. Click "+ Quick Add Supplier" above to onboard the first one.
+                          No suppliers in directory yet. Click &quot;+ Quick Add Supplier&quot; above to onboard the first one.
                         </p>
                       )}
                       {localSuppliers.length > 0 && filteredSuppliers.length === 0 && supplierSearchTerm && (
                         <p className="text-xs text-slate-500 mt-1">
-                          No suppliers match "{supplierSearchTerm}". Clear search or click "+ Quick Add Supplier".
+                          No suppliers match &quot;{supplierSearchTerm}&quot;. Clear search or click &quot;+ Quick Add Supplier&quot;.
                         </p>
                       )}
                     </>
@@ -1925,7 +1920,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                   className="w-full px-3 py-2 border rounded-xl tabular-nums"
                 />
                 <p className="text-xs text-slate-400 mt-1">
-                  Leading zeros preserved. Placeholders like 'New', 'Pending', 'Unknown', 'N/A' will be rejected.
+                  Leading zeros preserved. Placeholders like &apos;New&apos;, &apos;Pending&apos;, &apos;Unknown&apos;, &apos;N/A&apos; will be rejected.
                 </p>
               </div>
 

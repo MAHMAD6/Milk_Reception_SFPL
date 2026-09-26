@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShieldAlert, CheckCircle2, AlertTriangle, UserCheck, Search, Filter } from 'lucide-react';
+import { ShieldAlert, UserCheck, Search } from 'lucide-react';
 import type { GovernanceOverrideTelemetry } from '../types';
 
 interface MpdGovernanceScreenProps {
@@ -148,7 +148,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
                     </td>
                     <td className="py-3 px-4 max-w-xs">
                       <div className="text-slate-800 text-xs italic bg-subtle p-2 rounded border border-border">
-                        "{o.managerJustification}"
+                        &quot;{o.managerJustification}&quot;
                       </div>
                     </td>
                     <td className="py-3 px-4">

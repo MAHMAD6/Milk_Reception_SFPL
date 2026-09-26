@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { User } from '@core/types';
-import { ChevronLeft, ChevronRight, RefreshCw, Calendar, Truck } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RefreshCw, Truck } from 'lucide-react';
 import { DynamicDispatchForm } from '@modules/forms/DynamicDispatchForm';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 
@@ -53,7 +53,6 @@ interface MPDFieldWorkspaceProps {
 
 export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
   currentUser,
-  onRefresh,
 }) => {
   const [activeTab, setActiveTab] = useState<'new' | 'recent'>('new');
 

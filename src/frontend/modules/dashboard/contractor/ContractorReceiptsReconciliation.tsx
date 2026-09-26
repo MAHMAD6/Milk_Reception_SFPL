@@ -2,10 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { MilkProcessLog } from '@backend/core/types';
-import {
-  ContractorVehicleVisit,
-  ContractorReceiptsMetrics,
-} from './contractorManagerTypes';
+import { ContractorReceiptsMetrics } from './contractorManagerTypes';
 import {
   buildContractorVehicleVisits,
   computeContractorReceiptsMetrics,
@@ -19,10 +16,8 @@ import {
   Search,
   Filter,
   ShieldCheck,
-  Building2,
   FileSpreadsheet,
   AlertCircle,
-  Truck,
   Factory,
 } from 'lucide-react';
 

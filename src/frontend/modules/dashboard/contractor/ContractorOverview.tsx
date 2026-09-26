@@ -2,10 +2,7 @@
 
 import React, { useMemo } from 'react';
 import { MilkProcessLog } from '@backend/core/types';
-import {
-  ContractorVehicleVisit,
-  ContractorOverviewMetrics,
-} from './contractorManagerTypes';
+import { ContractorOverviewMetrics } from './contractorManagerTypes';
 import {
   buildContractorVehicleVisits,
   computeContractorOverview,

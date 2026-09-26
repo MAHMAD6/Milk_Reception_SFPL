@@ -1,11 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { MilkProcessLog } from '@backend/core/types';
-import {
-  ContractorVehicleVisit,
-  ContractorHistoryMetrics,
-} from './contractorManagerTypes';
+import { ContractorHistoryMetrics } from './contractorManagerTypes';
 import {
   buildContractorVehicleVisits,
   computeContractorHistoryMetrics,
@@ -14,17 +11,13 @@ import {
   History,
   Calendar,
   Search,
-  Filter,
   RefreshCw,
-  Receipt,
   Scale,
   ArrowRightLeft,
   Truck,
-  Building2,
   FileSpreadsheet,
   AlertCircle,
   CheckCircle2,
-  Clock,
   ShieldCheck,
 } from 'lucide-react';
 
@@ -36,7 +29,6 @@ interface ContractorHistoryReportsProps {
 
 export const ContractorHistoryReports: React.FC<ContractorHistoryReportsProps> = ({
   initialLogs,
-  serverBusinessDate,
   assignedSourceName,
 }) => {
   const [fromDate, setFromDate] = useState<string>('');

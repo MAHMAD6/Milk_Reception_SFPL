@@ -6,7 +6,6 @@ import { User } from '@core/types';
 import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { MPDFieldWorkspace } from '@modules/dashboard/MPDFieldWorkspace';
-import { RefreshCw } from 'lucide-react';
 import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 

@@ -3,7 +3,6 @@ import { getCurrentUser } from '@backend/core/auth';
 import { prisma } from '@backend/core/db';
 import { User, Role } from '@backend/core/types';
 import { getPaginatedOperationalLogs, RetrievalMode } from '@backend/services/operationalReadModelService';
-import { getOperationalBusinessDate } from '@backend/core/business-day';
 import { isValidDateOnly } from '@/lib/datetime-utils';
 
 export async function GET(req: NextRequest | Request) {

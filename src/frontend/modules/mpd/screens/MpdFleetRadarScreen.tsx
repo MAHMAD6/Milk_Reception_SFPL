@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Truck, Navigation, Thermometer, ShieldAlert, CheckCircle2, Clock, Search } from 'lucide-react';
+import { Truck, Navigation, Thermometer, ShieldAlert, Clock, Search } from 'lucide-react';
 import type { InTransitTankerTelemetry, MotRouteTelemetry, EmergencySubstituteTelemetry } from '../types';
 
 interface MpdFleetRadarScreenProps {

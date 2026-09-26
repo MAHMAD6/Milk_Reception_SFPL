@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
 
 // This route should be pinged by a Vercel Cron Job or AWS EventBridge every minute
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   try {
     // 1. Fetch up to 50 pending SMS messages
     const pendingMessages = await prisma.motCollectionSmsOutbox.findMany({

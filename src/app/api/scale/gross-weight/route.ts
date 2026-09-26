@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
-import { grossWeightSchema } from '@/lib/validations/scale';
 import { validatePositiveDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';

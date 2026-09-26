@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import { User } from '@core/types';
-import { ShieldCheck, Plus, Filter, CheckCircle2, AlertTriangle, XCircle, ArrowUpRight, History } from 'lucide-react';
+import { ShieldCheck, Plus, CheckCircle2, AlertTriangle, XCircle, History } from 'lucide-react';
 import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';

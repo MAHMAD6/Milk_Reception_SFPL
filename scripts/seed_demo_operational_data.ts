@@ -1,16 +1,7 @@
 import 'dotenv/config';
 import { prisma } from '../src/backend/core/db';
-import { evaluateLabResult } from '../src/lib/lab-rules';
 import { QualityRuleService } from '../src/backend/services/qualityRuleService';
-import {
-  calculateSNF,
-  calculateTS,
-  calculateDensity,
-  calculatePhysicalLiters,
-  calculateAt13TSLiters,
-  computeCanonicalMilkMetrics,
-  calculateGrossLiters,
-} from '../src/backend/utils/milkFormulas';
+import { computeCanonicalMilkMetrics } from '../src/backend/utils/milkFormulas';
 import {
   calculateVehicleReceivedQuantity,
   VehicleCalculationPortion,
@@ -86,7 +77,6 @@ export async function seedOperationalData() {
 
   const superAdmin = users.find((u) => u.role === 'SUPER_ADMIN' && u.is_active) || users.find((u) => u.role === 'SUPER_ADMIN') || users[0];
   const qaHead = users.find((u) => u.role === 'QA_HEAD' && u.is_active) || superAdmin;
-  const qaManager = users.find((u) => u.role === 'QA_MANAGER' && u.is_active) || qaHead;
 
   // Seed Stage 6G-G Paper Reference Policies
   console.log('Seeding Stage 6G-G Paper Reference Policies...');
@@ -531,7 +521,6 @@ export async function seedOperationalData() {
           if (t.testScope === 'PLANT' || t.testScope === 'BOTH') {
             let numVal: number | null = null;
             let textVal: string | null = null;
-            let isPassed = !isPlantReject;
 
             if (t.testName === 'Fat') numVal = plantFat;
             else if (t.testName.includes('Lactometer') || t.testName.includes('LR')) numVal = plantLr;
@@ -539,7 +528,6 @@ export async function seedOperationalData() {
             else if (t.testName === 'Acidity') numVal = isPlantReject ? 0.19 : acidVal;
             else if (t.testName === 'Clot on Boiling') {
               textVal = isPlantReject ? 'POSITIVE' : 'NEGATIVE';
-              isPassed = !isPlantReject;
             } else if (t.resultType === 'OK_NOT_OK') textVal = isPlantReject ? 'NOT_OK' : 'OK';
             else if (t.resultType === 'POSITIVE_NEGATIVE') textVal = 'NEGATIVE';
             else if (t.testName === 'BR Value') numVal = 40.0;
@@ -1135,7 +1123,7 @@ export async function seedOperationalData() {
 
   // B. PHE / Arrivals View Scenarios:
   // Arrival 1: Local Supplier arrival currently inside ZMCC and waiting for Lab
-  const arr1 = await prisma.zmccLocalSupplierArrival.create({
+  await prisma.zmccLocalSupplierArrival.create({
     data: {
       zmcc_id: hasilpurSource.id,
       local_supplier_id: supplier1.id,

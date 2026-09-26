@@ -54,7 +54,7 @@ export async function POST(
       }
     }
 
-    const result = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       // 1. Load vehicle visit with weight ticket
       const visit = await tx.vehicleVisit.findUnique({
         where: { id: visitId },

@@ -9,6 +9,19 @@ export default defineConfig([
     // Pre-existing debt surfaced when Next's rule sets were enabled. Kept visible as
     // warnings so they can be paid down incrementally without blocking CI.
     rules: {
+      // Leading underscore marks an intentionally unused binding (existing convention).
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          args: 'after-used',
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrors: 'all',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+          ignoreRestSiblings: true,
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       'react/no-unescaped-entities': 'warn',
       'react-hooks/set-state-in-effect': 'warn',

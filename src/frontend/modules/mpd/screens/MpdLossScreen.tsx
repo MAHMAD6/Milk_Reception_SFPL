@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers, HelpCircle, ShieldAlert, ArrowRight } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import type { MpdSummary } from '../types';
 
 interface MpdLossScreenProps {

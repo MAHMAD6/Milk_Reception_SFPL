@@ -428,7 +428,6 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
   });
 
   const activeMetadata = STATION_METADATA[activeStation];
-  const ActiveIcon = activeMetadata.icon;
 
   const isNumericTestType = (type?: string) =>
     ['NUMERIC', 'INTEGER', 'DECIMAL'].includes(type || '');
@@ -550,7 +549,7 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
             <FlaskConical className="w-8 h-8 mx-auto text-slate-300 mb-2" />
             <h3 className="text-sm font-semibold text-slate-700">No Policy Assignments</h3>
             <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-              No tests are currently assigned to {activeMetadata.label}. Click "Assign Test" above to configure testing requirements and acceptance criteria.
+              No tests are currently assigned to {activeMetadata.label}. Click &quot;Assign Test&quot; above to configure testing requirements and acceptance criteria.
             </p>
           </div>
         ) : (

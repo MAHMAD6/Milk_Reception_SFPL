@@ -52,7 +52,6 @@ export function evaluateLabResult(
   resultType: string = 'NUMERIC',
   resultOptions?: LabTestResultOption[] | null
 ): LabResultEvaluation {
-  const code = testCode.toUpperCase().trim();
   const rawText = textValue ? textValue.trim().toUpperCase() : '';
 
   // Formulate Observed Result String

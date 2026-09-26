@@ -5,21 +5,6 @@ import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentSer
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
 import { MilkTestPolicyService } from '@/backend/services/milkTestPolicyService';
 
-function serializeBigInt(obj: any): any {
-  if (obj === null || obj === undefined) return obj;
-  if (typeof obj === 'bigint') return obj.toString();
-  if (obj instanceof Date) return obj.toISOString();
-  if (Array.isArray(obj)) return obj.map(serializeBigInt);
-  if (typeof obj === 'object') {
-    const res: any = {};
-    for (const key of Object.keys(obj)) {
-      res[key] = serializeBigInt(obj[key]);
-    }
-    return res;
-  }
-  return obj;
-}
-
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ visitId: string }> }

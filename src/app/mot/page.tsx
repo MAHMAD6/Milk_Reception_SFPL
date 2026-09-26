@@ -7,19 +7,15 @@ import { Header } from '@modules/shared/Header';
 import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNavDrawer';
 import {
   Truck,
-  MapPin,
-  Clock,
   Store,
   RotateCw,
   AlertCircle,
-  CheckCircle2,
   Navigation,
   Wifi,
   WifiOff,
   Save,
   Send,
   X,
-  FileEdit,
 } from 'lucide-react';
 import {
   saveCachedJourney,
@@ -28,7 +24,6 @@ import {
   getMotOfflinePreparation,
   saveDraft,
   getDraft,
-  deleteDraft,
   queueCollection,
   queueGpsLocation,
   getUnsyncedSummary,
@@ -166,7 +161,7 @@ export default function MotDriverPage() {
       }
       setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
       await refreshUnsynced();
-    } catch (err: any) {
+    } catch {
       setSyncFeedback('Sync failed: Network issue.');
     } finally {
       setSyncing(false);

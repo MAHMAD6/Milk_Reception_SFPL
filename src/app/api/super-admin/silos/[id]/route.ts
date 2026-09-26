@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
-import { getSiloCurrentStockLiters, getSiloActiveReservedLiters, getSiloStockVolumeState } from '@/backend/services/siloInventoryService';
+import { getSiloActiveReservedLiters, getSiloStockVolumeState } from '@/backend/services/siloInventoryService';
 
 export async function PATCH(
   req: Request,

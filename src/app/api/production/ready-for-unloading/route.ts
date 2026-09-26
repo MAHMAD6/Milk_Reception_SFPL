@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@core/db';
 import { getCurrentUser } from '@core/auth';
-import {
-  getSiloCurrentStockLiters,
-  getSiloActiveReservedLiters,
-  getSiloProvisionalAvailableCapacity,
-  getSiloStockVolumeState,
-} from '@/backend/services/siloInventoryService';
+import { getSiloActiveReservedLiters, getSiloStockVolumeState } from '@/backend/services/siloInventoryService';
 import { aggregateAcceptedPortionQuantities } from '@/lib/portion-quantity-aggregator';
 import {
   calculateSNF,

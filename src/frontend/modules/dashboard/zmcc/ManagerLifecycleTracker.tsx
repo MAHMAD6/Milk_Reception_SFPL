@@ -1,11 +1,10 @@
 'use client';
 
 import React from 'react';
-import { ManagerLifecycleSummary, LifecycleStageInfo } from './zmccManagerTypes';
+import { ManagerLifecycleSummary } from './zmccManagerTypes';
 import {
   CheckCircle2,
   Circle,
-  Clock,
   FlaskConical,
   Scale,
   Factory,
@@ -38,11 +37,10 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
         {/* Continuous background connector line */}
         <div className="absolute top-4 left-6 right-6 h-0.5 bg-border z-0" />
 
-        {lifecycle.stages.map((stage, idx) => {
+        {lifecycle.stages.map((stage) => {
           const Icon = STAGE_ICONS[stage.id] || Circle;
           const isCompleted = stage.status === 'COMPLETED';
           const isCurrent = stage.status === 'CURRENT';
-          const isUpcoming = stage.status === 'UPCOMING';
 
           let circleBg = 'bg-slate-100 border-slate-300 text-slate-400';
           let labelColor = 'text-slate-500';

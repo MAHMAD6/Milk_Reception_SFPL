@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShieldCheck, Truck, Clock, Search, Radio, LogOut, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, Truck, Clock, Search, LogOut, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
 import { User } from '@core/types';
@@ -67,7 +67,6 @@ interface SecurityGatewayWorkspaceProps {
 }
 
 export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> = ({
-  currentUser,
   activeTab: controlledTab,
   onTabChange,
 }) => {

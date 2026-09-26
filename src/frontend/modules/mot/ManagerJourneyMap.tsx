@@ -4,14 +4,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { User } from '@core/types';
 import {
   MapPin,
-  Truck,
-  Store,
-  Navigation,
-  Clock,
   RotateCw,
   AlertTriangle,
   CheckCircle2,
-  Calendar,
   X,
 } from 'lucide-react';
 import { onActivateKey } from '@/lib/a11y';

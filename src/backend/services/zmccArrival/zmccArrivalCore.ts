@@ -354,64 +354,6 @@ function isExactMotArrivalReplay(
   return true;
 }
 
-interface ContractorArrivalReplayComparison {
-  zmcc_id: bigint;
-  contractor_source_id: bigint;
-  rmr_number: string;
-  vehicle_number: string;
-  arrival_timestamp: Date;
-  phe_latitude: number | null;
-  phe_longitude: number | null;
-  phe_gps_accuracy: number | null;
-}
-
-function isExactContractorArrivalReplay(
-  existing: {
-    zmcc_id: bigint;
-    contractor_source_id: bigint;
-    rmr_number: string | null;
-    vehicle_number: string;
-    arrival_timestamp: Date | string;
-    phe_latitude: any;
-    phe_longitude: any;
-    phe_gps_accuracy: any;
-  },
-  expected: ContractorArrivalReplayComparison
-): boolean {
-  if (existing.zmcc_id !== expected.zmcc_id) return false;
-  if (existing.contractor_source_id !== expected.contractor_source_id) return false;
-  if ((existing.rmr_number || '').trim() !== (expected.rmr_number || '').trim()) return false;
-  if (existing.vehicle_number.trim().toUpperCase() !== expected.vehicle_number.trim().toUpperCase()) return false;
-
-  const existingTime = new Date(existing.arrival_timestamp).getTime();
-  const expectedTime = expected.arrival_timestamp.getTime();
-  if (Math.abs(existingTime - expectedTime) >= 1000) return false;
-
-  const existingLat = existing.phe_latitude != null ? Number(existing.phe_latitude) : null;
-  const existingLng = existing.phe_longitude != null ? Number(existing.phe_longitude) : null;
-  const existingAcc = existing.phe_gps_accuracy != null ? Number(existing.phe_gps_accuracy) : null;
-
-  if (expected.phe_latitude == null) {
-    if (existingLat != null) return false;
-  } else {
-    if (existingLat == null || Math.abs(expected.phe_latitude - existingLat) >= 0.0001) return false;
-  }
-
-  if (expected.phe_longitude == null) {
-    if (existingLng != null) return false;
-  } else {
-    if (existingLng == null || Math.abs(expected.phe_longitude - existingLng) >= 0.0001) return false;
-  }
-
-  if (expected.phe_gps_accuracy == null) {
-    if (existingAcc != null) return false;
-  } else {
-    if (existingAcc == null || Math.abs(expected.phe_gps_accuracy - existingAcc) >= 0.01) return false;
-  }
-
-  return true;
-}
-
 interface LocalSupplierArrivalReplayComparison {
   zmcc_id: bigint;
   local_supplier_id: bigint;

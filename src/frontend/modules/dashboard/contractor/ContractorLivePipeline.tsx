@@ -2,22 +2,16 @@
 
 import React, { useState, useMemo } from 'react';
 import { MilkProcessLog } from '@backend/core/types';
-import {
-  ContractorVehicleVisit,
-  ContractorJourneyStage,
-} from './contractorManagerTypes';
 import { buildContractorVehicleVisits } from './contractorManagerHelpers';
 import {
   Truck,
   Search,
   Filter,
-  Clock,
   ShieldCheck,
   Scale,
   FlaskConical,
   Factory,
   Receipt,
-  FileSpreadsheet,
   AlertCircle,
 } from 'lucide-react';
 
@@ -32,7 +26,6 @@ type LiveStageFilter = 'ALL_ACTIVE' | 'GATE' | 'QA' | 'SCALE' | 'UNLOADING' | 'R
 
 export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
   logs,
-  assignedSourceName,
   isLoading = false,
   error = null,
 }) => {

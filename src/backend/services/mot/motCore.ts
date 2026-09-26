@@ -4,11 +4,7 @@ import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { getPakistanCalendarDate } from '@core/business-day';
 import { validatePhone, validateCnic } from '../zmccMasterDataService';
-import {
-  computeCanonicalMilkMetrics,
-  formatCollectionSmsMessage,
-  MOT_CALCULATION_VERSION,
-} from '@backend/utils/milkFormulas';
+import { computeCanonicalMilkMetrics, formatCollectionSmsMessage } from '@backend/utils/milkFormulas';
 import {
   recomputeMotJourneySummaryTx,
   serializeMotJourneySummary,
@@ -1292,7 +1288,6 @@ export async function assignAndDispatchJourney(
       };
     }
   }
-  const operationalDate = new Date(`${todayPktStr}T00:00:00.000Z`);
 
   // 6. Parse and validate IDs
   let routeId: bigint;

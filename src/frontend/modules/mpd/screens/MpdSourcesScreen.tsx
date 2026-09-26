@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Building2, Building, CheckCircle2, AlertCircle, Droplet, Search, ShieldCheck } from 'lucide-react';
+import { Building2, Building, CheckCircle2, Search, ShieldCheck } from 'lucide-react';
 import type { ZmccCenterTelemetry, PlantContractorTelemetry } from '../types';
 
 interface MpdSourcesScreenProps {

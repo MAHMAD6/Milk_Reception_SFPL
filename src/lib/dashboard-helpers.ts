@@ -1,4 +1,3 @@
-import { MilkProcessLog } from '@/backend/core/types';
 
 /**
  * Authoritative Canonical VehicleVisit statuses.

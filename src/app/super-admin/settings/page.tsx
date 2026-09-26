@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Settings, ShieldCheck, Server, Lock } from 'lucide-react';
+import { ShieldCheck, Server } from 'lucide-react';
 
 export default function SuperAdminSettingsPage() {
   return (

@@ -18,15 +18,6 @@ import {
 import { getOverviewDateRangeBounds } from './zmcc/zmccManagerHelpers';
 import { getPakistanCalendarDate } from '@backend/core/business-day';
 import type { RetrievalMode } from '@backend/services/operationalReadModelService';
-import {
-  LayoutDashboard,
-  Truck,
-  ArrowRightLeft,
-  History,
-  Store,
-  X,
-  Milk,
-} from 'lucide-react';
 import { ZmccMasterDataWorkspace } from '@/frontend/modules/zmcc/ZmccMasterDataWorkspace';
 import { ZmccArrivalsWorkspace } from '@/frontend/modules/zmcc/arrivals/ZmccArrivalsWorkspace';
 import { ZmccLabWorkspace } from '@/frontend/modules/zmcc/lab/ZmccLabWorkspace';
@@ -41,14 +32,6 @@ type ManagerHistoryView =
   | 'QUALITY_REJECTIONS'
   | 'ARRIVAL_CORRECTIONS'
   | 'LAB_CORRECTIONS';
-
-const TABS: { id: ZMCCManagerTab; label: string; icon: React.FC<{ className?: string }> }[] = [
-  { id: 'OVERVIEW', label: 'Overview', icon: LayoutDashboard },
-  { id: 'LIVE', label: 'Live Operations', icon: Truck },
-  { id: 'RECONCILIATION', label: 'Reconciliation', icon: ArrowRightLeft },
-  { id: 'HISTORY', label: 'History & Reports', icon: History },
-  { id: 'MASTER_DATA', label: 'Master Data', icon: Store },
-];
 
 export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
   currentUser,

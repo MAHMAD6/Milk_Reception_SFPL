@@ -16,8 +16,6 @@ import {
   CheckCircle2,
   Loader2,
   X,
-  ChevronRight,
-  Filter,
   Users,
   Truck,
 } from 'lucide-react';

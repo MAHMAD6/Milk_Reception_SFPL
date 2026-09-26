@@ -210,7 +210,6 @@ async function resetAndSeedWithValidation() {
   });
 
   const idempotencyKeys = finalReceipts.map((r) => r.idempotency_key || '');
-  const uniqueKeys = new Set(idempotencyKeys);
   const perPortionKeys = idempotencyKeys.filter((k) => k.includes(':PORTION:'));
   const vehicleLevelKeys = idempotencyKeys.filter((k) => /^FINAL_RECEIPT:VISIT:\d+$/.test(k));
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { FolderTree, Database, Truck, FlaskConical, Store } from 'lucide-react';
+import { Database, Truck, FlaskConical, Store } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SuperAdminMasterDataPage() {

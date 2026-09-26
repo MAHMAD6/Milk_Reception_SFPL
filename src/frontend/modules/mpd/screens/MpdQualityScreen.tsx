@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldAlert, AlertTriangle, CheckCircle2, FlaskConical, Filter } from 'lucide-react';
+import { FlaskConical, Filter } from 'lucide-react';
 import type { QualityFunnelTelemetry } from '../types';
 
 interface MpdQualityScreenProps {
@@ -101,7 +101,7 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
           <div className="flex items-center gap-2">
             <FlaskConical className="w-4 h-4 text-primary" />
             <h2 className="text-xs font-semibold text-foreground">
-              Today's Adulteration & Spoilage Incidents Log
+              Today&apos;s Adulteration & Spoilage Incidents Log
             </h2>
           </div>
           <span className="text-xs font-medium text-slate-500">

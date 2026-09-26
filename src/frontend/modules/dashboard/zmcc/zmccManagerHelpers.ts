@@ -23,7 +23,7 @@ import {
   HistoryReceiptFilter,
   HistoryTransactionItem,
 } from './zmccManagerTypes';
-import { formatOperationalDatetime, formatOperationalTime } from '@/lib/datetime-utils';
+import { formatOperationalDatetime } from '@/lib/datetime-utils';
 import { getPakistanCalendarDate } from '@backend/core/business-day';
 
 /**
@@ -389,25 +389,6 @@ export function buildVehicleVisitGroups(logs: MilkProcessLog[]): VehicleVisitGro
     if (!primary) continue;
 
     const lifecycle = deriveManagerLifecycle(portions);
-
-    // Sum portion dispatch quantities strictly without fabrication
-    let sumGrossLiters = 0;
-    let sum13TsLiters = 0;
-    let allGrossPresent = portions.length > 0;
-    let all13TsPresent = portions.length > 0;
-
-    for (const p of portions) {
-      if (p.dispatch_liters_gross != null) {
-        sumGrossLiters += p.dispatch_liters_gross;
-      } else {
-        allGrossPresent = false;
-      }
-      if (p.computed_dispatch_13ts_liters != null) {
-        sum13TsLiters += p.computed_dispatch_13ts_liters;
-      } else {
-        all13TsPresent = false;
-      }
-    }
 
     const vehicleAuthoritativeGrossLiters =
       primary.vehicle_dispatch_gross_liters != null
@@ -1505,7 +1486,7 @@ export function filterHistoryTransactionItems(
  * Generates CSV content from filtered HistoryTransactionItem records.
  * Strictly adheres to authoritative fields (no computed plant liters fallback, no fake 13% TS).
  */
-export function generateHistoryCsv(items: HistoryTransactionItem[], sourceName: string): string {
+export function generateHistoryCsv(items: HistoryTransactionItem[], _sourceName: string): string {
   const headers = [
     'Business Date',
     'Vehicle Number',

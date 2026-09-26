@@ -21,7 +21,6 @@ import {
   Search,
   Filter,
   ShieldCheck,
-  Building2,
   FileSpreadsheet,
   AlertCircle,
   Truck,
