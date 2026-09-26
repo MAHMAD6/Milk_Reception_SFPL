@@ -1,5 +1,22 @@
 import { prisma } from '@core/db';
-import { Prisma, QuantityUnit } from '@prisma/client';
+import {
+  Prisma,
+  QuantityUnit,
+  type LocalSupplierRmrIssuance,
+  type MotJourney,
+  type MotJourneySummary,
+  type MotProfile,
+  type MotVehicle,
+  type ProcurementSource,
+  type ZmccContractorArrival,
+  type ZmccLabResult,
+  type ZmccLabSession,
+  type ZmccLocalSupplier,
+  type ZmccLocalSupplierArrival,
+  type ZmccMotArrival,
+  type ZmccRoute,
+} from '@prisma/client';
+import type { SourceRef, UserRef } from '@/backend/core/serializable';
 import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { validateCategoricalOption } from '@/lib/lab-rules';
@@ -7,7 +24,7 @@ import { isValidDateOnly } from '@/lib/datetime-utils';
 import { computeCanonicalMilkMetrics } from '@/backend/utils/milkFormulas';
 import { resolveCoreMilkTestResults, validateCoreMilkTestCandidates } from '@/backend/utils/milkTestResolvers';
 import { MilkTestPolicyService } from '@/backend/services/milkTestPolicyService';
-import { QualityRuleService } from '@/backend/services/qualityRuleService';
+import { QualityRuleService, type QualityResultEvaluation } from '@/backend/services/qualityRuleService';
 import { TestingPoint } from '@/types/milk-test-policy';
 import { getTankPhysicalStock, serializeTankReceipt } from '@/backend/services/zmccTankService';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
@@ -41,7 +58,7 @@ export interface ServiceResult<T> {
 }
 
 export async function resolveZmccLabAuth(
-  reqOrUser?: Request | User | any,
+  reqOrUser?: Request | User,
   action: ZmccLabAction = 'READ_LAB'
 ): Promise<{ auth?: ZmccLabAuthContext; errorResponse?: { error: string; status: number } }> {
   let authUser: User | null = null;
@@ -180,7 +197,7 @@ export interface IssueLocalSupplierRmrPayload {
   idempotency_key: string;
 }
 
-function serializeLocalSupplierRmr(issuance: any) {
+function serializeLocalSupplierRmr(issuance: LocalSupplierRmrIssuance) {
   return {
     id: issuance.id.toString(), local_supplier_arrival_id: issuance.local_supplier_arrival_id.toString(),
     final_lab_session_id: issuance.final_lab_session_id.toString(), tank_receipt_id: issuance.tank_receipt_id.toString(),
@@ -253,7 +270,7 @@ export async function issueLocalSupplierRmr(
   }
 }
 
-export function serializeLabResult(res: any) {
+export function serializeLabResult(res: ZmccLabResult) {
   return {
     id: res.id.toString(),
     session_id: res.session_id.toString(),
@@ -315,7 +332,7 @@ export async function createCanonicalTankReceiptTx(
   } = params;
 
   // Lock target tank
-  const lockedTankRows: Array<{ id: bigint; zmcc_id: bigint; capacity_liters: any; is_active: boolean }> =
+  const lockedTankRows: Array<{ id: bigint; zmcc_id: bigint; capacity_liters: Prisma.Decimal; is_active: boolean }> =
     await tx.$queryRaw`
       SELECT id, zmcc_id, capacity_liters, is_active FROM zmcc_tank WHERE id = ${targetTankId} FOR UPDATE
     `;
@@ -415,7 +432,31 @@ export async function createCanonicalTankReceiptTx(
   return tankReceipt;
 }
 
-export function serializeLabSession(session: any) {
+/** A lab session plus whichever relations the query included (all optional). */
+export type SerializableLabSession = ZmccLabSession & {
+  zmcc?: (SourceRef & Pick<ProcurementSource, 'source_type'>) | null;
+  starter?: UserRef | null;
+  completer?: UserRef | null;
+  last_corrector?: UserRef | null;
+  mot_arrival?:
+    | (ZmccMotArrival & {
+        journey?:
+          | (MotJourney & {
+              route?: ZmccRoute | null;
+              mot_vehicle?: MotVehicle | null;
+              mot_profile?: MotProfile | null;
+              summary?: MotJourneySummary | null;
+            })
+          | null;
+      })
+    | null;
+  contractor_arrival?: (ZmccContractorArrival & { contractor_source?: SourceRef | null }) | null;
+  local_supplier_arrival?: (ZmccLocalSupplierArrival & { local_supplier?: ZmccLocalSupplier | null }) | null;
+  tank_receipt?: Parameters<typeof serializeTankReceipt>[0] | null;
+  results?: ZmccLabResult[];
+};
+
+export function serializeLabSession(session: SerializableLabSession) {
   return {
     id: session.id.toString(),
     zmcc_id: session.zmcc_id.toString(),
@@ -447,8 +488,9 @@ export function serializeLabSession(session: any) {
     original_decision: session.original_decision || null,
     corrected_decision: session.corrected_decision || null,
     correction_reason: session.correction_reason || null,
-    corrected_by: session.corrected_by ? session.corrected_by.toString() : null,
-    corrected_at: session.corrected_at instanceof Date ? session.corrected_at.toISOString() : session.corrected_at,
+    // Aliases of the last-correction columns (the model has no separate corrected_by/corrected_at).
+    corrected_by: session.last_corrected_by_user_id ? session.last_corrected_by_user_id.toString() : null,
+    corrected_at: session.last_corrected_at ? session.last_corrected_at.toISOString() : null,
     rejection_reason: session.rejection_reason,
     remarks: session.remarks,
     completion_client_event_id: session.completion_client_event_id,
@@ -673,7 +715,7 @@ export async function getArrivalsQueue(
     }),
   ]);
 
-  const queueItems: any[] = [];
+  const queueItems: Array<Record<string, unknown> & { arrival_timestamp: Date | string }> = [];
 
   for (const m of motArrivals) {
     queueItems.push({
@@ -1343,7 +1385,7 @@ export async function updateDraftResults(
       }
     }
 
-    const sessionUpdateData: any = {};
+    const sessionUpdateData: Prisma.ZmccLabSessionUpdateInput = {};
     if (payload.quantity_value !== undefined) {
       sessionUpdateData.quantity_value = payload.quantity_value !== null ? new Prisma.Decimal(effectiveQty!.toFixed(2)) : null;
     }
@@ -1387,7 +1429,7 @@ export interface CompleteSessionPayload {
 }
 
 function matchesPersistedSessionCompletion(
-  persistedSession: any,
+  persistedSession: ZmccLabSession & { results: ZmccLabResult[]; tank_receipt?: { tank_id: bigint } | null },
   targetSessionId: bigint,
   payload: CompleteSessionPayload
 ): boolean {
@@ -1444,7 +1486,7 @@ function matchesPersistedSessionCompletion(
     return false;
   }
 
-  const persistedMap = new Map<string, any>(persistedSession.results.map((r: any) => [r.test_id.toString(), r]));
+  const persistedMap = new Map<string, ZmccLabResult>(persistedSession.results.map((r) => [r.test_id.toString(), r]));
 
   const submittedMap = new Map<string, { numeric_value?: number | null; text_value?: string | null }>();
   for (const item of payload.results) {
@@ -1523,7 +1565,8 @@ export async function completeSession(
   const clientEventId = completion_client_event_id.trim();
 
   // Reject manually submitted calculated metrics (they are system-owned)
-  const pAny = payload as any;
+  // Clients must not submit server-computed metrics; inspect the raw payload for them.
+  const pAny = payload as unknown as Record<string, unknown>;
   if (
     pAny.density !== undefined ||
     pAny.gross_liters !== undefined ||
@@ -1539,7 +1582,7 @@ export async function completeSession(
   }
 
   // Validate quantity
-  if (payload.quantity_value === undefined || payload.quantity_value === null || payload.quantity_value === ('' as any)) {
+  if (payload.quantity_value === undefined || payload.quantity_value === null || (payload.quantity_value as unknown) === '') {
     return { status: 400, error: 'Actual milk quantity is required to complete session.' };
   }
   const quantityNum = Number(payload.quantity_value);
@@ -1831,7 +1874,7 @@ export async function completeSession(
         ? 'ZMCC_LAB_LOCAL_SUPPLIER'
         : 'ZMCC_LAB_CONTRACTOR';
 
-      const evaluations: any[] = [];
+      const evaluations: Array<QualityResultEvaluation & { isRequired: boolean }> = [];
 
       // Update all submitted test results
       for (const item of results) {
@@ -1901,7 +1944,7 @@ export async function completeSession(
       // Fail closed on RULE_CONFIGURATION_ERROR or NO_ACTIVE_RULE: Acceptance, receipt creation, and stock movement are strictly blocked
       if (
         (systemQualityOutcome === 'RULE_CONFIGURATION_ERROR' ||
-          evaluations.some((e: any) => e.evaluationStatus === 'RULE_CONFIGURATION_ERROR'))
+          evaluations.some((e) => e.evaluationStatus === 'RULE_CONFIGURATION_ERROR'))
       ) {
         throw new Error(
           'RULE_CONFIGURATION_ERROR:Laboratory rule configuration error detected. QA completion cannot accept milk under invalid rule configuration.'
@@ -2003,6 +2046,7 @@ export async function completeSession(
         },
       });
 
+      let completedWithReceipt: SerializableLabSession = updated;
       if (effectiveFinalDecision === 'ACCEPTED' && targetTankId) {
         const tankReceipt = await createCanonicalTankReceiptTx(tx, {
           sessionId,
@@ -2017,7 +2061,7 @@ export async function completeSession(
           actorUserId: auth.actorUserId,
           receivedAt: updated.completed_at || new Date(),
         });
-        (updated as any).tank_receipt = tankReceipt;
+        completedWithReceipt = { ...updated, tank_receipt: tankReceipt };
       }
 
       await tx.auditLog.create({
@@ -2065,7 +2109,7 @@ export async function completeSession(
         });
       }
 
-      return updated;
+      return completedWithReceipt;
     });
 
     return {
@@ -2257,7 +2301,8 @@ export async function correctCompletedSession(
   const reasonTrimmed = rawReason;
 
   // Reject manual modification of calculated metrics (they are system-owned)
-  const pAny = payload as any;
+  // Clients must not submit server-computed metrics; inspect the raw payload for them.
+  const pAny = payload as unknown as Record<string, unknown>;
   if (
     pAny.density !== undefined ||
     pAny.gross_liters !== undefined ||
@@ -2664,7 +2709,7 @@ export async function correctCompletedSession(
         throw new Error('MAX_CORRECTIONS_REACHED');
       }
 
-      const oldValues: any = {
+      const oldValues: Record<string, unknown> = {
         session_id: sessionId.toString(),
         effective_decision: session.decision,
         original_decision: session.original_decision ?? (isPendingReview ? null : session.decision),
@@ -2710,7 +2755,7 @@ export async function correctCompletedSession(
         : 'ZMCC_LAB_CONTRACTOR';
 
       const eventTimestamp = session.started_at || session.completed_at || correctionTimestamp;
-      const allEvaluations: any[] = [];
+      const allEvaluations: Array<QualityResultEvaluation & { isRequired: boolean }> = [];
 
       // Build updated results map for recalculating metrics
       const mergedResultsMap = new Map(session.results.map((r) => [r.test_id.toString(), { ...r }]));
@@ -2798,7 +2843,7 @@ export async function correctCompletedSession(
       // BLOCKER C: Fail closed if RULE_CONFIGURATION_ERROR or NO_ACTIVE_RULE is detected
       if (
         recomputedSystemQualityOutcome === 'RULE_CONFIGURATION_ERROR' ||
-        allEvaluations.some((e: any) => e.evaluationStatus === 'RULE_CONFIGURATION_ERROR')
+        allEvaluations.some((e) => e.evaluationStatus === 'RULE_CONFIGURATION_ERROR')
       ) {
         if (effectiveDecision === 'ACCEPTED') {
           throw new Error(
@@ -2809,7 +2854,7 @@ export async function correctCompletedSession(
 
       if (
         recomputedSystemQualityOutcome === 'NO_ACTIVE_RULE' ||
-        allEvaluations.some((e: any) => e.evaluationStatus === 'NO_ACTIVE_RULE')
+        allEvaluations.some((e) => e.evaluationStatus === 'NO_ACTIVE_RULE')
       ) {
         if (effectiveDecision === 'ACCEPTED') {
           throw new Error(
@@ -2852,8 +2897,8 @@ export async function correctCompletedSession(
       const lockedReceiptRows: Array<{
         id: bigint;
         tank_id: bigint;
-        gross_liters: any;
-        at_13ts_liters: any;
+        gross_liters: Prisma.Decimal;
+        at_13ts_liters: Prisma.Decimal;
       }> = await tx.$queryRaw`
         SELECT id, tank_id, gross_liters, at_13ts_liters FROM zmcc_tank_receipt WHERE lab_session_id = ${sessionId} FOR UPDATE
       `;
@@ -2868,7 +2913,7 @@ export async function correctCompletedSession(
         const deltaAt13 = Number((newAt13Num - oldReceiptAt13).toFixed(2));
 
         // Lock destination tank row FOR UPDATE
-        const lockedTankRows: Array<{ id: bigint; capacity_liters: any }> = await tx.$queryRaw`
+        const lockedTankRows: Array<{ id: bigint; capacity_liters: Prisma.Decimal }> = await tx.$queryRaw`
           SELECT id, capacity_liters FROM zmcc_tank WHERE id = ${receiptRow.tank_id} FOR UPDATE
         `;
         if (!lockedTankRows || lockedTankRows.length === 0) {
@@ -3010,7 +3055,7 @@ export async function correctCompletedSession(
         ? (effectiveDecision === 'ACCEPTED' ? 'APPROVED' : 'REJECTED')
         : session.manager_review_status;
 
-      const newValues: any = {
+      const newValues: Record<string, unknown> = {
         session_id: sessionId.toString(),
         requested_manager_decision: decision || effectiveDecision,
         effective_decision: effectiveDecision,
@@ -3119,8 +3164,8 @@ export async function correctCompletedSession(
           table_name: 'zmcc_lab_session',
           record_id: sessionId,
           action: auditAction,
-          old_values: oldValues,
-          new_values: newValues,
+          old_values: toJsonInput(oldValues),
+          new_values: toJsonInput(newValues),
           user_id: auth.actorUserId,
         },
       });
