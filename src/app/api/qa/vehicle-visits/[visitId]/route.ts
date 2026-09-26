@@ -46,12 +46,29 @@ export async function GET(
 
     // For in-progress / completed QA work: use assigned snapshot.
     // For waiting visits prior to QA start: query current active master tests.
-    let activePlantTests: any[] = [];
-    if (visit.qa_session) {
-      activePlantTests = await getOrAssignPlantQATests(prisma, visitId);
-    } else {
-      activePlantTests = await MilkTestPolicyService.getEffectivePolicy('PLANT_QA');
-    }
+    const activePlantTests = visit.qa_session
+      ? (await getOrAssignPlantQATests(prisma, visitId)).map((a) => ({
+          id: a.test_id.toString(),
+          testCode: a.test_code_snapshot,
+          testName: a.test_name_snapshot,
+          resultType: a.result_type_snapshot,
+          unit: a.unit_snapshot,
+          testScope: a.test_scope_snapshot || 'BOTH',
+          isRequired: a.is_required_snapshot,
+          displayOrder: a.display_order_snapshot,
+          resultOptions: a.result_options_snapshot || null,
+        }))
+      : (await MilkTestPolicyService.getEffectivePolicy('PLANT_QA')).map((t) => ({
+          id: t.id,
+          testCode: t.testCode,
+          testName: t.testName,
+          resultType: t.resultType,
+          unit: t.unit,
+          testScope: 'BOTH',
+          isRequired: t.isRequired,
+          displayOrder: t.displayOrder,
+          resultOptions: t.resultOptions || null,
+        }));
 
     // Determine overall visit decision summary
     const portions = visit.portions || [];
@@ -120,17 +137,7 @@ export async function GET(
           isPassed: pr.is_passed,
         })),
       })),
-      active_plant_tests: activePlantTests.map((t) => ({
-        id: (t.test_id || t.id).toString(),
-        testCode: t.test_code_snapshot || t.testCode,
-        testName: t.test_name_snapshot || t.testName,
-        resultType: t.result_type_snapshot || t.resultType,
-        unit: t.unit_snapshot !== undefined ? t.unit_snapshot : t.unit,
-        testScope: t.test_scope_snapshot || t.testScope || 'BOTH',
-        isRequired: t.is_required_snapshot !== undefined ? t.is_required_snapshot : t.isRequired,
-        displayOrder: t.display_order_snapshot !== undefined ? t.display_order_snapshot : t.displayOrder,
-        resultOptions: t.result_options_snapshot || t.resultOptions || null,
-      })),
+      active_plant_tests: activePlantTests,
     };
 
     return NextResponse.json({ visit: formattedVisit });

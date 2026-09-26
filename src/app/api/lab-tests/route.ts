@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
+import type { LabTest } from '@prisma/client';
 import { getErrorMessage } from '@/lib/errors';
 
-function serializeLabTest(test: any) {
+function serializeLabTest(test: LabTest) {
   return {
     id: test.id.toString(),
     testCode: test.testCode,

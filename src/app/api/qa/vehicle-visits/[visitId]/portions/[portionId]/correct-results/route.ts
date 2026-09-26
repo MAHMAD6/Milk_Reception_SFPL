@@ -168,8 +168,8 @@ export async function POST(
       // Resolve rule at original authoritative test/result/session timestamp
       const authoritativeTs = portion.plant_decided_at || portion.created_at || (await tx.vehicleVisit.findUnique({ where: { id: visitId } }))?.created_at || new Date();
       const activeRulesMap = await QualityRuleService.resolveActiveRulesForTestingPoint('PLANT_QA', authoritativeTs, tx);
-      const correctionsMade: any[] = [];
-      const oldResultsEvidence: any[] = [];
+      const correctionsMade: Prisma.InputJsonObject[] = [];
+      const oldResultsEvidence: Prisma.InputJsonObject[] = [];
 
       for (const item of validated.results) {
         const testIdBigInt = BigInt(String(item.test_id));
@@ -225,7 +225,8 @@ export async function POST(
           new_text: item.text_value ?? null,
           evaluation_status: evalRes.evaluationStatus,
           is_passed: evalRes.isPassed,
-          applied_rule_id: evalRes.appliedRuleId ?? null,
+          // Stored as a string, like applied_rule_id in the old-values evidence above.
+          applied_rule_id: evalRes.appliedRuleId != null ? evalRes.appliedRuleId.toString() : null,
           applied_rule_version: evalRes.appliedRuleVersion ?? null,
         });
       }

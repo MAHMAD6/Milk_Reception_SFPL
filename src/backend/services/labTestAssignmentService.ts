@@ -1,4 +1,6 @@
-import { PrismaClient, Prisma } from '@prisma/client';
+import { PrismaClient, Prisma, type LabTestAssignment } from '@prisma/client';
+import type { LabTestResultOption } from '@/lib/validations/labTest';
+import { toJsonInput } from '@/lib/json';
 import { MilkTestPolicyService } from './milkTestPolicyService';
 
 type DbClient = PrismaClient | Prisma.TransactionClient;
@@ -13,11 +15,13 @@ export interface AssignedLabTestDTO {
   testScope: string;
   isRequired: boolean;
   displayOrder: number;
-  resultOptions?: any[] | null;
+  resultOptions?: LabTestResultOption[] | null;
   assignedAt?: string;
 }
 
-export function serializeAssignment(a: any): AssignedLabTestDTO {
+export function serializeAssignment(
+  a: LabTestAssignment & { resultOptions?: LabTestResultOption[] | null }
+): AssignedLabTestDTO {
   return {
     id: a.id.toString(),
     testId: a.test_id.toString(),
@@ -28,7 +32,7 @@ export function serializeAssignment(a: any): AssignedLabTestDTO {
     testScope: a.test_scope_snapshot || 'BOTH',
     isRequired: a.is_required_snapshot,
     displayOrder: a.display_order_snapshot,
-    resultOptions: a.result_options_snapshot || (a.resultOptions ? a.resultOptions : null),
+    resultOptions: (a.result_options_snapshot as LabTestResultOption[] | null) || (a.resultOptions ? a.resultOptions : null),
     assignedAt: a.assigned_at ? a.assigned_at.toISOString() : undefined,
   };
 }
@@ -39,7 +43,7 @@ export function serializeAssignment(a: any): AssignedLabTestDTO {
 export async function getAssignedPlantQATests(
   db: DbClient,
   visitId: bigint
-): Promise<any[] | null> {
+): Promise<LabTestAssignment[] | null> {
   const assignments = await db.labTestAssignment.findMany({
     where: {
       visit_id: visitId,
@@ -60,7 +64,7 @@ export async function getAssignedPlantQATests(
 export async function getAssignedDispatchTests(
   db: DbClient,
   visitId: bigint
-): Promise<any[] | null> {
+): Promise<LabTestAssignment[] | null> {
   const assignments = await db.labTestAssignment.findMany({
     where: {
       visit_id: visitId,
@@ -82,7 +86,7 @@ export async function getAssignedDispatchTests(
 export async function getOrAssignPlantQATests(
   db: DbClient,
   visitId: bigint
-): Promise<any[]> {
+): Promise<LabTestAssignment[]> {
   const existing = await getAssignedPlantQATests(db, visitId);
   if (existing) {
     return existing;
@@ -154,7 +158,7 @@ export async function getOrAssignPlantQATests(
         test_scope_snapshot: t.testScope,
         is_required_snapshot: t.isRequired,
         display_order_snapshot: t.displayOrder,
-        result_options_snapshot: (defaultOptions as any) ?? undefined,
+        result_options_snapshot: defaultOptions != null ? toJsonInput(defaultOptions) : undefined,
       },
     });
   }
@@ -169,7 +173,7 @@ export async function getOrAssignPlantQATests(
 export async function getOrAssignDispatchTests(
   db: DbClient,
   visitId: bigint
-): Promise<any[]> {
+): Promise<LabTestAssignment[]> {
   const existing = await getAssignedDispatchTests(db, visitId);
   if (existing) {
     return existing;
@@ -240,7 +244,7 @@ export async function getOrAssignDispatchTests(
         test_scope_snapshot: t.testScope,
         is_required_snapshot: t.isRequired,
         display_order_snapshot: t.displayOrder,
-        result_options_snapshot: (defaultOptions as any) ?? undefined,
+        result_options_snapshot: defaultOptions != null ? toJsonInput(defaultOptions) : undefined,
       },
     });
   }

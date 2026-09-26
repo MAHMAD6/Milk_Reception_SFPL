@@ -1,4 +1,5 @@
-import { Prisma } from '@prisma/client';
+import { Prisma, type MotJourneySummary } from '@prisma/client';
+import { toJsonInput } from '@/lib/json';
 
 export const MOT_JOURNEY_SUMMARY_VERSION = '1.0';
 
@@ -163,8 +164,8 @@ export function calculateJourneySummaryMetrics(
   };
 }
 
-function serializeSummaryAuditValues(summary: any): Record<string, any> {
-  return {
+function serializeSummaryAuditValues(summary: MotJourneySummary): Prisma.InputJsonValue {
+  return toJsonInput({
     journey_id: summary.journey_id.toString(),
     revision: summary.revision,
     assigned_shop_count: summary.assigned_shop_count,
@@ -184,7 +185,7 @@ function serializeSummaryAuditValues(summary: any): Record<string, any> {
       ? JSON.parse(summary.source_calculation_versions)
       : [],
     journey_ended_at: summary.journey_ended_at instanceof Date ? summary.journey_ended_at.toISOString() : summary.journey_ended_at,
-  };
+  });
 }
 
 /**
@@ -379,7 +380,9 @@ export async function recomputeMotJourneySummaryTx(
 /**
  * Canonical serializer for MotJourneySummary into client-friendly plain object.
  */
-export function serializeMotJourneySummary(summary: any): SerializedMotJourneySummary | null {
+export function serializeMotJourneySummary(
+  summary: MotJourneySummary | null | undefined
+): SerializedMotJourneySummary | null {
   if (!summary) return null;
 
   return {

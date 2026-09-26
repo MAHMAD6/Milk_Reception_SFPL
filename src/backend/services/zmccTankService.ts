@@ -1,7 +1,8 @@
 import { prisma } from '@core/db';
 import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
-import { Prisma } from '@prisma/client';
+import { Prisma, type ZmccTank, type ZmccTankReceipt, type ZmccTankInventoryTransaction } from '@prisma/client';
+import type { NumericLike, SourceRef, UserRef } from '@/backend/core/serializable';
 import { resolveCoreMilkTestResults } from '@/backend/utils/milkTestResolvers';
 import { getErrorCode, getErrorMessage, getErrorMeta } from '@/lib/errors';
 
@@ -191,8 +192,17 @@ export async function getTankPhysicalStock(
     };
   }
 
+  export type SerializableTank = ZmccTank & {
+    current_stock?: NumericLike | null;
+    current_commercial_stock_at_13ts?: NumericLike | null;
+    commercial_balance_complete?: boolean;
+    creator?: UserRef | null;
+    updater?: UserRef | null;
+    zmcc?: SourceRef | null;
+  };
+
   export function serializeTank(
-    tank: any,
+    tank: SerializableTank,
     stockOrSummary?:
       | { physicalStockGrossLiters: number; commercialStockAt13Ts: number | null; commercialBalanceComplete: boolean }
       | number
@@ -238,7 +248,9 @@ export async function getTankPhysicalStock(
     };
   }
 
-  export function serializeTankReceipt(receipt: any) {
+  export function serializeTankReceipt(
+    receipt: ZmccTankReceipt & { tank?: SerializableTank | null; receiver?: UserRef | null }
+  ) {
     return {
       id: receipt.id.toString(),
       lab_session_id: receipt.lab_session_id.toString(),
@@ -268,7 +280,7 @@ export async function getTankPhysicalStock(
     };
   }
 
-  export function serializeTankTransaction(tx: any) {
+  export function serializeTankTransaction(tx: ZmccTankInventoryTransaction) {
     return {
       id: tx.id.toString(),
       tank_id: tx.tank_id.toString(),
@@ -860,6 +872,9 @@ export async function receiveHistoricalSession(
       where: { id: session.tank_receipt.id },
       include: { tank: true, receiver: true },
     });
+    if (!existingReceipt) {
+      return { status: 500, error: 'Existing tank receipt could not be loaded.' };
+    }
     return { status: 200, data: { tank_receipt: serializeTankReceipt(existingReceipt) } };
   }
 

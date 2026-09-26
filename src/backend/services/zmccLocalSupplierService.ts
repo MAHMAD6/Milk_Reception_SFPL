@@ -148,7 +148,7 @@ export function validateErpReference(raw: unknown): { value: string | null; erro
 export async function getLocalSuppliers(
   reqOrUser?: Request | User,
   params: LocalSupplierSearchParams = {}
-): Promise<ServiceResult<any[]>> {
+): Promise<ServiceResult<ReturnType<typeof serializeLocalSupplier>[]>> {
   const { auth, errorResponse } = await resolveZmccAuth(reqOrUser as Request, 'READ');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -254,7 +254,9 @@ export async function getLocalSupplierById(
 }
 
 /** Manager remediation queue for legacy suppliers that cannot be activated or used for arrivals. */
-export async function getIncompleteLocalSuppliers(reqOrUser?: Request | User): Promise<ServiceResult<any[]>> {
+export async function getIncompleteLocalSuppliers(
+  reqOrUser?: Request | User
+): Promise<ServiceResult<ReturnType<typeof serializeLocalSupplier>[]>> {
   const { auth, errorResponse } = await resolveZmccAuth(reqOrUser as Request, 'READ');
   if (errorResponse) return errorResponse;
   if (!auth || (!auth.isSuperAdmin && !auth.isZmccManager)) return { status: 403, error: 'Forbidden. Only ZMCC Manager or Super Admin may view incomplete identities.' };
