@@ -1,5 +1,18 @@
 import { prisma } from '@core/db';
-import { Prisma } from '@prisma/client';
+import {
+  Prisma,
+  type MotCollectionSmsOutbox,
+  type MotJourney,
+  type MotJourneyLocation,
+  type MotJourneyStop,
+  type MotJourneySummary,
+  type MotProfile,
+  type MotShopCollection,
+  type MotVehicle,
+  type ZmccRoute,
+  type ZmccShop,
+} from '@prisma/client';
+import type { SourceRef, UserRef } from '@/backend/core/serializable';
 import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { getPakistanCalendarDate } from '@core/business-day';
@@ -16,6 +29,8 @@ import { QualityRuleService } from '@/backend/services/qualityRuleService';
 import { isLrTestCandidate, isFatTestCandidate } from '@/backend/utils/milkTestResolvers';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
 import { getErrorCode, getErrorMessage, getErrorMetaTarget } from '@/lib/errors';
+import { requireZmccScope } from '@/backend/core/scope';
+import { toJsonInput } from '@/lib/json';
 
 export interface MotAuthContext {
   user: User;
@@ -237,14 +252,14 @@ export async function listMotProfiles(
   auth: MotAuthContext,
   filters?: { zmcc_id?: string; is_active?: string; search?: string }
 ) {
-  const where: any = {};
+  const where: Prisma.MotProfileWhereInput = {};
 
   if (auth.isSuperAdmin) {
     if (filters?.zmcc_id) {
       where.zmcc_id = BigInt(filters.zmcc_id);
     }
   } else {
-    where.zmcc_id = auth.effectiveZmccId;
+    where.zmcc_id = requireZmccScope(auth);
   }
 
   if (auth.isPheOperator) {
@@ -429,7 +444,7 @@ async function validateLinkedMotUser(
     return { error: 'Linked user must be assigned to the same ZMCC as the MOT Profile.', status: 400 };
   }
 
-  const whereAssigned: any = { user_id: userId };
+  const whereAssigned: Prisma.MotProfileWhereInput = { user_id: userId };
   if (excludeProfileId) {
     whereAssigned.id = { not: excludeProfileId };
   }
@@ -634,7 +649,7 @@ export async function updateMotProfile(
     };
   }
 
-  const updateData: any = {
+  const updateData: Prisma.MotProfileUncheckedUpdateInput = {
     updated_by: auth.actorUserId,
   };
 
@@ -814,14 +829,14 @@ export async function listMotVehicles(
   auth: MotAuthContext,
   filters?: { zmcc_id?: string; is_active?: string; search?: string }
 ) {
-  const where: any = {};
+  const where: Prisma.MotVehicleWhereInput = {};
 
   if (auth.isSuperAdmin) {
     if (filters?.zmcc_id) {
       where.zmcc_id = BigInt(filters.zmcc_id);
     }
   } else {
-    where.zmcc_id = auth.effectiveZmccId;
+    where.zmcc_id = requireZmccScope(auth);
   }
 
   if (auth.isPheOperator) {
@@ -1098,7 +1113,7 @@ export async function updateMotVehicle(
     };
   }
 
-  const updateData: any = {
+  const updateData: Prisma.MotVehicleUncheckedUpdateInput = {
     updated_by: auth.actorUserId,
   };
 
@@ -1326,7 +1341,7 @@ export async function assignAndDispatchJourney(
     });
   };
 
-  const validateAndReturnExistingJourney = (existing: any) => {
+  const validateAndReturnExistingJourney = (existing: SerializableJourney) => {
     // Cross-ZMCC: Never return another ZMCC's journey through an idempotency-key lookup
     if (existing.zmcc_id !== targetZmccId) {
       return {
@@ -1824,14 +1839,14 @@ export async function listMotJourneys(
     mot_vehicle_id?: string;
   }
 ) {
-  const where: any = {};
+  const where: Prisma.MotJourneyWhereInput = {};
 
   if (auth.isSuperAdmin) {
     if (filters?.zmcc_id) {
       where.zmcc_id = BigInt(filters.zmcc_id);
     }
   } else {
-    where.zmcc_id = auth.effectiveZmccId;
+    where.zmcc_id = requireZmccScope(auth);
   }
 
   if (filters?.status && filters.status !== 'all') {
@@ -2024,7 +2039,28 @@ export async function getCurrentMotJourney(auth: MotAuthContext): Promise<Servic
 }
 
 // Helper: Serializes BigInt and Decimal fields for clean JSON responses
-export function serializeJourney(j: any) {
+/** A collection plus its SMS outbox row when included. */
+export type SerializableCollection = MotShopCollection & { sms_outbox?: MotCollectionSmsOutbox | null };
+
+type SerializableStop = MotJourneyStop & {
+  shop?: Partial<Pick<ZmccShop, 'shop_code' | 'shop_name' | 'owner_name' | 'phone_number'>> | null;
+  collection?: SerializableCollection | null;
+};
+
+/** A journey plus whichever relations the query included (all optional). */
+export type SerializableJourney = MotJourney & {
+  zmcc?: SourceRef | null;
+  route?: Pick<ZmccRoute, 'id' | 'route_code' | 'name'> | null;
+  mot_profile?: Pick<MotProfile, 'id' | 'mot_code' | 'name' | 'phone_number'> | null;
+  mot_vehicle?: Pick<MotVehicle, 'id' | 'vehicle_number'> | null;
+  assigner?: UserRef | null;
+  canceller?: UserRef | null;
+  summary?: MotJourneySummary | null;
+  stops?: SerializableStop[];
+  locations?: MotJourneyLocation[];
+};
+
+export function serializeJourney(j: SerializableJourney) {
   return {
     id: j.id.toString(),
     journey_number: j.journey_number,
@@ -2081,7 +2117,7 @@ export function serializeJourney(j: any) {
     cancelled_by_name: j.canceller ? j.canceller.full_name || j.canceller.username : null,
     cancelled_at: j.cancelled_at ? j.cancelled_at.toISOString() : null,
     cancellation_reason: j.cancellation_reason,
-    stops: (j.stops || []).map((s: any) => ({
+    stops: (j.stops || []).map((s) => ({
       id: s.id.toString(),
       journey_id: s.journey_id.toString(),
       shop_id: s.shop_id.toString(),
@@ -2110,7 +2146,7 @@ export function serializeJourney(j: any) {
       },
       collection: s.collection ? serializeCollection(s.collection) : null,
     })),
-    locations: (j.locations || []).map((l: any) => ({
+    locations: (j.locations || []).map((l) => ({
       id: l.id.toString(),
       journey_id: l.journey_id.toString(),
       recorded_by_user_id: l.recorded_by_user_id ? l.recorded_by_user_id.toString() : null,
@@ -2129,7 +2165,7 @@ export function serializeJourney(j: any) {
 }
 
 // Helper: Serializes MotShopCollection BigInt and Decimal fields
-export function serializeCollection(c: any) {
+export function serializeCollection(c: SerializableCollection) {
   return {
     id: c.id.toString(),
     collection_number: c.collection_number,
@@ -2202,6 +2238,14 @@ export interface SubmitCollectionPayload {
   requestException?: boolean;
   exception_reason?: string | null;
   exceptionReason?: string | null;
+  // Legacy field names still sent by older offline clients.
+  stop_id?: string | number | bigint;
+  quantity?: number;
+  unit?: string;
+  recorded_latitude?: number;
+  recorded_longitude?: number;
+  recorded_gps_accuracy?: number | null;
+  offline_created_at?: string;
 }
 
 /**
@@ -2210,7 +2254,7 @@ export interface SubmitCollectionPayload {
  * Idempotent: Re-submitting with the same client_event_id returns HTTP 200 with the original record.
  */
 function matchesCollectionIdempotency(
-  existingCollection: any,
+  existingCollection: SerializableCollection,
   params: {
     stopId: bigint;
     quantityValue: number;
@@ -2263,9 +2307,9 @@ function matchesCollectionIdempotency(
 }
 
 function resolveCollectionIdempotencyMatch(
-  existingCollection: any,
+  existingCollection: SerializableCollection,
   auth: MotAuthContext,
-  linkedProfile: any,
+  linkedProfile: Pick<MotProfile, 'id'>,
   params: {
     stopId: bigint;
     quantityValue: number;
@@ -2337,7 +2381,10 @@ export async function submitShopCollection(
   }
 
   // 3. Validate numerical & text inputs (supporting flexible aliases)
-  const rawStopId = payload.journey_stop_id || (payload as any).stop_id;
+  const rawStopId = payload.journey_stop_id || payload.stop_id;
+  if (rawStopId === undefined) {
+    return { status: 400, error: 'Invalid journey_stop_id format.' };
+  }
   let stopId: bigint;
   try {
     stopId = BigInt(rawStopId);
@@ -2345,13 +2392,13 @@ export async function submitShopCollection(
     return { status: 400, error: 'Invalid journey_stop_id format.' };
   }
 
-  const rawQty = payload.quantity_value !== undefined ? payload.quantity_value : (payload as any).quantity;
+  const rawQty = payload.quantity_value !== undefined ? payload.quantity_value : payload.quantity;
   const quantityValue = Number(rawQty);
   if (isNaN(quantityValue) || quantityValue <= 0 || quantityValue > 10000) {
     return { status: 400, error: 'Quantity must be a positive number up to 10,000.' };
   }
 
-  const rawUnit = payload.quantity_unit || (payload as any).unit || '';
+  const rawUnit = payload.quantity_unit || payload.unit || '';
   const quantityUnit = rawUnit.trim().toUpperCase();
   if (quantityUnit !== 'LITER' && quantityUnit !== 'KG') {
     return { status: 400, error: 'Quantity unit must be either LITER or KG.' };
@@ -2367,21 +2414,21 @@ export async function submitShopCollection(
     return { status: 400, error: 'Fat percentage must be a positive number.' };
   }
 
-  const rawLat = payload.latitude !== undefined ? payload.latitude : (payload as any).recorded_latitude;
-  const rawLng = payload.longitude !== undefined ? payload.longitude : (payload as any).recorded_longitude;
+  const rawLat = payload.latitude !== undefined ? payload.latitude : payload.recorded_latitude;
+  const rawLng = payload.longitude !== undefined ? payload.longitude : payload.recorded_longitude;
   const lat = Number(rawLat);
   const lng = Number(rawLng);
   if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180 || (lat === 0 && lng === 0)) {
     return { status: 400, error: 'Invalid collection GPS coordinates.' };
   }
 
-  const rawAcc = payload.gps_accuracy !== undefined ? payload.gps_accuracy : (payload as any).recorded_gps_accuracy;
+  const rawAcc = payload.gps_accuracy !== undefined ? payload.gps_accuracy : payload.recorded_gps_accuracy;
   const accuracy = rawAcc != null ? Number(rawAcc) : null;
   if (accuracy != null && (isNaN(accuracy) || accuracy < 0)) {
     return { status: 400, error: 'Invalid GPS accuracy.' };
   }
 
-  const rawTimestamp = payload.device_collected_at || (payload as any).offline_created_at || new Date().toISOString();
+  const rawTimestamp = payload.device_collected_at || payload.offline_created_at || new Date().toISOString();
   const deviceCollectedAt = new Date(rawTimestamp);
   if (isNaN(deviceCollectedAt.getTime())) {
     return { status: 400, error: 'Invalid device_collected_at timestamp.' };
@@ -2390,7 +2437,7 @@ export async function submitShopCollection(
     return { status: 400, error: 'device_collected_at cannot be in the future.' };
   }
 
-  const rawNotes = payload.collection_notes !== undefined ? payload.collection_notes : (payload as any).notes;
+  const rawNotes = payload.collection_notes !== undefined ? payload.collection_notes : payload.notes;
   const notes = typeof rawNotes === 'string' ? rawNotes.trim() : null;
 
   // Look up Journey Stop & Journey Hierarchy
@@ -2451,7 +2498,7 @@ export async function submitShopCollection(
       deviceCollectedAt,
       notes,
       shopRmrNumber: validatedShopRmrForReplay,
-      hasExplicitTimestamp: !!(payload.device_collected_at || (payload as any).offline_created_at),
+      hasExplicitTimestamp: !!(payload.device_collected_at || payload.offline_created_at),
     });
   }
 
@@ -2497,8 +2544,8 @@ export async function submitShopCollection(
   }
 
   // 6b. Evaluate Quality Acceptance Rules for MOT_SHOP
-  const requestException = Boolean(payload.request_exception || (payload as any).requestException);
-  const rawExceptionReason = payload.exception_reason || (payload as any).exceptionReason || '';
+  const requestException = Boolean(payload.request_exception || payload.requestException);
+  const rawExceptionReason = payload.exception_reason || payload.exceptionReason || '';
   const exceptionReason = typeof rawExceptionReason === 'string' ? rawExceptionReason.trim() : '';
 
   const activeRulesMap = await QualityRuleService.resolveActiveRulesForTestingPoint('MOT_SHOP', deviceCollectedAt);
@@ -3394,7 +3441,7 @@ export async function getSmsOutbox(
   if (filterParams?.journey_id) {
     try {
       const jId = BigInt(filterParams.journey_id);
-      where.collection = { ...(where.collection as any), journey_id: jId };
+      where.collection = { ...(where.collection as Prisma.MotShopCollectionWhereInput | undefined), journey_id: jId };
     } catch {
       return { status: 400, error: 'Invalid journey_id filter.' };
     }
@@ -3678,11 +3725,11 @@ export async function correctShopCollection(
         },
       });
 
-      const oldAuditValues: Record<string, any> = {
+      const oldAuditValues: Record<string, unknown> = {
         correction_count: currentTotalCount,
         manager_correction_count: currentManagerCount,
       };
-      const newAuditValues: Record<string, any> = {
+      const newAuditValues: Record<string, unknown> = {
         correction_count: nextCorrectionCount,
         manager_correction_count: nextManagerCount,
         correction_reason: reason,
@@ -3721,8 +3768,8 @@ export async function correctShopCollection(
           table_name: 'mot_shop_collection',
           record_id: collection.id,
           action: 'MOT_SHOP_COLLECTION_CORRECTED',
-          old_values: oldAuditValues,
-          new_values: newAuditValues,
+          old_values: toJsonInput(oldAuditValues),
+          new_values: toJsonInput(newAuditValues),
           user_id: auth.actorUserId,
         },
       });

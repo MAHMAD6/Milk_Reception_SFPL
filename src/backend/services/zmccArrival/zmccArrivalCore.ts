@@ -1,5 +1,20 @@
+import { toJsonInput } from '@/lib/json';
 import { prisma } from '@core/db';
-import { Prisma, PaperReferenceType } from '@prisma/client';
+import {
+  Prisma,
+  PaperReferenceType,
+  type MotJourney,
+  type MotJourneySummary,
+  type MotProfile,
+  type MotVehicle,
+  type ProcurementSource,
+  type ZmccContractorArrival,
+  type ZmccLocalSupplier,
+  type ZmccLocalSupplierArrival,
+  type ZmccMotArrival,
+  type ZmccRoute,
+} from '@prisma/client';
+import type { NumericLike, SourceRef, UserRef } from '@/backend/core/serializable';
 import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { getPakistanCalendarDate } from '@core/business-day';
@@ -316,9 +331,9 @@ function isExactMotArrivalReplay(
     route_milk_token?: string | null;
     raw_milk_token_number?: string | null;
     arrival_timestamp: Date | string;
-    phe_latitude: any;
-    phe_longitude: any;
-    phe_gps_accuracy: any;
+    phe_latitude: NumericLike | null;
+    phe_longitude: NumericLike | null;
+    phe_gps_accuracy: NumericLike | null;
   },
   expected: MotArrivalReplayComparison
 ): boolean {
@@ -375,9 +390,9 @@ function isExactLocalSupplierArrivalReplay(
     raw_milk_token_number?: string | null;
     vehicle_number: string;
     arrival_timestamp: Date | string;
-    phe_latitude: any;
-    phe_longitude: any;
-    phe_gps_accuracy: any;
+    phe_latitude: NumericLike | null;
+    phe_longitude: NumericLike | null;
+    phe_gps_accuracy: NumericLike | null;
   },
   expected: LocalSupplierArrivalReplayComparison
 ): boolean {
@@ -445,7 +460,51 @@ function validateRmrNumber(
   return { value: trimmed };
 }
 
-export function serializeMotArrival(arrival: any) {
+/** Arrival rows plus whichever relations the query included (all optional). */
+const journeyDetailInclude = {
+  route: true,
+  mot_vehicle: true,
+  mot_profile: true,
+  summary: true,
+} satisfies Prisma.MotJourneyInclude;
+
+const motArrivalWithLabInclude = {
+  journey: { include: journeyDetailInclude },
+  zmcc: true,
+  recorded_by: true,
+  exit_recorded_by: true,
+  lab_session: { include: { tank_receipt: true } },
+} satisfies Prisma.ZmccMotArrivalInclude;
+
+const localSupplierArrivalWithLabInclude = {
+  local_supplier: true,
+  zmcc: true,
+  recorded_by: true,
+  exit_recorded_by: true,
+  lab_session: { include: { tank_receipt: true } },
+} satisfies Prisma.ZmccLocalSupplierArrivalInclude;
+
+type ArrivalActors = { zmcc?: SourceRef | null; recorded_by?: UserRef | null; exit_recorded_by?: UserRef | null };
+
+export type SerializableMotArrival = ZmccMotArrival &
+  ArrivalActors & {
+    journey?:
+      | (MotJourney & {
+          route?: Pick<ZmccRoute, 'route_code' | 'name'> | null;
+          mot_vehicle?: Pick<MotVehicle, 'vehicle_number'> | null;
+          mot_profile?: Pick<MotProfile, 'name' | 'mot_code'> | null;
+          summary?: MotJourneySummary | null;
+        })
+      | null;
+  };
+
+export type SerializableContractorArrival = ZmccContractorArrival &
+  ArrivalActors & { contractor_source?: (SourceRef & Pick<ProcurementSource, 'source_type'>) | null };
+
+export type SerializableLocalSupplierArrival = ZmccLocalSupplierArrival &
+  ArrivalActors & { local_supplier?: ZmccLocalSupplier | null };
+
+export function serializeMotArrival(arrival: SerializableMotArrival) {
   return {
     id: arrival.id.toString(),
     journey_id: arrival.journey_id.toString(),
@@ -524,7 +583,7 @@ export function serializeMotArrival(arrival: any) {
   };
 }
 
-export function serializeContractorArrival(arrival: any) {
+export function serializeContractorArrival(arrival: SerializableContractorArrival) {
   return {
     id: arrival.id.toString(),
     zmcc_id: arrival.zmcc_id.toString(),
@@ -568,7 +627,7 @@ export function serializeContractorArrival(arrival: any) {
   };
 }
 
-export function serializeLocalSupplierArrival(arrival: any) {
+export function serializeLocalSupplierArrival(arrival: SerializableLocalSupplierArrival) {
   return {
     id: arrival.id.toString(),
     zmcc_id: arrival.zmcc_id.toString(),
@@ -1108,8 +1167,8 @@ export async function correctMotArrival(
 
   const updateData: Prisma.ZmccMotArrivalUncheckedUpdateInput = {};
 
-  const oldValues: Record<string, any> = {};
-  const newValues: Record<string, any> = {};
+  const oldValues: Record<string, unknown> = {};
+  const newValues: Record<string, unknown> = {};
   let newArrivalDate: Date | null = null;
 
   if (payload.route_milk_token !== undefined) {
@@ -1407,8 +1466,8 @@ export async function correctContractorArrival(
 
   const updateData: Prisma.ZmccContractorArrivalUpdateInput = {};
 
-  const oldValues: Record<string, any> = {};
-  const newValues: Record<string, any> = {};
+  const oldValues: Record<string, unknown> = {};
+  const newValues: Record<string, unknown> = {};
 
   if (payload.rmr_number !== undefined) {
     const rmrValidation = validateRmrNumber(payload.rmr_number, false);
@@ -1509,12 +1568,12 @@ export async function correctContractorArrival(
           table_name: 'zmcc_contractor_arrival',
           record_id: arrivalId,
           action: 'ZMCC_CONTRACTOR_ARRIVAL_CORRECTED',
-          old_values: oldValues,
-          new_values: {
+          old_values: toJsonInput(oldValues),
+          new_values: toJsonInput({
             ...newValues,
             correction_reason: reason,
             correction_count: nextCorrectionCount,
-          },
+          }),
           user_id: auth.actorUserId,
         },
       });
@@ -2268,8 +2327,8 @@ export async function correctLocalSupplierArrival(
 
   const updateData: Prisma.ZmccLocalSupplierArrivalUncheckedUpdateInput = {};
 
-  const oldValues: Record<string, any> = {};
-  const newValues: Record<string, any> = {};
+  const oldValues: Record<string, unknown> = {};
+  const newValues: Record<string, unknown> = {};
 
   // Supplier correction: Must exist, be active, and stay in the same ZMCC
   if (payload.local_supplier_id !== undefined) {
@@ -2631,7 +2690,7 @@ export async function recordGateExit(
     return { status: 400, error: 'Missing request payload.' };
   }
 
-  const rawEventId = payload.client_event_id || (payload as any).exit_client_event_id;
+  const rawEventId = payload.client_event_id || payload.exit_client_event_id;
   const clientEventId = typeof rawEventId === 'string' ? rawEventId.trim() : '';
   if (!clientEventId) {
     return { status: 400, error: 'client_event_id is required.' };
@@ -2676,7 +2735,10 @@ export async function recordGateExit(
       }
 
       // 2. Authoritative re-read within locked transaction
-      let arrival: any = null;
+      let arrival:
+        | Prisma.ZmccMotArrivalGetPayload<{ include: typeof motArrivalWithLabInclude }>
+        | Prisma.ZmccLocalSupplierArrivalGetPayload<{ include: typeof localSupplierArrivalWithLabInclude }>
+        | null = null;
       if (arrivalType === 'MOT') {
         arrival = await tx.zmccMotArrival.findUnique({
           where: { id: arrivalId },
@@ -2741,7 +2803,7 @@ export async function recordGateExit(
           if (isSameTimestamp) {
             return {
               status: 200,
-              data: arrivalType === 'MOT'
+              data: 'journey' in arrival
                 ? { ...serializeMotArrival(arrival), is_replay: true }
                 : { ...serializeLocalSupplierArrival(arrival), is_replay: true },
             };
@@ -2917,37 +2979,38 @@ export async function recordGateExit(
     return result;
   } catch (err) {
     if (getErrorCode(err) === 'P2002') {
-      const conflictRecord = arrivalType === 'MOT'
-        ? await prisma.zmccMotArrival.findUnique({
-            where: { exit_client_event_id: clientEventId },
-            include: {
-              journey: { include: { route: true, mot_vehicle: true, mot_profile: true, summary: true } },
-              zmcc: true,
-              recorded_by: true,
-              exit_recorded_by: true,
-              lab_session: { include: { tank_receipt: true } },
-            },
-          })
-        : await prisma.zmccLocalSupplierArrival.findUnique({
-            where: { exit_client_event_id: clientEventId },
-            include: {
-              local_supplier: true,
-              zmcc: true,
-              recorded_by: true,
-              exit_recorded_by: true,
-              lab_session: { include: { tank_receipt: true } },
-            },
-          });
+      const isSameExit = (record: { id: bigint; exit_timestamp: Date | null } | null) =>
+        !!record &&
+        record.id === arrivalId &&
+        Math.abs(new Date(record.exit_timestamp!).getTime() - exitDate.getTime()) < 1000;
 
-      if (conflictRecord && conflictRecord.id === arrivalId) {
-        const isSame = Math.abs(new Date(conflictRecord.exit_timestamp!).getTime() - exitDate.getTime()) < 1000;
-        if (isSame) {
-          return {
-            status: 200,
-            data: arrivalType === 'MOT'
-              ? { ...serializeMotArrival(conflictRecord), is_replay: true }
-              : { ...serializeLocalSupplierArrival(conflictRecord), is_replay: true },
-          };
+      if (arrivalType === 'MOT') {
+        const conflictRecord = await prisma.zmccMotArrival.findUnique({
+          where: { exit_client_event_id: clientEventId },
+          include: {
+            journey: { include: { route: true, mot_vehicle: true, mot_profile: true, summary: true } },
+            zmcc: true,
+            recorded_by: true,
+            exit_recorded_by: true,
+            lab_session: { include: { tank_receipt: true } },
+          },
+        });
+        if (conflictRecord && isSameExit(conflictRecord)) {
+          return { status: 200, data: { ...serializeMotArrival(conflictRecord), is_replay: true } };
+        }
+      } else {
+        const conflictRecord = await prisma.zmccLocalSupplierArrival.findUnique({
+          where: { exit_client_event_id: clientEventId },
+          include: {
+            local_supplier: true,
+            zmcc: true,
+            recorded_by: true,
+            exit_recorded_by: true,
+            lab_session: { include: { tank_receipt: true } },
+          },
+        });
+        if (conflictRecord && isSameExit(conflictRecord)) {
+          return { status: 200, data: { ...serializeLocalSupplierArrival(conflictRecord), is_replay: true } };
         }
       }
       return {
@@ -2991,8 +3054,8 @@ export async function correctGateExit(
     return { status: 400, error: 'Missing correction payload.' };
   }
 
-  const reason = typeof (payload.reason || (payload as any).supervisor_reason) === 'string'
-    ? (payload.reason || (payload as any).supervisor_reason).trim()
+  const reason = typeof (payload.reason || payload.supervisor_reason) === 'string'
+    ? (payload.reason || payload.supervisor_reason || '').trim()
     : '';
   if (!reason || reason.length < 5) {
     return { status: 400, error: 'Correction reason is mandatory and must be at least 5 characters.' };
@@ -3033,7 +3096,14 @@ export async function correctGateExit(
       }
 
       // 2. Authoritative re-read under the acquired row lock
-      let currentArrival: any = null;
+      let currentArrival:
+        | Prisma.ZmccMotArrivalGetPayload<{
+            include: { journey: { include: typeof journeyDetailInclude }; zmcc: true; recorded_by: true; exit_recorded_by: true; lab_session: true };
+          }>
+        | Prisma.ZmccLocalSupplierArrivalGetPayload<{
+            include: { local_supplier: true; zmcc: true; recorded_by: true; exit_recorded_by: true; lab_session: true };
+          }>
+        | null = null;
       if (arrivalType === 'MOT') {
         currentArrival = await tx.zmccMotArrival.findUnique({
           where: { id: arrivalId },
@@ -3118,7 +3188,13 @@ export async function correctGateExit(
         : new Date(currentArrival.exit_timestamp).toISOString();
       const newExitTs = exitDate.toISOString();
 
-      let updatedRecord: any;
+      let updatedRecord:
+        | Prisma.ZmccMotArrivalGetPayload<{
+            include: { journey: { include: typeof journeyDetailInclude }; zmcc: true; recorded_by: true; exit_recorded_by: true };
+          }>
+        | Prisma.ZmccLocalSupplierArrivalGetPayload<{
+            include: { local_supplier: true; zmcc: true; recorded_by: true; exit_recorded_by: true };
+          }>;
       if (arrivalType === 'MOT') {
         updatedRecord = await tx.zmccMotArrival.update({
           where: { id: arrivalId },
@@ -3205,7 +3281,7 @@ export async function correctGateExit(
 
     return {
       status: 200,
-      data: arrivalType === 'MOT' ? serializeMotArrival(updated) : serializeLocalSupplierArrival(updated),
+      data: 'journey' in updated ? serializeMotArrival(updated) : serializeLocalSupplierArrival(updated),
     };
   } catch (err) {
     if (err instanceof ExitCorrectionError) {
@@ -3216,11 +3292,30 @@ export async function correctGateExit(
   }
 }
 
+type InsideVehicle = {
+  id: string;
+  arrival_type: 'MOT' | 'LOCAL_SUPPLIER';
+  vehicle_number: string;
+  source_name: string;
+  local_supplier_code: string | null;
+  zmcc_token: string | null;
+  arrival_timestamp: string;
+  lab_status: string;
+  lab_decision: string | null;
+  has_tank_receipt: boolean;
+  can_exit: boolean;
+  exit_ineligibility_reason: string | null;
+  gate_exit_required: boolean;
+  gate_exit_recorded: boolean;
+  zmcc?: { id: string; code: string; name: string };
+  raw_arrival: ReturnType<typeof serializeMotArrival> | ReturnType<typeof serializeLocalSupplierArrival>;
+};
+
 export async function getVehiclesInsideZmcc(
   reqOrUser: Request | User,
   zmccIdQuery?: string,
   limitQuery?: number | string
-): Promise<ServiceResult<{ vehicles: any[]; items: any[]; limit: number; total_count: number; has_more: boolean }>> {
+): Promise<ServiceResult<{ vehicles: InsideVehicle[]; items: InsideVehicle[]; limit: number; total_count: number; has_more: boolean }>> {
   const { auth, errorResponse } = await resolveZmccArrivalAuth(reqOrUser, 'READ_ARRIVAL');
   if (errorResponse) return errorResponse;
   if (!auth) return { status: 401, error: 'Unauthorized.' };
@@ -3315,7 +3410,7 @@ export async function getVehiclesInsideZmcc(
   ]);
 
   const totalCount = totalMotCount + totalLsCount;
-  const vehicles: any[] = [];
+  const vehicles: InsideVehicle[] = [];
 
   for (const a of motArrivals) {
     const lab = a.lab_session;

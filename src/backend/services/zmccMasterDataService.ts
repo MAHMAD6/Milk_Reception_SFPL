@@ -4,6 +4,7 @@ import { getCurrentUser } from '@core/auth';
 import { User, Role } from '@core/types';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
 import { Prisma } from '@prisma/client';
+import { requireZmccScope } from '@/backend/core/scope';
 
 export interface ZmccAuthContext {
   user: User;
@@ -16,13 +17,6 @@ export interface ZmccAuthContext {
   effectiveZmccId: bigint | null;
 }
 
-/** Non-admin reads are always ZMCC-scoped; fail closed if the scope is somehow missing. */
-function requireZmccScope(auth: { effectiveZmccId: bigint | null }): bigint {
-  if (auth.effectiveZmccId == null) {
-    throw new Error('ZMCC scope is required for non-admin access.');
-  }
-  return auth.effectiveZmccId;
-}
 
 export type RequiredMasterDataAction =
   | 'READ'
