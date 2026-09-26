@@ -109,7 +109,7 @@ export function validateQuantityAgainstPolicy(
 
   const allowedList = Array.isArray(allowedMeasurementsOrRules)
     ? allowedMeasurementsOrRules
-    : (allowedMeasurementsOrRules as any)?.allowedMeasurements || [];
+    : allowedMeasurementsOrRules.allowedMeasurements || [];
 
   const allowed = isCombinationAllowed(allowedList, combination);
   if (!allowed) {

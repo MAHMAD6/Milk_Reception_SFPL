@@ -3,12 +3,14 @@
 import React from 'react';
 import { Play, CheckCircle2, PauseCircle, XCircle } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
+import type { OnHoldVisit, WaitingVisit } from './QAQueuePanel';
+import type { VisitDetail } from './QATestingSection';
 
 export interface QADecisionModalsProps {
   activeActionModal: 'START' | 'RESUME' | 'ACCEPT' | 'HOLD' | 'REJECT' | null;
   onCloseModal: () => void;
   actionVisitId: string | null;
-  visitDetail: any;
+  visitDetail: VisitDetail | null;
   activePortionIndex: number;
   qaOpTimestamp: string;
   onQaOpTimestampChange: (val: string) => void;
@@ -24,8 +26,8 @@ export interface QADecisionModalsProps {
   onHoldPortionConfirm: (e: React.FormEvent) => void;
   onRejectPortionConfirm: (e: React.FormEvent) => void;
   isSubmitting: boolean;
-  waitingVisits: any[];
-  onHoldVisits: any[];
+  waitingVisits: WaitingVisit[];
+  onHoldVisits: OnHoldVisit[];
 }
 
 export const QADecisionModals: React.FC<QADecisionModalsProps> = ({

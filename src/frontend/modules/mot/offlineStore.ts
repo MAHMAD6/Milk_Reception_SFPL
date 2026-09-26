@@ -10,6 +10,46 @@ import { getErrorMessage } from '@/lib/errors';
  * - FIFO Collection syncing with state lifecycle: DRAFT -> QUEUED -> SYNCING -> SYNCED / CONFLICT / FAILED_RETRYABLE
  */
 
+export interface CachedCollection {
+  id?: string;
+  collection_number?: string;
+  gross_liters: number;
+  unit: string;
+  lr: number;
+  fat: number;
+  at_13ts_liters: number;
+  created_at?: string;
+}
+
+type IdLike = string | number | bigint;
+
+/** Shape of the current-journey payload returned by the server, as far as the cache reads it. */
+export interface CacheableJourney {
+  id?: IdLike | null;
+  journey_number: string;
+  operational_date: string;
+  status: string;
+  zmcc?: CachedJourney['zmcc'] | null;
+  route?: CachedJourney['route'] | null;
+  mot_profile?: CachedJourney['mot_profile'] | null;
+  mot_vehicle?: CachedJourney['mot_vehicle'] | null;
+  stops?: Array<{
+    id?: IdLike | null;
+    planned_sequence: number;
+    status: 'PENDING' | 'VISITED';
+    shop_code?: string;
+    shop_name?: string;
+    owner_name?: string;
+    phone_number?: string;
+    area_code?: string;
+    area_name?: string;
+    shop?: Partial<Record<'shop_code' | 'shop_name' | 'owner_name' | 'phone_number' | 'area_code' | 'area_name', string>> | null;
+    planned_latitude?: number | string | null;
+    planned_longitude?: number | string | null;
+    collection?: CachedCollection | null;
+  }>;
+}
+
 export interface CachedJourney {
   id: string;
   journey_number: string;
@@ -31,7 +71,7 @@ export interface CachedJourney {
     area_name: string;
     planned_latitude: number | null;
     planned_longitude: number | null;
-    collection?: any;
+    collection?: CachedCollection | null;
   }>;
   cached_at: string;
 }
@@ -160,7 +200,7 @@ export function openMotDb(): Promise<IDBDatabase> {
 // Journey Cache Operations
 // -------------------------------------------------------------
 
-export async function saveCachedJourney(journey: any): Promise<void> {
+export async function saveCachedJourney(journey: CacheableJourney): Promise<void> {
   if (!isIndexedDbSupported()) return;
   const db = await openMotDb();
   return new Promise((resolve, reject) => {
@@ -176,12 +216,12 @@ export async function saveCachedJourney(journey: any): Promise<void> {
       journey_number: journey.journey_number,
       operational_date: journey.operational_date,
       status: journey.status,
-      zmcc: journey.zmcc,
-      route: journey.route,
-      mot_profile: journey.mot_profile,
-      mot_vehicle: journey.mot_vehicle,
-      stops: (journey.stops || []).map((s: any) => ({
-        id: s.id?.toString(),
+      zmcc: journey.zmcc ?? undefined,
+      route: journey.route ?? undefined,
+      mot_profile: journey.mot_profile ?? undefined,
+      mot_vehicle: journey.mot_vehicle ?? undefined,
+      stops: (journey.stops || []).map((s) => ({
+        id: s.id?.toString() ?? '',
         planned_sequence: s.planned_sequence,
         status: s.status,
         shop_code: s.shop_code || s.shop?.shop_code || '',

@@ -463,16 +463,16 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
         {viewMode === 'ZMCC_LAB' ? (
           <div className="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-border/60 text-xs">
             <span className="text-[11px] font-semibold text-slate-500 mr-1 uppercase">Filter:</span>
-            {[
+            {([
               { id: 'ALL', label: 'All ZMCC Sessions' },
               { id: 'PENDING_REVIEW', label: 'Needs Manager Review' },
               { id: 'REJECTED', label: 'Rejected Intake' },
               { id: 'REVIEWED_EXITED', label: 'Reviewed After Exit' },
               { id: 'APPROVED', label: 'Exceptions Approved' },
-            ].map((opt) => (
+            ] as const).map((opt) => (
               <button
                 key={opt.id}
-                onClick={() => setLabFilter(opt.id as any)}
+                onClick={() => setLabFilter(opt.id)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   labFilter === opt.id
                     ? 'bg-primary text-white shadow-2xs'

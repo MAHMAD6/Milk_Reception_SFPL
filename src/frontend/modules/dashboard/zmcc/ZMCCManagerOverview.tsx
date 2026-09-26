@@ -5,6 +5,7 @@ import { MilkProcessLog } from '@backend/core/types';
 import {
   OverviewDateRange,
   ZMCCManagerOverviewMetrics,
+  ZMCCManagerTab,
 } from './zmccManagerTypes';
 import {
   computeManagerOverview,
@@ -37,7 +38,7 @@ interface ZMCCManagerOverviewProps {
   dateRange: OverviewDateRange;
   onDateRangeChange: (range: OverviewDateRange) => void;
   onInspectDetails: (log: MilkProcessLog) => void;
-  onNavigateToTab: (tab: any) => void;
+  onNavigateToTab: (tab: ZMCCManagerTab) => void;
   currentFromDate?: string;
   currentToDate?: string;
   onDateFilterChange?: (fromDate?: string, toDate?: string) => void;

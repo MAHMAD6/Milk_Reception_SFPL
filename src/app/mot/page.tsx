@@ -20,6 +20,7 @@ import {
 import {
   saveCachedJourney,
   getCachedJourney,
+  type CachedJourney,
   saveMotOfflinePreparation,
   getMotOfflinePreparation,
   saveDraft,
@@ -75,6 +76,21 @@ interface CurrentJourney {
   assigned_by_name: string | null;
   assigned_at: string;
   stops: StopDetail[];
+}
+
+/** Offline cache -> page model. Assignment metadata is not cached (and not rendered). */
+function toCurrentJourney(cached: CachedJourney): CurrentJourney {
+  return {
+    id: cached.id,
+    journey_number: cached.journey_number,
+    operational_date: cached.operational_date,
+    status: cached.status,
+    route: cached.route ?? null,
+    mot_vehicle: cached.mot_vehicle ?? null,
+    assigned_by_name: null,
+    assigned_at: cached.cached_at,
+    stops: cached.stops.map((stop) => ({ ...stop, collection: stop.collection ?? null })),
+  };
 }
 
 export default function MotDriverPage() {
@@ -274,7 +290,7 @@ export default function MotDriverPage() {
         const cached = await getCachedJourney();
         const preparation = await getMotOfflinePreparation();
         if (cached && preparation && preparation.journeyId === cached.id && new Date(preparation.expiresAt).getTime() > Date.now()) {
-          setJourney(cached as any);
+          setJourney(toCurrentJourney(cached));
         } else {
           setJourney(null);
           setJourneyError('Offline preparation is missing or expired. Reconnect and prepare the active journey again.');
@@ -286,7 +302,7 @@ export default function MotDriverPage() {
         const cached = await getCachedJourney();
         const preparation = await getMotOfflinePreparation();
         if (cached && preparation && preparation.journeyId === cached.id && new Date(preparation.expiresAt).getTime() > Date.now()) {
-          setJourney(cached as any);
+          setJourney(toCurrentJourney(cached));
         } else {
           setJourneyError(getErrorMessage(err) || 'Unable to connect and no cached journey available.');
         }

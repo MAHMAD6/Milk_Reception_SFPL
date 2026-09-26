@@ -48,7 +48,7 @@ interface MapData {
       longitude: number;
       gps_accuracy: number | null;
     } | null;
-    endpoint: any | null;
+    endpoint: unknown;
     endpoint_status: string;
   };
   stops: Array<{
@@ -144,7 +144,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
   const projection = useMemo(() => {
     if (!mapData) return null;
 
-    const points: Array<{ lat: number; lng: number; type: string; meta?: any }> = [];
+    const points: Array<{ lat: number; lng: number; type: string }> = [];
 
     // Start point
     if (mapData.journey.start_point) {
@@ -162,7 +162,6 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
           lat: stop.planned_latitude,
           lng: stop.planned_longitude,
           type: 'STOP',
-          meta: stop,
         });
       }
     }
@@ -173,7 +172,6 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
         lat: gps.latitude,
         lng: gps.longitude,
         type: 'GPS',
-        meta: gps,
       });
     }
 

@@ -7,6 +7,7 @@ import {
   QuantityUnit,
   MeasurementBasis,
   getAllowedBases,
+  type AllowedMeasurementConfig,
 } from '@/backend/modules/dispatch/quantity-policy/types';
 
 export type QuantityUnitType = QuantityUnit;
@@ -66,7 +67,7 @@ export interface DispatchPortionEditorProps {
     field: 'numericValue' | 'textValue' | 'notPerformedReason',
     value: string
   ) => void;
-  portionAllowedMeasurements: any;
+  portionAllowedMeasurements: AllowedMeasurementConfig[];
   portionAllowedUnits: QuantityUnitType[];
   portionErrors: Record<number, { quantity?: string; tests?: Record<string, string> }>;
   isContractorSource: boolean;

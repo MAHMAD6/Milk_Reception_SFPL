@@ -175,7 +175,7 @@ export default function SuperAdminLabTestsPage() {
 
     setIsSubmittingCreate(true);
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         testName: trimmedName,
         resultType: createResultType,
         unit: createUnit ? createUnit.trim() : null,
@@ -235,7 +235,7 @@ export default function SuperAdminLabTestsPage() {
 
     setIsSubmittingEdit(true);
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         testName: trimmedName,
         unit: editUnit ? editUnit.trim() : null,
         testScope,

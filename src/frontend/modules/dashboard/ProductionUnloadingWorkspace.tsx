@@ -101,7 +101,6 @@ interface SiloIssueHistoryDef {
 export type ProductionTab = 'READY' | 'UNLOADING' | 'SILO_ISSUE';
 
 interface ProductionUnloadingWorkspaceProps {
-  logs?: any[];
   currentUser?: User | null;
   activeTab?: ProductionTab;
   onTabChange?: (tab: ProductionTab) => void;

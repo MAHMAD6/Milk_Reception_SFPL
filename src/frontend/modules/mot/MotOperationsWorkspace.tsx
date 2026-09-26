@@ -15,6 +15,7 @@ import {
   User as UserIcon,
   Phone,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import { User } from '@core/types';
 import { ManagerJourneyMap } from './ManagerJourneyMap';
@@ -165,8 +166,8 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
   const isPheOperator = currentUser?.role === 'PHE_OPERATOR';
 
   // Permitted tabs
-  const permittedTabs: { id: MotWorkspaceTab; label: string; icon: any }[] = useMemo(() => {
-    const tabs: { id: MotWorkspaceTab; label: string; icon: any }[] = [
+  const permittedTabs: { id: MotWorkspaceTab; label: string; icon: LucideIcon }[] = useMemo(() => {
+    const tabs: { id: MotWorkspaceTab; label: string; icon: LucideIcon }[] = [
       { id: 'DISPATCH', label: 'Assign & Dispatch', icon: Send },
       { id: 'ACTIVE_JOURNEYS', label: 'Active Journeys', icon: Truck },
       { id: 'JOURNEY_HISTORY', label: 'Journey History', icon: Clock },
@@ -264,7 +265,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       fetch('/api/super-admin/sources?source_type=ZMCC')
         .then((res) => res.json())
         .then((data) => {
-          const list = (data.sources || []).filter((s: any) => s.is_active);
+          const list = (data.sources || []).filter((s: ZmccSource) => s.is_active);
           setSources(list);
           if (list.length > 0 && !selectedZmccId) {
             setSelectedZmccId(list[0].id);

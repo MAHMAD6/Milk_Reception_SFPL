@@ -4,6 +4,7 @@ import React from 'react';
 import { RefreshCw, Play, CheckCircle2, XCircle } from 'lucide-react';
 import { QualitativeResultRadioGroup } from '@/frontend/modules/shared/QualitativeResultRadioGroup';
 import { formatOperationalTime } from '@/lib/datetime-utils';
+import type { OnHoldVisit, WaitingVisit } from './QAQueuePanel';
 
 export type TestPerformanceStatus = 'PERFORMED' | 'NOT_PERFORMED';
 
@@ -42,7 +43,7 @@ export interface VisitDetailPortion {
   dispatch_quantity_basis?: string;
   plant_decision: string;
   plant_rejection_reason: string | null;
-  dispatch_results: any[];
+  dispatch_results: unknown[];
   plant_results: SavedPlantResult[];
 }
 
@@ -70,8 +71,8 @@ export interface TestInputState {
 export interface QATestingSectionProps {
   activeTab: 'WAITING' | 'IN_TESTING' | 'ON_HOLD';
   searchQuery: string;
-  selectedWaitingVisit: any;
-  selectedHeldVisit: any;
+  selectedWaitingVisit: WaitingVisit | null;
+  selectedHeldVisit: OnHoldVisit | null;
   visitDetail: VisitDetail | null;
   activePortionIndex: number;
   onSelectPortion: (index: number) => void;

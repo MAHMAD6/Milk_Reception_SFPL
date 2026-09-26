@@ -18,7 +18,7 @@ import {
 import { getOverviewDateRangeBounds } from './zmcc/zmccManagerHelpers';
 import { getPakistanCalendarDate } from '@backend/core/business-day';
 import type { RetrievalMode } from '@backend/services/operationalReadModelService';
-import { ZmccMasterDataWorkspace } from '@/frontend/modules/zmcc/ZmccMasterDataWorkspace';
+import { ZmccMasterDataWorkspace, type MasterDataTab } from '@/frontend/modules/zmcc/ZmccMasterDataWorkspace';
 import { ZmccArrivalsWorkspace } from '@/frontend/modules/zmcc/arrivals/ZmccArrivalsWorkspace';
 import { ZmccLabWorkspace } from '@/frontend/modules/zmcc/lab/ZmccLabWorkspace';
 import { PageTransition } from '@/components/motion/page-transition';
@@ -586,7 +586,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
             <ZmccMasterDataWorkspace
               currentUser={currentUser}
               activeTab={
-                (searchParams?.get('view')?.toUpperCase() as any) || undefined
+                (searchParams?.get('view')?.toUpperCase() as MasterDataTab | undefined) || undefined
               }
             />
           </div>

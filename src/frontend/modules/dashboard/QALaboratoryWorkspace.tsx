@@ -41,7 +41,6 @@ export type {
 export type QATab = 'WAITING' | 'IN_TESTING' | 'ON_HOLD';
 
 interface QALaboratoryWorkspaceProps {
-  logs?: any[];
   currentUser?: User | null;
   activeTab?: QATab;
   onTabChange?: (tab: QATab) => void;
@@ -189,18 +188,18 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
         setOnHoldVisits(onHold);
 
         setSelectedWaitingVisitId((prev) => {
-          if (prev && waiting.some((v: any) => v.id === prev)) return prev;
+          if (prev && waiting.some((v: WaitingVisit) => v.id === prev)) return prev;
           return waiting.length > 0 ? waiting[0].id : null;
         });
 
         setSelectedTestingVisitId((prev) => {
-          if (prev && inTesting.some((v: any) => v.id === prev)) return prev;
+          if (prev && inTesting.some((v: InTestingVisit) => v.id === prev)) return prev;
           if (inTesting.length === 0) return null;
           return inTesting[0].id;
         });
 
         setSelectedHeldVisitId((prev) => {
-          if (prev && onHold.some((v: any) => v.id === prev)) return prev;
+          if (prev && onHold.some((v: OnHoldVisit) => v.id === prev)) return prev;
           return onHold.length > 0 ? onHold[0].id : null;
         });
       }

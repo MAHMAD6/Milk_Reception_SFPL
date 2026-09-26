@@ -46,9 +46,7 @@ interface PaginationMeta {
 }
 
 interface MPDFieldWorkspaceProps {
-  logs?: any[];
   currentUser: User | null;
-  onSaveDispatch?: (data: any) => Promise<void>;
   onRefresh?: () => void;
 }
 

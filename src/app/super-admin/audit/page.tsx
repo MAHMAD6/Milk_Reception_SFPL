@@ -9,8 +9,8 @@ interface AuditLogItem {
   tableName: string;
   recordId: string | null;
   action: string;
-  oldValues: any;
-  newValues: any;
+  oldValues: unknown;
+  newValues: unknown;
   user: string;
   createdAt: string;
 }

@@ -59,7 +59,6 @@ interface ReadyForExitVisit {
 export type SecurityTab = 'WAITING_ENTRY' | 'INSIDE_PLANT' | 'READY_EXIT';
 
 interface SecurityGatewayWorkspaceProps {
-  logs?: any[];
   currentUser?: User | null;
   activeTab?: SecurityTab;
   onTabChange?: (tab: SecurityTab) => void;

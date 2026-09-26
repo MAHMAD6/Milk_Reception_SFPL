@@ -11,6 +11,8 @@ import {
   MeasurementBasis,
   getAllowedUnits,
   getAllowedBases,
+  DEFAULT_DISPATCH_QUANTITY_POLICY,
+  type DispatchQuantityPolicySnapshotDTO,
 } from '@/backend/modules/dispatch/quantity-policy/types';
 import {
   applySharedPortionUnit,
@@ -51,7 +53,7 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
 
   const [availableSources, setAvailableSources] = useState<Array<{ id: string; name: string; source_type: string }>>([]);
   const [selectedSourceId, setSelectedSourceId] = useState<string>('');
-  const [frozenQuantityPolicy, setFrozenQuantityPolicy] = useState<any>(null);
+  const [frozenQuantityPolicy, setFrozenQuantityPolicy] = useState<DispatchQuantityPolicySnapshotDTO | null>(null);
 
   // Vehicle Header Fields
   const [vehicleNumber, setVehicleNumber] = useState('');
@@ -275,7 +277,10 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
     : defaultBases;
 
   // Portion Allowed Rules
-  const portionAllowedMeasurements = frozenQuantityPolicy?.policy?.portionRules?.allowedMeasurements;
+  // Until the source's policy snapshot loads, use the same default the server falls back to.
+  const portionAllowedMeasurements =
+    frozenQuantityPolicy?.policy?.portionRules?.allowedMeasurements ??
+    DEFAULT_DISPATCH_QUANTITY_POLICY.portionRules.allowedMeasurements;
   const portionAllowedUnits: QuantityUnit[] = isPolicyReady && portionAllowedMeasurements
     ? getAllowedUnits(portionAllowedMeasurements)
     : defaultUnits;

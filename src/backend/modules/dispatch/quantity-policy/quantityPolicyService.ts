@@ -6,6 +6,7 @@ import {
 } from './types';
 import { validateQuantityPolicy } from './validation';
 import { toJsonInput } from '@/lib/json';
+import type { DispatchQuantityPolicySnapshot } from '@prisma/client';
 
 type DbClient = PrismaClient | Prisma.TransactionClient;
 
@@ -34,14 +35,18 @@ export class VisitSourceMismatchError extends Error {
 }
 
 export function serializeQuantityPolicySnapshot(
-  snapshot: any
+  snapshot: Pick<DispatchQuantityPolicySnapshot, 'visit_id' | 'source_id' | 'policy_version' | 'policy_snapshot'> & {
+    id?: bigint;
+    created_at?: Date | null;
+  }
 ): DispatchQuantityPolicySnapshotDTO {
   return {
     id: snapshot.id?.toString(),
     visitId: snapshot.visit_id.toString(),
     sourceId: snapshot.source_id.toString(),
     policyVersion: snapshot.policy_version,
-    policy: snapshot.policy_snapshot as DispatchQuantityPolicyConfig,
+    // Stored JSON is validated against DispatchQuantityPolicyConfig when written.
+    policy: snapshot.policy_snapshot as unknown as DispatchQuantityPolicyConfig,
     createdAt: snapshot.created_at ? snapshot.created_at.toISOString() : undefined,
   };
 }
