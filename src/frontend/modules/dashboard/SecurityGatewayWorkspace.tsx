@@ -290,7 +290,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                 value={entrySearchQuery}
                 onChange={(e) => handleEntrySearch(e.target.value)}
                 placeholder="Search vehicle number..."
-                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
+                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring/30 focus:border-primary"
               />
             </div>
 
@@ -315,7 +315,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                       onClick={() => setSelectedEntryVisitId(v.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                           : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
@@ -346,7 +346,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                 Select a waiting vehicle from the queue to process gate entry.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-5 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-5 text-foreground">
                 <div className="pb-3 border-b border-border-strong">
                   <h3 className="text-base font-semibold text-foreground">Gate Entry Processing</h3>
                   <p className="text-xs text-slate-700 font-semibold mt-0.5">
@@ -375,7 +375,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                       value={tokenNumber}
                       onChange={(e) => setTokenNumber(e.target.value.toUpperCase())}
                       placeholder="e.g. TK-9025"
-                      className="w-full min-h-[44px] px-4 py-2.5 text-sm tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary outline-none"
+                      className="w-full min-h-[44px] px-4 py-2.5 text-sm tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary outline-hidden"
                       required
                     />
                   </div>
@@ -391,7 +391,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                       min={selectedEntryVisit.dispatch_timestamp ? toDatetimeLocalInput(selectedEntryVisit.dispatch_timestamp) : undefined}
                       max={toDatetimeLocalInput(new Date())}
                       onChange={(e) => setEntryOpTimestamp(e.target.value)}
-                      className="w-full min-h-[44px] px-4 py-2.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary outline-none"
+                      className="w-full min-h-[44px] px-4 py-2.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary outline-hidden"
                       required
                     />
                   </div>
@@ -413,7 +413,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
 
       {/* TAB 2: INSIDE PLANT */}
       {activeTab === 'INSIDE_PLANT' && (
-        <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-4">
+        <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-border-strong">
             <h3 className="text-sm font-semibold text-foreground">
               Vehicles Inside Plant ({activeVisits.length})
@@ -486,7 +486,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                 value={exitSearchQuery}
                 onChange={(e) => handleExitSearch(e.target.value)}
                 placeholder="Search token or vehicle number..."
-                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
+                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring/30 focus:border-primary"
               />
             </div>
 
@@ -507,7 +507,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                       onClick={() => setSelectedExitVisitId(v.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                           : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
@@ -545,7 +545,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                 Select a ready vehicle from the left queue to process gate exit.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-5 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-5 text-foreground">
                 <div className="pb-3 border-b border-border-strong">
                   <h3 className="text-base font-semibold text-foreground">Gate Exit Clearance</h3>
                   <p className="text-xs text-slate-700 font-semibold mt-0.5">
@@ -598,7 +598,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
                       value={exitOpTimestamp}
                       max={toDatetimeLocalInput(new Date())}
                       onChange={(e) => setExitOpTimestamp(e.target.value)}
-                      className="w-full min-h-[44px] px-4 py-2.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full min-h-[44px] px-4 py-2.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                       required
                     />
                   </div>

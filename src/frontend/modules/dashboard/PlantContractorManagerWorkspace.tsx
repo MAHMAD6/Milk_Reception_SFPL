@@ -134,7 +134,7 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
 
             <div className="flex items-center space-x-2 self-start sm:self-auto">
               {serverBusinessDate && (
-                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-subtle border border-border-strong rounded-xl text-xs tabular-nums font-semibold text-slate-700 shadow-xs">
+                <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-subtle border border-border-strong rounded-xl text-xs tabular-nums font-semibold text-slate-700 shadow-2xs">
                   <Calendar className="w-3.5 h-3.5 text-primary" />
                   <span>{serverBusinessDate}</span>
                 </div>
@@ -143,7 +143,7 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
                 type="button"
                 onClick={() => fetchLogs(page)}
                 disabled={loading}
-                className="flex items-center space-x-1.5 px-3.5 py-2 min-h-[44px] bg-subtle hover:bg-muted/60 border border-border-strong rounded-xl text-xs font-semibold text-foreground shadow-xs transition active:scale-95 disabled:opacity-50"
+                className="flex items-center space-x-1.5 px-3.5 py-2 min-h-[44px] bg-subtle hover:bg-muted/60 border border-border-strong rounded-xl text-xs font-semibold text-foreground shadow-2xs transition active:scale-95 disabled:opacity-50"
               >
                 <RefreshCw className={`w-3.5 h-3.5 text-primary ${loading ? 'animate-spin' : ''}`} />
                 <span>Refresh</span>
@@ -167,7 +167,7 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
         {/* Tab Content Body */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
           {error && (
-            <div className="p-4 mb-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center space-x-2 shadow-sm">
+            <div className="p-4 mb-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center space-x-2 shadow-xs">
               <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>{error}</span>
             </div>
@@ -229,7 +229,7 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
 
           {/* Pagination bar for non-history tabs */}
           {activeTab !== 'HISTORY' && totalRecords > 0 && (
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-border-strong rounded-xl text-xs shadow-xs mt-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-border-strong rounded-xl text-xs shadow-2xs mt-4">
               <div className="text-slate-600 font-medium">
                 Showing page <span className="font-semibold text-slate-900">{page}</span> of{' '}
                 <span className="font-semibold text-slate-900">{totalPages}</span>{' '}

@@ -104,7 +104,7 @@ export const SecurityManager: React.FC = () => {
 
       <main className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-6 w-full max-w-full">
           {/* Top Header Panel */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-border-strong shadow-sm">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-xl bg-white border border-border-strong shadow-xs">
             <div>
               <div className="flex items-center space-x-2.5 flex-wrap gap-y-1">
                 <ShieldCheck className="w-6 h-6 text-primary" />
@@ -124,7 +124,7 @@ export const SecurityManager: React.FC = () => {
               type="button"
               onClick={handleManualSync}
               disabled={isLoading}
-              className="flex items-center justify-center space-x-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-subtle border border-border-strong text-xs font-semibold text-foreground hover:bg-muted/60 active:scale-95 transition-all shadow-sm disabled:opacity-50 self-start md:self-auto"
+              className="flex items-center justify-center space-x-2 px-4 py-2.5 min-h-[44px] rounded-xl bg-subtle border border-border-strong text-xs font-semibold text-foreground hover:bg-muted/60 active:scale-95 transition-all shadow-xs disabled:opacity-50 self-start md:self-auto"
             >
               <RefreshCw className={`w-4 h-4 text-primary ${isLoading ? 'animate-spin' : ''}`} />
               <span>{isLoading ? 'Syncing...' : 'Refresh Audit Log'}</span>
@@ -134,7 +134,7 @@ export const SecurityManager: React.FC = () => {
           {/* SECURITY AUDIT METRIC CARDS */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Blue Box: Gate Entries */}
-            <div className="p-5 rounded-xl bg-blue-50 border border-blue-200 shadow-sm space-y-1.5 transition-all hover:bg-blue-100/80">
+            <div className="p-5 rounded-xl bg-blue-50 border border-blue-200 shadow-xs space-y-1.5 transition-all hover:bg-blue-100/80">
               <span className="text-primary-hover font-sans block text-[11px] font-semibold uppercase tracking-wider">
                 Total Gate 2 IGP Entries
               </span>
@@ -145,7 +145,7 @@ export const SecurityManager: React.FC = () => {
             </div>
 
             {/* Red Alert Box: Delays */}
-            <div className="p-5 rounded-xl bg-red-50 border border-red-200 shadow-sm space-y-1.5 transition-all hover:bg-red-100/80">
+            <div className="p-5 rounded-xl bg-red-50 border border-red-200 shadow-xs space-y-1.5 transition-all hover:bg-red-100/80">
               <span className="text-red-800 font-sans block text-[11px] font-semibold uppercase tracking-wider">
                 Gate-to-Lab Transit Delays (&gt;15 mins)
               </span>
@@ -157,7 +157,7 @@ export const SecurityManager: React.FC = () => {
             </div>
 
             {/* Green Box: Completed Clearance */}
-            <div className="p-5 rounded-xl bg-green-50 border border-green-200 shadow-sm space-y-1.5 transition-all hover:bg-green-100/80">
+            <div className="p-5 rounded-xl bg-green-50 border border-green-200 shadow-xs space-y-1.5 transition-all hover:bg-green-100/80">
               <span className="text-green-800 font-sans block text-[11px] font-semibold uppercase tracking-wider">
                 Completed Gate Clearance Outs
               </span>
@@ -169,7 +169,7 @@ export const SecurityManager: React.FC = () => {
           </div>
 
           {/* Filter Bar */}
-          <div className="p-4 rounded-xl bg-white border border-border-strong shadow-sm flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+          <div className="p-4 rounded-xl bg-white border border-border-strong shadow-xs flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
             <div className="relative w-full sm:max-w-xs">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
@@ -177,7 +177,7 @@ export const SecurityManager: React.FC = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search vehicle #, token #..."
-                className="w-full pl-10 pr-4 py-2.5 min-h-[44px] text-xs font-semibold rounded-xl bg-subtle border border-border-strong text-foreground focus:ring-2 focus:ring-primary outline-none shadow-xs"
+                className="w-full pl-10 pr-4 py-2.5 min-h-[44px] text-xs font-semibold rounded-xl bg-subtle border border-border-strong text-foreground focus:ring-2 focus:ring-primary outline-hidden shadow-2xs"
               />
             </div>
             <span className="text-xs font-semibold text-slate-700 self-end sm:self-center">
@@ -186,7 +186,7 @@ export const SecurityManager: React.FC = () => {
           </div>
 
           {/* SECURITY AUDIT LEDGER TABLE */}
-          <div className="p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-4 text-foreground">
+          <div className="p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-4 text-foreground">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-border">
               <h3 className="text-sm font-semibold text-foreground">
                 Guard Team Station Timestamps & Transit Durations

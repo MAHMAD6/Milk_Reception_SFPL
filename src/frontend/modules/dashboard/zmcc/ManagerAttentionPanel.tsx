@@ -32,7 +32,7 @@ export const ManagerAttentionPanel: React.FC<ManagerAttentionPanelProps> = ({
 }) => {
   if (items.length === 0) {
     return (
-      <div className="p-6 rounded-xl bg-card border border-border/80 shadow-sm text-center space-y-2">
+      <div className="p-6 rounded-xl bg-card border border-border/80 shadow-xs text-center space-y-2">
         <div className="w-10 h-10 rounded-full bg-green-50 text-green-800 flex items-center justify-center mx-auto border border-green-200">
           <CheckCircle2 className="w-5 h-5" />
         </div>
@@ -45,7 +45,7 @@ export const ManagerAttentionPanel: React.FC<ManagerAttentionPanelProps> = ({
   }
 
   return (
-    <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+    <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
       <div className="flex items-center justify-between pb-2 border-b border-border/80">
         <div className="flex items-center space-x-2">
           <AlertTriangle className="w-4 h-4 text-amber-700" />
@@ -94,7 +94,7 @@ export const ManagerAttentionPanel: React.FC<ManagerAttentionPanelProps> = ({
           return (
             <div
               key={item.id}
-              className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition shadow-xs hover:shadow-sm ${cardBg}`}
+              className={`p-4 rounded-xl border flex flex-col justify-between space-y-3 transition shadow-2xs hover:shadow-xs ${cardBg}`}
             >
               <div className="space-y-2">
                 <div className="flex items-start justify-between gap-2">
@@ -141,7 +141,7 @@ export const ManagerAttentionPanel: React.FC<ManagerAttentionPanelProps> = ({
                 </span>
                 <button
                   onClick={() => onInspectDetails(item.log)}
-                  className="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-hover text-white font-sans text-xs font-semibold transition flex items-center space-x-1 shadow-xs"
+                  className="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-hover text-white font-sans text-xs font-semibold transition flex items-center space-x-1 shadow-2xs"
                 >
                   <Eye className="w-3 h-3" />
                   <span>View Details</span>

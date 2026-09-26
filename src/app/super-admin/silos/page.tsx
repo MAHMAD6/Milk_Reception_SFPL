@@ -235,7 +235,7 @@ export default function SuperAdminSilosPage() {
             setModalError(null);
             setShowCreateModal(true);
           }}
-          className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary text-white rounded-xl text-xs font-semibold shadow-sm hover:bg-primary-hover transition shrink-0"
+          className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary text-white rounded-xl text-xs font-semibold shadow-xs hover:bg-primary-hover transition shrink-0"
         >
           <Plus className="w-4 h-4" />
           <span>Add Silo</span>
@@ -257,7 +257,7 @@ export default function SuperAdminSilosPage() {
       )}
 
       {/* SILOS TABLE */}
-      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
+      <div className="bg-white rounded-xl border border-border/80 shadow-xs overflow-hidden w-full max-w-full">
         <div className="overflow-x-auto w-full">
           <table className="w-full text-left text-xs min-w-[650px]">
             <thead className="bg-subtle text-slate-600 border-b border-border">
@@ -391,7 +391,7 @@ export default function SuperAdminSilosPage() {
                   required
                   value={siloCode}
                   onChange={(e) => setSiloCode(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong uppercase tabular-nums focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong uppercase tabular-nums focus:outline-hidden focus:border-primary"
                   placeholder="e.g. SILO-05"
                   disabled={isSubmitting}
                 />
@@ -407,7 +407,7 @@ export default function SuperAdminSilosPage() {
                   required
                   value={siloName}
                   onChange={(e) => setSiloName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="e.g. Storage Silo Tank 05"
                   disabled={isSubmitting}
                 />
@@ -424,7 +424,7 @@ export default function SuperAdminSilosPage() {
                   min={1}
                   value={capacityLiters}
                   onChange={(e) => setCapacityLiters(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-hidden focus:border-primary"
                   disabled={isSubmitting}
                 />
               </div>
@@ -441,7 +441,7 @@ export default function SuperAdminSilosPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-5 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
+                  className="min-h-[44px] px-5 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-xs disabled:opacity-50"
                 >
                   {isSubmitting ? 'Saving...' : 'Save Silo'}
                 </button>
@@ -502,7 +502,7 @@ export default function SuperAdminSilosPage() {
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   disabled={isSubmitting}
                 />
               </div>
@@ -518,7 +518,7 @@ export default function SuperAdminSilosPage() {
                   min={1}
                   value={editCapacity}
                   onChange={(e) => setEditCapacity(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-hidden focus:border-primary"
                   disabled={isSubmitting}
                 />
               </div>
@@ -535,7 +535,7 @@ export default function SuperAdminSilosPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="min-h-[44px] px-5 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
+                  className="min-h-[44px] px-5 py-2 rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-xs disabled:opacity-50"
                 >
                   {isSubmitting ? 'Updating...' : 'Update Silo'}
                 </button>
@@ -584,7 +584,7 @@ export default function SuperAdminSilosPage() {
                 type="button"
                 onClick={handleConfirmDeactivate}
                 disabled={isSubmitting}
-                className="min-h-[44px] px-5 py-2 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 transition shadow-sm disabled:opacity-50"
+                className="min-h-[44px] px-5 py-2 rounded-xl bg-rose-600 text-white font-semibold hover:bg-rose-700 transition shadow-xs disabled:opacity-50"
               >
                 {isSubmitting ? 'Deactivating...' : 'Confirm Deactivate'}
               </button>

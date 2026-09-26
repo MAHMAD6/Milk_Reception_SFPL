@@ -40,7 +40,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
             placeholder="Search vehicle number, driver, MOT, or ZMCC source..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border focus:outline-none focus:border-primary bg-subtle"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border focus:outline-hidden focus:border-primary bg-subtle"
           />
         </div>
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
@@ -65,7 +65,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
 
       {/* 1. Heavy In-Transit Tankers (ZMCC to Plant) */}
       {(activeFilter === 'ALL' || activeFilter === 'TANKERS') && (
-        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Truck className="w-4 h-4 text-primary" />
@@ -155,7 +155,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
 
       {/* 2. MOT Route Vans (Village Pickups to ZMCC) */}
       {(activeFilter === 'ALL' || activeFilter === 'MOT_ROUTES') && (
-        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Navigation className="w-4 h-4 text-primary" />
@@ -246,7 +246,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
 
       {/* 3. Emergency Vehicle Substitutions */}
       {(activeFilter === 'ALL' || activeFilter === 'SUBSTITUTES') && (
-        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ShieldAlert className="w-4 h-4 text-amber-600" />

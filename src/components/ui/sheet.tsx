@@ -37,7 +37,7 @@ export function Sheet({ open, onOpenChange, title, side = 'left', className, chi
             <DialogPrimitive.Content asChild forceMount aria-describedby={undefined}>
               <motion.div
                 className={cn(
-                  'fixed inset-y-0 z-modal flex w-72 max-w-[85vw] flex-col bg-card shadow-xl outline-none',
+                  'fixed inset-y-0 z-modal flex w-72 max-w-[85vw] flex-col bg-card shadow-xl outline-hidden',
                   side === 'left' ? 'left-0 border-r' : 'right-0 border-l',
                   className
                 )}

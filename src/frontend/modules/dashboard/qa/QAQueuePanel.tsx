@@ -103,7 +103,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search vehicle or token..."
-          className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
+          className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring/30 focus:border-primary"
         />
       </div>
 
@@ -131,7 +131,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
                   onClick={() => onSelectWaitingVisit(v.id)}
                   className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                     isSelected
-                      ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                      ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                       : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                   }`}
                 >
@@ -166,7 +166,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
                       e.stopPropagation();
                       onOpenActionModal('START', v.id);
                     }}
-                    className="w-full min-h-[44px] mt-1 py-2 px-3 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm"
+                    className="w-full min-h-[44px] mt-1 py-2 px-3 rounded-lg bg-primary hover:bg-primary-hover text-white text-xs font-semibold transition flex items-center justify-center space-x-1.5 shadow-xs"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>Start Testing</span>
@@ -192,7 +192,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
                   onClick={() => onSelectTestingVisit(v.id)}
                   className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                     isSelected
-                      ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                      ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                       : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                   }`}
                 >
@@ -236,7 +236,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
                 onClick={() => onSelectHeldVisit(v.id)}
                 className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                   isSelected
-                    ? 'bg-amber-50/70 text-foreground border-amber-500 ring-1 ring-amber-500 shadow-sm'
+                    ? 'bg-amber-50/70 text-foreground border-amber-500 ring-1 ring-amber-500 shadow-xs'
                     : 'bg-amber-50 text-foreground border-amber-200 hover:bg-accent'
                 }`}
               >
@@ -268,7 +268,7 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
                     e.stopPropagation();
                     onOpenActionModal('RESUME', v.id);
                   }}
-                  className="w-full min-h-[44px] mt-1 py-2 px-3 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm"
+                  className="w-full min-h-[44px] mt-1 py-2 px-3 rounded-lg bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold transition flex items-center justify-center space-x-1.5 shadow-xs"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
                   <span>Resume Testing</span>

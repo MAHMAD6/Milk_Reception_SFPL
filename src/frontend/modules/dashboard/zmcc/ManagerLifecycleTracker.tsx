@@ -48,7 +48,7 @@ export const ManagerLifecycleTracker: React.FC<ManagerLifecycleTrackerProps> = (
           let labelColor = 'text-slate-500';
 
           if (isCompleted) {
-            circleBg = 'bg-green-800 border-green-800 text-white shadow-sm';
+            circleBg = 'bg-green-800 border-green-800 text-white shadow-xs';
             labelColor = 'text-green-800 font-semibold';
           } else if (isCurrent) {
             circleBg = 'bg-primary border-primary text-white ring-4 ring-blue-100 shadow-md';

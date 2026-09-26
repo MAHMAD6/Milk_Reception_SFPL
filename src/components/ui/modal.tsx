@@ -99,7 +99,7 @@ export function Modal({
                 ref={contentRef}
                 tabIndex={-1}
                 className={cn(
-                  'relative my-auto w-full rounded-xl border bg-card text-card-foreground shadow-xl outline-none',
+                  'relative my-auto w-full rounded-xl border bg-card text-card-foreground shadow-xl outline-hidden',
                   SIZE_CLASSES[size],
                   className
                 )}
@@ -119,7 +119,7 @@ export function Modal({
                       ) : null}
                     </div>
                     <DialogPrimitive.Close
-                      className="-mr-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="-mr-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                       aria-label="Close"
                     >
                       <X className="h-4 w-4" />

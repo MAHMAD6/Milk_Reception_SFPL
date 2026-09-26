@@ -497,7 +497,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
               placeholder={activeTab === 'SILO_ISSUE' ? 'Search silo code or name...' : 'Search vehicle or token...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
+              className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring/30 focus:border-primary"
             />
           </div>
 
@@ -524,7 +524,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                       onClick={() => setSelectedReadyVisitId(v.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                           : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
@@ -576,7 +576,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                       onClick={() => setSelectedUnloadingVisitId(v.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                           : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
@@ -626,7 +626,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                       onClick={() => setSelectedIssueSiloId(silo.id)}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                           : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
@@ -674,7 +674,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                 Select a vehicle from the ready queue to assign silos and start unloading.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-6 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-6 text-foreground">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-strong pb-4">
                   <div>
                     <h3 className="text-base font-semibold text-foreground">Start Silo Unloading</h3>
@@ -710,7 +710,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                         <select
                           value={portionSiloMap[p.id] || ''}
                           onChange={(e) => setPortionSiloMap((prev) => ({ ...prev, [p.id]: e.target.value }))}
-                          className="w-full min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                         >
                           <option value="">Select Target Silo...</option>
                           {activeSilos.filter((s) => s.is_active).map((s) => (
@@ -735,7 +735,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                     min={selectedReadyVisit.gross_timestamp ? toDatetimeLocalInput(selectedReadyVisit.gross_timestamp) : undefined}
                     max={toDatetimeLocalInput(new Date())}
                     onChange={(e) => setStartOpTimestamp(e.target.value)}
-                    className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -758,7 +758,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                 Select a vehicle from the unloading in-progress queue to record completion.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-6 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-6 text-foreground">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-strong pb-4">
                   <div>
                     <h3 className="text-base font-semibold text-foreground">Complete Silo Unloading</h3>
@@ -804,7 +804,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                     min={selectedUnloadingVisit.started_at ? toDatetimeLocalInput(selectedUnloadingVisit.started_at) : undefined}
                     max={toDatetimeLocalInput(new Date())}
                     onChange={(e) => setCompleteOpTimestamp(e.target.value)}
-                    className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                   />
                 </div>
 
@@ -828,7 +828,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
               </div>
             ) : (
               <div className="space-y-6">
-                <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-6 text-foreground">
+                <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-6 text-foreground">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-strong pb-4">
                     <div>
                       <h3 className="text-base font-semibold text-foreground">Record Outbound Milk Issue</h3>
@@ -868,7 +868,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                         value={issueQuantityLiters}
                         onChange={(e) => setIssueQuantityLiters(e.target.value)}
                         placeholder="e.g. 5000"
-                        className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                       />
                     </div>
 
@@ -882,7 +882,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                           value={issuePurpose}
                           onChange={(e) => setIssuePurpose(e.target.value)}
                           placeholder="e.g. UHT Milk, Pasteurized Milk"
-                          className="w-full min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                         />
                       </div>
 
@@ -895,7 +895,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                           value={issueFlowMeterRef}
                           onChange={(e) => setIssueFlowMeterRef(e.target.value)}
                           placeholder="e.g. FM-004"
-                          className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                         />
                       </div>
                     </div>
@@ -909,7 +909,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                         value={issueOpTimestamp}
                         max={toDatetimeLocalInput(new Date())}
                         onChange={(e) => setIssueOpTimestamp(e.target.value)}
-                        className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                       />
                     </div>
                   </div>
@@ -926,7 +926,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
                 </div>
 
                 {/* Compact Recent Issues Card */}
-                <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3 text-foreground">
+                <div className="p-5 rounded-xl bg-card border border-border shadow-xs space-y-3 text-foreground">
                   <div className="flex items-center justify-between border-b border-border-strong pb-2">
                     <h4 className="text-xs font-semibold text-foreground">
                       Recent Issues — {selectedIssueSilo.silo_code}

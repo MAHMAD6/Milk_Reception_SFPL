@@ -152,7 +152,7 @@ export function FinanceReconciliationWorkspace() {
 
       {/* Amber Hold Alert for Entities Pending ERP Mapping */}
       {pendingSuppliers.length > 0 && (
-        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+        <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-amber-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
           <div className="flex items-center space-x-3">
             <div className="p-2 bg-amber-100 rounded-lg text-amber-700">
               <AlertTriangle className="w-5 h-5 shrink-0" />
@@ -175,7 +175,7 @@ export function FinanceReconciliationWorkspace() {
               setErpInput('');
               setShowMappingModal(true);
             }}
-            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition shadow-xs shrink-0"
+            className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition shadow-2xs shrink-0"
           >
             Review & Map ERP Codes
           </button>
@@ -331,7 +331,7 @@ export function FinanceReconciliationWorkspace() {
                   <button
                     type="submit"
                     disabled={mappingSubmitting}
-                    className="flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition shadow-xs"
+                    className="flex items-center space-x-1.5 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-xl transition shadow-2xs"
                   >
                     {mappingSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                     <span>Save & Release Hold</span>

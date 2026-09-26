@@ -46,7 +46,7 @@ export function BrandMark({ className }: { className?: string }) {
 }
 
 const itemBase =
-  'group flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+  'group flex w-full items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring';
 
 export function NavPanel({
   sections,
@@ -67,7 +67,7 @@ export function NavPanel({
         <BrandMark />
         {showClose ? (
           <SheetClose
-            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             aria-label="Close navigation"
           >
             <X className="h-4 w-4" />
@@ -166,7 +166,7 @@ export function NavPanel({
                               )}
                             >
                               {active ? (
-                                <span className="absolute -left-[9px] top-1.5 bottom-1.5 w-0.5 rounded-full bg-primary" />
+                                <span className="absolute left-[-9px] top-1.5 bottom-1.5 w-0.5 rounded-full bg-primary" />
                               ) : null}
                               <span className="truncate">{leaf.label}</span>
                             </Link>

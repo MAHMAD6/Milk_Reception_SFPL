@@ -115,7 +115,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
           <button
             type="button"
             onClick={onAddPortionClick}
-            className="flex items-center space-x-1.5 h-10 px-3.5 rounded-xl bg-primary-hover text-white text-xs font-semibold shadow-sm hover:bg-blue-800 transition"
+            className="flex items-center space-x-1.5 h-10 px-3.5 rounded-xl bg-primary-hover text-white text-xs font-semibold shadow-xs hover:bg-blue-800 transition"
           >
             <PlusCircle className="w-4 h-4" />
             <span>+ Add Portion</span>
@@ -135,12 +135,12 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
             return (
               <div
                 key={`portion-card-${portion.clientId}`}
-                className="p-4 rounded-xl bg-white border border-border-strong shadow-sm space-y-3 transition"
+                className="p-4 rounded-xl bg-white border border-border-strong shadow-xs space-y-3 transition"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 rounded-xl bg-emerald-100 text-emerald-800 shrink-0">
-                      <Check className="w-4 h-4 stroke-[3]" />
+                      <Check className="w-4 h-4 stroke-3" />
                     </div>
                     <div>
                       <div className="flex items-center space-x-2">
@@ -257,7 +257,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                         value={portion.quantity.value}
                         onChange={(e) => onPortionQuantityValueChange(index, e.target.value)}
                         placeholder="e.g. 8500"
-                        className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-card text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+                        className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-card text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition ${
                           portionErrors[index]?.quantity
                             ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500'
                             : 'border-border-strong'
@@ -275,7 +275,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                           id={`portion-unit-select-${index}`}
                           value={portion.quantity.unit}
                           onChange={(e) => onPortionUnitChange(index, e.target.value as QuantityUnitType)}
-                          className="w-full h-11 px-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
+                          className="w-full h-11 px-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition"
                         >
                           {portionAllowedUnits.map((u) => (
                             <option key={u} value={u}>
@@ -290,7 +290,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                           readOnly
                           disabled
                           value={portion.quantity.unit}
-                          className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed outline-none select-none"
+                          className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed outline-hidden select-none"
                         />
                       )}
                     </div>
@@ -304,7 +304,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                           id={`portion-basis-select-${index}`}
                           value={portion.quantity.basis}
                           onChange={(e) => onPortionBasisChange(index, e.target.value as MeasurementBasisType)}
-                          className="w-full h-11 px-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
+                          className="w-full h-11 px-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition"
                         >
                           {pAllowedBases.map((b) => (
                             <option key={b} value={b}>
@@ -319,7 +319,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                           readOnly
                           disabled
                           value={portion.quantity.basis}
-                          className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed outline-none select-none"
+                          className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-slate-200 bg-slate-100 text-slate-500 cursor-not-allowed outline-hidden select-none"
                         />
                       )}
                     </div>
@@ -382,7 +382,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                 onClick={() => onPerformanceStatusChange(index, test.testId, 'PERFORMED')}
                                 className={`h-8 px-3 rounded-lg text-xs font-semibold transition ${
                                   isPerformed
-                                    ? 'bg-primary-hover text-white shadow-sm'
+                                    ? 'bg-primary-hover text-white shadow-xs'
                                     : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                                 }`}
                               >
@@ -393,7 +393,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                 onClick={() => onPerformanceStatusChange(index, test.testId, 'NOT_PERFORMED')}
                                 className={`h-8 px-3 rounded-lg text-xs font-semibold transition ${
                                   !isPerformed
-                                    ? 'bg-rose-700 text-white shadow-sm'
+                                    ? 'bg-rose-700 text-white shadow-xs'
                                     : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                                 }`}
                               >
@@ -415,7 +415,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                       onTestResultChange(index, test.testId, 'numericValue', e.target.value)
                                     }
                                     placeholder="Enter numeric value"
-                                    className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+                                    className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition ${
                                       testError ? 'border-rose-500' : 'border-border-strong'
                                     }`}
                                   />
@@ -439,7 +439,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                       onTestResultChange(index, test.testId, 'textValue', e.target.value)
                                     }
                                     placeholder="Enter result"
-                                    className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+                                    className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition ${
                                       testError ? 'border-rose-500' : 'border-border-strong'
                                     }`}
                                   />
@@ -455,7 +455,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                     onTestResultChange(index, test.testId, 'notPerformedReason', e.target.value)
                                   }
                                   placeholder="Reason (e.g. Contract Vehicle)"
-                                  className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-rose-50/40 text-rose-900 border-rose-300 focus:ring-2 focus:ring-rose-500 outline-none transition ${
+                                  className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-rose-50/40 text-rose-900 border-rose-300 focus:ring-2 focus:ring-rose-500 outline-hidden transition ${
                                     testError ? 'border-rose-500' : ''
                                   }`}
                                 />
@@ -521,7 +521,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                       onClick={() => onPerformanceStatusChange(index, test.testId, 'PERFORMED')}
                                       className={`h-7 px-2.5 rounded text-[11px] font-semibold transition ${
                                         resultState.performanceStatus === 'PERFORMED'
-                                          ? 'bg-blue-700 text-white shadow-sm'
+                                          ? 'bg-blue-700 text-white shadow-xs'
                                           : 'bg-slate-200 text-slate-700'
                                       }`}
                                     >
@@ -532,7 +532,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                       onClick={() => onPerformanceStatusChange(index, test.testId, 'NOT_PERFORMED')}
                                       className={`h-7 px-2.5 rounded text-[11px] font-semibold transition ${
                                         resultState.performanceStatus === 'NOT_PERFORMED'
-                                          ? 'bg-rose-700 text-white shadow-sm'
+                                          ? 'bg-rose-700 text-white shadow-xs'
                                           : 'bg-slate-200 text-slate-700'
                                       }`}
                                     >
@@ -550,7 +550,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                         onTestResultChange(index, test.testId, 'numericValue', e.target.value)
                                       }
                                       placeholder="Enter value"
-                                      className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground outline-none transition ${
+                                      className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground outline-hidden transition ${
                                         testError ? 'border-rose-500 focus:ring-2 focus:ring-rose-500' : 'border-border-strong focus:ring-2 focus:ring-primary-hover'
                                       }`}
                                     />
@@ -563,7 +563,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                         onTestResultChange(index, test.testId, 'notPerformedReason', e.target.value)
                                       }
                                       placeholder="Enter reason for not performing"
-                                      className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-rose-50 text-rose-900 border-rose-300 outline-none transition ${
+                                      className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-rose-50 text-rose-900 border-rose-300 outline-hidden transition ${
                                         testError ? 'border-rose-500 focus:ring-2 focus:ring-rose-500' : ''
                                       }`}
                                     />
@@ -577,7 +577,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                       onClick={() => onPerformanceStatusChange(index, test.testId, 'PERFORMED')}
                                       className={`h-7 px-2.5 rounded text-[11px] font-semibold transition ${
                                         resultState.performanceStatus === 'PERFORMED'
-                                          ? 'bg-blue-700 text-white shadow-sm'
+                                          ? 'bg-blue-700 text-white shadow-xs'
                                           : 'bg-slate-200 text-slate-700'
                                       }`}
                                     >
@@ -588,7 +588,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                       onClick={() => onPerformanceStatusChange(index, test.testId, 'NOT_PERFORMED')}
                                       className={`h-7 px-2.5 rounded text-[11px] font-semibold transition ${
                                         resultState.performanceStatus === 'NOT_PERFORMED'
-                                          ? 'bg-rose-700 text-white shadow-sm'
+                                          ? 'bg-rose-700 text-white shadow-xs'
                                           : 'bg-slate-200 text-slate-700'
                                       }`}
                                     >
@@ -616,7 +616,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                         onTestResultChange(index, test.testId, 'notPerformedReason', e.target.value)
                                       }
                                       placeholder="Enter reason for not performing"
-                                      className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-rose-50 text-rose-900 border-rose-300 outline-none transition ${
+                                      className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-rose-50 text-rose-900 border-rose-300 outline-hidden transition ${
                                         testError ? 'border-rose-500 focus:ring-2 focus:ring-rose-500' : ''
                                       }`}
                                     />
@@ -631,7 +631,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                                     onTestResultChange(index, test.testId, 'textValue', e.target.value)
                                   }
                                   placeholder="Enter result"
-                                  className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground outline-none transition ${
+                                  className={`w-full h-10 px-3 text-xs tabular-nums font-semibold rounded-lg border bg-white text-foreground outline-hidden transition ${
                                     testError ? 'border-rose-500 focus:ring-2 focus:ring-rose-500' : 'border-border-strong focus:ring-2 focus:ring-primary-hover'
                                   }`}
                                 />
@@ -671,7 +671,7 @@ export const DispatchPortionEditor: React.FC<DispatchPortionEditorProps> = ({
                   <button
                     type="button"
                     onClick={() => onSavePortion(index)}
-                    className="h-11 px-5 rounded-xl bg-emerald-700 text-white text-xs font-semibold shadow-sm hover:bg-emerald-800 transition"
+                    className="h-11 px-5 rounded-xl bg-emerald-700 text-white text-xs font-semibold shadow-xs hover:bg-emerald-800 transition"
                   >
                     Save Portion
                   </button>

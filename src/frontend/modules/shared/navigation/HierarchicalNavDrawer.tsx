@@ -122,7 +122,7 @@ export const HierarchicalNavDrawer: React.FC<HierarchicalNavDrawerProps> = ({
       {persistent ? (
         <aside
           data-app-sidebar
-          className="fixed inset-y-0 left-0 z-sidebar hidden w-[var(--sidebar-width)] border-r bg-card lg:block"
+          className="fixed inset-y-0 left-0 z-sidebar hidden w-(--sidebar-width) border-r bg-card lg:block"
         >
           <NavPanel sections={sections} isActive={isActive} caption={caption} footer={footer} />
         </aside>

@@ -52,4 +52,5 @@ Only use the named scale — never `z-50`, `z-[999]`, etc.
 | `z-toast` | 80 | sonner toasts |
 | `z-tooltip` | 90 | tooltips |
 
-Values live in `--z-*` variables in `globals.css` and are mapped in `tailwind.config.js`.
+Values live in `--z-*` variables in `globals.css`, exposed as `@utility z-*` rules in the same file
+(Tailwind v4 is configured in CSS; there is no `tailwind.config.js`).

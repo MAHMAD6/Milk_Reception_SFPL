@@ -97,7 +97,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
   };
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl shadow-xs overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden">
       {/* Card Header & Controls */}
       <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/50">
         <div className="flex items-center space-x-2.5">
@@ -119,7 +119,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
               type="button"
               onClick={() => setPeriod('today')}
               className={`px-2.5 py-1 rounded-md transition-colors ${
-                period === 'today' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                period === 'today' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Daily
@@ -128,7 +128,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
               type="button"
               onClick={() => setPeriod('wtd')}
               className={`px-2.5 py-1 rounded-md transition-colors ${
-                period === 'wtd' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                period === 'wtd' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Weekly
@@ -137,7 +137,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
               type="button"
               onClick={() => setPeriod('mtd')}
               className={`px-2.5 py-1 rounded-md transition-colors ${
-                period === 'mtd' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                period === 'mtd' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               Monthly

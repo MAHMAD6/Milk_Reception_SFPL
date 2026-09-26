@@ -311,7 +311,7 @@ export default function SuperAdminLabTestsPage() {
       )}
 
       {/* LAB TESTS TABLE */}
-      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
+      <div className="bg-white rounded-xl border border-border/80 shadow-xs overflow-hidden w-full max-w-full">
         <div className="p-3 sm:px-4 sm:py-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <h2 className="text-sm font-semibold text-foreground">Lab Tests</h2>
@@ -327,7 +327,7 @@ export default function SuperAdminLabTestsPage() {
             }}
             aria-label="Add lab test"
             title="Add lab test"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-2xs transition-colors hover:bg-primary-hover focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4" />
             <span>Add lab test</span>
@@ -522,7 +522,7 @@ export default function SuperAdminLabTestsPage() {
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
                   placeholder="e.g. Alcohol Stability Test"
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                 />
               </div>
 
@@ -541,7 +541,7 @@ export default function SuperAdminLabTestsPage() {
                         ]);
                       }
                     }}
-                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   >
                     <option value="QUALITATIVE">QUALITATIVE (Configurable Choices)</option>
                     <option value="NUMERIC">NUMERIC (Decimal / Float)</option>
@@ -558,7 +558,7 @@ export default function SuperAdminLabTestsPage() {
                     type="text"
                     value={createUnit}
                     onChange={(e) => setCreateUnit(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                     placeholder="e.g. % or °C (optional)"
                   />
                 </div>
@@ -614,7 +614,7 @@ export default function SuperAdminLabTestsPage() {
                     required
                     value={createDisplayOrder}
                     onChange={(e) => setCreateDisplayOrder(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
+                    className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-hidden focus:border-primary"
                   />
                 </div>
               </div>
@@ -714,7 +714,7 @@ export default function SuperAdminLabTestsPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingCreate}
-                  className="px-5 py-2 min-h-[44px] rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
+                  className="px-5 py-2 min-h-[44px] rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-xs disabled:opacity-50"
                 >
                   {isSubmittingCreate ? 'Creating...' : 'Create Lab Test'}
                 </button>
@@ -765,7 +765,7 @@ export default function SuperAdminLabTestsPage() {
                   required
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                 />
               </div>
 
@@ -776,7 +776,7 @@ export default function SuperAdminLabTestsPage() {
                     type="text"
                     value={editUnit}
                     onChange={(e) => setEditUnit(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                     placeholder="e.g. °C or % or leave blank"
                   />
                 </div>
@@ -788,7 +788,7 @@ export default function SuperAdminLabTestsPage() {
                     required
                     value={editDisplayOrder}
                     onChange={(e) => setEditDisplayOrder(Number(e.target.value))}
-                    className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-none focus:border-primary"
+                    className="w-full p-2.5 rounded-lg border border-border-strong tabular-nums focus:outline-hidden focus:border-primary"
                   />
                 </div>
               </div>
@@ -928,7 +928,7 @@ export default function SuperAdminLabTestsPage() {
                 <button
                   type="submit"
                   disabled={isSubmittingEdit}
-                  className="px-5 py-2 min-h-[44px] rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-sm disabled:opacity-50"
+                  className="px-5 py-2 min-h-[44px] rounded-xl bg-primary text-white font-semibold hover:bg-primary-hover transition shadow-xs disabled:opacity-50"
                 >
                   {isSubmittingEdit ? 'Updating...' : 'Update Metadata'}
                 </button>
@@ -1007,7 +1007,7 @@ export default function SuperAdminLabTestsPage() {
                 type="button"
                 onClick={handleConfirmToggleActive}
                 disabled={isSubmittingToggle}
-                className={`px-5 py-2 min-h-[44px] rounded-xl font-semibold text-white transition shadow-sm disabled:opacity-50 ${
+                className={`px-5 py-2 min-h-[44px] rounded-xl font-semibold text-white transition shadow-xs disabled:opacity-50 ${
                   showConfirmModal.action === 'DEACTIVATE'
                     ? 'bg-rose-600 hover:bg-rose-700'
                     : 'bg-emerald-600 hover:bg-emerald-700'

@@ -93,9 +93,9 @@ export default function PublicYardTVBoardPage() {
           )}
         </>
       ) : (
-        <header className="w-full max-w-full flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border bg-card text-foreground shadow-xs shrink-0">
+        <header className="w-full max-w-full flex items-center justify-between px-4 sm:px-6 py-3 border-b border-border bg-card text-foreground shadow-2xs shrink-0">
           <div className="flex items-center space-x-3">
-            <div className="p-2 bg-primary rounded-xl text-white shadow-xs">
+            <div className="p-2 bg-primary rounded-xl text-white shadow-2xs">
               <Tv className="w-5 h-5" />
             </div>
             <div>
@@ -111,7 +111,7 @@ export default function PublicYardTVBoardPage() {
           <div className="flex items-center space-x-2">
             <Link
               href="/login"
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border-strong bg-subtle hover:bg-muted text-xs font-semibold text-primary transition shadow-xs"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border border-border-strong bg-subtle hover:bg-muted text-xs font-semibold text-primary transition shadow-2xs"
             >
               <LogIn className="w-3.5 h-3.5" />
               <span>Operator Login</span>
@@ -125,9 +125,9 @@ export default function PublicYardTVBoardPage() {
         <PageTransition>
         <div>
           {/* TV Sub-Header Banner */}
-          <div className="bg-white border border-border rounded-xl p-4 sm:p-5 shadow-xs mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="bg-white border border-border rounded-xl p-4 sm:p-5 shadow-2xs mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-3.5">
-              <div className="p-2.5 bg-primary text-white rounded-xl shadow-xs shrink-0">
+              <div className="p-2.5 bg-primary text-white rounded-xl shadow-2xs shrink-0">
                 <Tv className="w-6 h-6" />
               </div>
               <div>
@@ -141,7 +141,7 @@ export default function PublicYardTVBoardPage() {
             </div>
 
             <div className="flex items-center space-x-3 shrink-0">
-              <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold shadow-xs">
+              <div className="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-semibold shadow-2xs">
                 <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
                 <span>LIVE YARD FEED</span>
               </div>
@@ -154,7 +154,7 @@ export default function PublicYardTVBoardPage() {
           {/* Vehicle Queue Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {activeVehicles.length === 0 ? (
-              <div className="col-span-full p-16 text-center border-2 border-dashed border-border rounded-xl bg-white text-muted-foreground text-sm shadow-xs">
+              <div className="col-span-full p-16 text-center border-2 border-dashed border-border rounded-xl bg-white text-muted-foreground text-sm shadow-2xs">
                 <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-muted text-slate-400 flex items-center justify-center">
                   <Truck className="w-6 h-6" />
                 </div>
@@ -171,7 +171,7 @@ export default function PublicYardTVBoardPage() {
                 return (
                   <div
                     key={`tv-vehicle-${vehicle.visitId}`}
-                    className={`p-5 rounded-xl border transition-all flex flex-col justify-between space-y-4 shadow-xs ${
+                    className={`p-5 rounded-xl border transition-all flex flex-col justify-between space-y-4 shadow-2xs ${
                       isNext
                         ? 'bg-blue-50/70 border-blue-400 ring-2 ring-blue-500/30 shadow-md'
                         : isRejected
@@ -181,7 +181,7 @@ export default function PublicYardTVBoardPage() {
                   >
                     <div className="flex items-center justify-between">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold tabular-nums tracking-wider shadow-xs ${
+                        className={`px-3 py-1 rounded-full text-xs font-semibold tabular-nums tracking-wider shadow-2xs ${
                           isNext
                             ? 'bg-primary text-white animate-bounce'
                             : isRejected

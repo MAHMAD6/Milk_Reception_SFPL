@@ -819,7 +819,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                           onClick={() => setSelectedJourney(j)}
                           className={`p-4 rounded-xl border transition-all cursor-pointer ${
                             isSelected
-                              ? 'bg-blue-50/60 border-primary shadow-xs'
+                              ? 'bg-blue-50/60 border-primary shadow-2xs'
                               : 'bg-white border-border hover:border-slate-300'
                           }`}
                         >
@@ -850,7 +850,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
               </div>
 
               {/* Arrival Form */}
-              <div className="lg:col-span-6 bg-white rounded-xl border border-border p-6 shadow-xs space-y-4">
+              <div className="lg:col-span-6 bg-white rounded-xl border border-border p-6 shadow-2xs space-y-4">
                 <h3 className="text-sm font-semibold text-slate-900 border-b pb-2">
                   Record MOT Arrival at ZMCC
                 </h3>
@@ -984,7 +984,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
               {insideVehicles.map((v) => (
                 <div
                   key={`${v.arrival_type}-${v.id}`}
-                  className="bg-white rounded-xl border border-border p-5 shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition-all"
+                  className="bg-white rounded-xl border border-border p-5 shadow-2xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition-all"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -1043,7 +1043,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                       <button
                         type="button"
                         onClick={() => openExitModal(v)}
-                        className="w-full py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-semibold transition-all shadow-xs cursor-pointer flex items-center justify-center space-x-1.5"
+                        className="w-full py-2 bg-indigo-700 hover:bg-indigo-800 text-white rounded-xl text-xs font-semibold transition-all shadow-2xs cursor-pointer flex items-center justify-center space-x-1.5"
                       >
                         <MapPin className="w-3.5 h-3.5" />
                         <span>Record Gate Exit</span>
@@ -1065,7 +1065,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
 
       {/* 2.5 LOCAL SUPPLIER ARRIVAL SUB-TAB */}
       {activeTab === 'LOCAL_SUPPLIER_ARRIVAL' && canSubmit && (
-        <div className="max-w-xl mx-auto bg-white rounded-xl border border-emerald-200 p-6 shadow-xs space-y-4">
+        <div className="max-w-xl mx-auto bg-white rounded-xl border border-emerald-200 p-6 shadow-2xs space-y-4">
           <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
             <div>
               <div className="flex items-center space-x-2">
@@ -1317,7 +1317,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
       {activeTab === 'HISTORY' && (
         <div className="space-y-4">
           {/* Filters */}
-          <div className="bg-white rounded-xl border border-border p-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+          <div className="bg-white rounded-xl border border-border p-4 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex rounded-xl border border-slate-200 overflow-hidden text-xs font-semibold">
                 <button
@@ -1380,7 +1380,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
           </div>
 
           {/* Table */}
-          <div className="bg-white rounded-xl border border-border overflow-hidden shadow-xs">
+          <div className="bg-white rounded-xl border border-border overflow-hidden shadow-2xs">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>

@@ -73,7 +73,7 @@ export default function SuperAdminQaWarningsPage() {
       )}
 
       {/* MONTHLY SUMMARY PER SOURCE */}
-      <div className="bg-white p-5 rounded-xl border border-border/80 shadow-sm space-y-3">
+      <div className="bg-white p-5 rounded-xl border border-border/80 shadow-xs space-y-3">
         <h2 className="text-sm font-semibold text-foreground">Derived Monthly Active Warnings per Supplier</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
           {summary.map((s) => (
@@ -91,7 +91,7 @@ export default function SuperAdminQaWarningsPage() {
       </div>
 
       {/* WARNING EVENT RECORDS TABLE */}
-      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden space-y-2 p-4">
+      <div className="bg-white rounded-xl border border-border/80 shadow-xs overflow-hidden space-y-2 p-4">
         <h2 className="text-sm font-semibold text-foreground flex items-center space-x-2">
           <AlertTriangle className="w-4 h-4 text-amber-600" />
           <span>Individual Immutable Warning Log</span>

@@ -51,7 +51,7 @@ export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
   return (
     <div className="space-y-6">
       {/* Overview & Pricing Context Banner */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm">
+      <div className="bg-white border border-border rounded-xl p-4 shadow-xs">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-primary shrink-0">
             <Layers className="w-4 h-4" />
@@ -72,7 +72,7 @@ export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
         {tiers.map((t, idx) => (
           <div
             key={t.tier}
-            className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col justify-between ${
+            className={`bg-white border rounded-xl p-4 shadow-xs flex flex-col justify-between ${
               idx === 3 ? 'border-primary/40 bg-slate-50/50' : 'border-border'
             }`}
           >

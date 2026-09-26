@@ -117,7 +117,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
   if (isLoading && logs.length === 0) {
     return (
       <div className="space-y-4" aria-busy="true" aria-label="Loading live dispatches">
-        <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm animate-pulse space-y-3">
+        <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs animate-pulse space-y-3">
           <div className="h-6 bg-slate-200 rounded w-1/3" />
           <div className="h-10 bg-slate-100 rounded w-full" />
         </div>
@@ -128,7 +128,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
   return (
     <div className="space-y-6" role="region" aria-label="ZMCC Manager Live Dispatches">
       {/* 1. Header and Tracking Info Banner */}
-      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/80">
           <div className="flex items-center space-x-2">
             <Truck className="w-5 h-5 text-primary" />
@@ -158,7 +158,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search vehicle number, token #..."
               aria-label="Search live vehicles"
-              className="w-full pl-10 pr-4 py-2 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-none shadow-xs"
+              className="w-full pl-10 pr-4 py-2 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-hidden shadow-2xs"
             />
           </div>
 
@@ -168,7 +168,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
               onClick={() => setLifecycleFilter('ALL_ACTIVE')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 lifecycleFilter === 'ALL_ACTIVE'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-primary text-white shadow-2xs'
                   : 'bg-subtle text-slate-600 border border-border/80 hover:bg-muted/60'
               }`}
             >
@@ -178,7 +178,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
               onClick={() => setLifecycleFilter('GATE_ENTERED')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 lifecycleFilter === 'GATE_ENTERED'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-primary text-white shadow-2xs'
                   : 'bg-subtle text-slate-600 border border-border/80 hover:bg-muted/60'
               }`}
             >
@@ -188,7 +188,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
               onClick={() => setLifecycleFilter('PLANT_QA')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 lifecycleFilter === 'PLANT_QA'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-primary text-white shadow-2xs'
                   : 'bg-subtle text-slate-600 border border-border/80 hover:bg-muted/60'
               }`}
             >
@@ -198,7 +198,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
               onClick={() => setLifecycleFilter('WEIGHBRIDGE')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 lifecycleFilter === 'WEIGHBRIDGE'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-primary text-white shadow-2xs'
                   : 'bg-subtle text-slate-600 border border-border/80 hover:bg-muted/60'
               }`}
             >
@@ -208,7 +208,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
               onClick={() => setLifecycleFilter('UNLOADING')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 lifecycleFilter === 'UNLOADING'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-primary text-white shadow-2xs'
                   : 'bg-subtle text-slate-600 border border-border/80 hover:bg-muted/60'
               }`}
             >
@@ -218,7 +218,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
               onClick={() => setLifecycleFilter('AWAITING_RECEIPT')}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
                 lifecycleFilter === 'AWAITING_RECEIPT'
-                  ? 'bg-primary text-white shadow-xs'
+                  ? 'bg-primary text-white shadow-2xs'
                   : 'bg-subtle text-slate-600 border border-border/80 hover:bg-muted/60'
               }`}
             >
@@ -230,7 +230,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
 
       {/* 3. Active Vehicle List / Cards */}
       {filteredActiveGroups.length === 0 ? (
-        <div className="p-8 rounded-xl bg-card border border-border/80 shadow-sm text-center space-y-2">
+        <div className="p-8 rounded-xl bg-card border border-border/80 shadow-xs text-center space-y-2">
           <div className="w-12 h-12 rounded-full bg-slate-100 text-slate-500 flex items-center justify-center mx-auto border border-slate-200">
             <Truck className="w-6 h-6" />
           </div>
@@ -250,7 +250,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
             return (
               <div
                 key={group.visitId}
-                className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4 hover:border-primary/40 transition"
+                className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4 hover:border-primary/40 transition"
               >
                 {/* Top Row: Vehicle Info, Token, Stage Badge, Elapsed Timer */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-border/80">
@@ -340,7 +340,7 @@ export const ZMCCManagerLiveDispatches: React.FC<ZMCCManagerLiveDispatchesProps>
 
                   <button
                     onClick={() => onInspectDetails(primary)}
-                    className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-sans text-xs font-semibold transition flex items-center justify-center space-x-1.5 shadow-sm self-stretch md:self-auto"
+                    className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-hover text-white font-sans text-xs font-semibold transition flex items-center justify-center space-x-1.5 shadow-xs self-stretch md:self-auto"
                   >
                     <Eye className="w-3.5 h-3.5" />
                     <span>Inspect Full Visit Details</span>

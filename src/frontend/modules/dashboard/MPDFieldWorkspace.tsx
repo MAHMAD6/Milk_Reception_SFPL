@@ -198,7 +198,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
       >
         <div className="max-w-4xl mx-auto space-y-4">
           {/* Header & Date Controls */}
-          <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-4">
+          <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2">
                 <h2 className="text-base font-semibold text-foreground">Recent Dispatches</h2>
@@ -215,7 +215,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                 onClick={() => handleRangeChange('today')}
                 className={`h-9 rounded-lg text-xs font-semibold transition ${
                   dateRange === 'today'
-                    ? 'bg-primary-hover text-white shadow-sm'
+                    ? 'bg-primary-hover text-white shadow-xs'
                     : 'text-slate-700 hover:bg-white/60'
                 }`}
               >
@@ -226,7 +226,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                 onClick={() => handleRangeChange('7d')}
                 className={`h-9 rounded-lg text-xs font-semibold transition ${
                   dateRange === '7d'
-                    ? 'bg-primary-hover text-white shadow-sm'
+                    ? 'bg-primary-hover text-white shadow-xs'
                     : 'text-slate-700 hover:bg-white/60'
                 }`}
               >
@@ -237,7 +237,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                 onClick={() => handleRangeChange('30d')}
                 className={`h-9 rounded-lg text-xs font-semibold transition ${
                   dateRange === '30d'
-                    ? 'bg-primary-hover text-white shadow-sm'
+                    ? 'bg-primary-hover text-white shadow-xs'
                     : 'text-slate-700 hover:bg-white/60'
                 }`}
               >
@@ -248,7 +248,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                 onClick={() => handleRangeChange('custom')}
                 className={`h-9 rounded-lg text-xs font-semibold transition ${
                   dateRange === 'custom'
-                    ? 'bg-primary-hover text-white shadow-sm'
+                    ? 'bg-primary-hover text-white shadow-xs'
                     : 'text-slate-700 hover:bg-white/60'
                 }`}
               >
@@ -266,7 +266,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                       type="date"
                       value={fromDate}
                       onChange={(e) => setFromDate(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-border-strong bg-white tabular-nums text-xs text-foreground focus:ring-2 focus:ring-primary-hover outline-none"
+                      className="w-full h-11 px-3.5 rounded-xl border border-border-strong bg-white tabular-nums text-xs text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden"
                     />
                   </div>
                   <div className="space-y-1">
@@ -275,7 +275,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                       type="date"
                       value={toDate}
                       onChange={(e) => setToDate(e.target.value)}
-                      className="w-full h-11 px-3.5 rounded-xl border border-border-strong bg-white tabular-nums text-xs text-foreground focus:ring-2 focus:ring-primary-hover outline-none"
+                      className="w-full h-11 px-3.5 rounded-xl border border-border-strong bg-white tabular-nums text-xs text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden"
                     />
                   </div>
                 </div>
@@ -291,7 +291,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                   <button
                     type="button"
                     onClick={handleApplyCustomDate}
-                    className="h-10 px-4 bg-primary-hover text-white font-semibold text-xs rounded-xl shadow-sm hover:bg-blue-800 transition"
+                    className="h-10 px-4 bg-primary-hover text-white font-semibold text-xs rounded-xl shadow-xs hover:bg-blue-800 transition"
                   >
                     Apply Filter
                   </button>
@@ -321,7 +321,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
               dbDispatches.map((log) => (
                 <div
                   key={`mpd-dispatch-${String(log.id)}`}
-                  className="p-4 sm:p-5 rounded-xl border bg-white text-foreground border-border-strong shadow-sm space-y-3 transition"
+                  className="p-4 sm:p-5 rounded-xl border bg-white text-foreground border-border-strong shadow-xs space-y-3 transition"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2.5">
@@ -386,7 +386,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
 
           {/* Server-side Pagination Footer */}
           {pagination.totalRecords > 0 && (
-            <div className="p-3.5 rounded-xl bg-white border border-border-strong shadow-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold">
+            <div className="p-3.5 rounded-xl bg-white border border-border-strong shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold">
               <span className="text-slate-600 font-sans text-xs">
                 Showing {Math.min((pagination.page - 1) * pagination.pageSize + 1, pagination.totalRecords)}–{Math.min(pagination.page * pagination.pageSize, pagination.totalRecords)} of {pagination.totalRecords} dispatches
               </span>
@@ -397,7 +397,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                     type="button"
                     disabled={page <= 1 || isLoading}
                     onClick={() => handlePageChange(page - 1)}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent transition focus:outline-none focus:ring-2 focus:ring-primary-hover"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent transition focus:outline-hidden focus:ring-2 focus:ring-primary-hover"
                     aria-label="Previous page"
                   >
                     <ChevronLeft className="w-4 h-4" />
@@ -412,7 +412,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
                     type="button"
                     disabled={page >= pagination.totalPages || isLoading}
                     onClick={() => handlePageChange(page + 1)}
-                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent transition focus:outline-none focus:ring-2 focus:ring-primary-hover"
+                    className="min-h-[44px] min-w-[44px] flex items-center justify-center space-x-1 px-3.5 py-2 rounded-xl bg-muted border border-border-strong text-foreground disabled:opacity-40 disabled:cursor-not-allowed hover:bg-accent transition focus:outline-hidden focus:ring-2 focus:ring-primary-hover"
                     aria-label="Next page"
                   >
                     <span>Next</span>

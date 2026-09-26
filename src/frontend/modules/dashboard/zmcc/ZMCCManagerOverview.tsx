@@ -123,7 +123,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
   if (isLoading && logs.length === 0) {
     return (
       <div className="space-y-6" aria-busy="true" aria-label="Loading overview data">
-        <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm animate-pulse space-y-4">
+        <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs animate-pulse space-y-4">
           <div className="h-6 bg-slate-200 rounded w-1/3" />
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
             {[1, 2, 3, 4].map((i) => (
@@ -138,7 +138,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
   return (
     <div className="space-y-6" role="region" aria-label="ZMCC Manager Overview">
       {/* 1. Date Range & Scope Header */}
-      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-border/80">
           <div className="flex items-center space-x-2">
             <Layers className="w-5 h-5 text-primary" />
@@ -160,7 +160,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
               value={dateRange}
               onChange={(e) => onDateRangeChange(e.target.value as OverviewDateRange)}
               aria-label="Select overview period"
-              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-none shadow-sm"
+              className="px-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-hidden shadow-xs"
             >
               <option value="TODAY">Today ({displayCalendarDate})</option>
               <option value="YESTERDAY">Yesterday</option>
@@ -309,7 +309,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
       <ManagerAttentionPanel items={attentionItems} onInspectDetails={onInspectDetails} />
 
       {/* 5. Quick Recent Dispatches Preview */}
-      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-border/80">
           <div className="flex items-center space-x-2">
             <History className="w-4 h-4 text-primary" />

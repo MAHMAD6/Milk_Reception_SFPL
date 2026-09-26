@@ -84,7 +84,7 @@ export const ZMCCManagerReceiptsPerformance: React.FC<ZMCCManagerReceiptsPerform
   return (
     <div className="space-y-6">
       {/* 1. Header & Summary Banner */}
-      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-border/80">
           <div className="flex items-center space-x-2.5">
             <div className="p-2 rounded-lg bg-green-800/10 text-green-800">
@@ -180,7 +180,7 @@ export const ZMCCManagerReceiptsPerformance: React.FC<ZMCCManagerReceiptsPerform
       </div>
 
       {/* 2. Filters & Controls */}
-      <div className="p-4 rounded-xl bg-card border border-border/80 shadow-sm space-y-3">
+      <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Search */}
           <div className="relative flex-1 max-w-sm">
@@ -190,7 +190,7 @@ export const ZMCCManagerReceiptsPerformance: React.FC<ZMCCManagerReceiptsPerform
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search vehicle #, token #, silo, tx #..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-none"
+              className="w-full pl-9 pr-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-hidden"
             />
           </div>
 
@@ -239,7 +239,7 @@ export const ZMCCManagerReceiptsPerformance: React.FC<ZMCCManagerReceiptsPerform
                 onClick={() => setFilterState(opt.id)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   isActive
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-200/70 border border-slate-200'
                 }`}
               >
@@ -290,7 +290,7 @@ export const ZMCCManagerReceiptsPerformance: React.FC<ZMCCManagerReceiptsPerform
           {filteredItems.map((item) => (
             <div
               key={item.visitId}
-              className={`p-5 rounded-xl bg-card border shadow-xs space-y-4 transition-all ${
+              className={`p-5 rounded-xl bg-card border shadow-2xs space-y-4 transition-all ${
                 item.isCompletedReceipt
                   ? 'border-emerald-200 hover:border-emerald-400'
                   : item.isReceiptPending

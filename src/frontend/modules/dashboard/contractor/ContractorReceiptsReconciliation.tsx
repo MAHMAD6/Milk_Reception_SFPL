@@ -91,9 +91,9 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
   return (
     <div className="space-y-6">
       {/* 1. Header Scope Banner */}
-      <div className="p-5 rounded-xl bg-white border border-border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-5 rounded-xl bg-white border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-blue-900 text-white rounded-xl shadow-sm">
+          <div className="p-2.5 bg-blue-900 text-white rounded-xl shadow-xs">
             <Receipt className="w-5 h-5" />
           </div>
           <div>
@@ -116,7 +116,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
       {/* 2. Four Summary Metrics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Authoritative Final Receipts */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-xs space-y-2">
           <div className="flex items-center justify-between text-emerald-700 text-xs font-semibold">
             <span>Final Receipts</span>
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -130,7 +130,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
         </div>
 
         {/* Receipt Pending */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-xs space-y-2">
           <div className="flex items-center justify-between text-purple-700 text-xs font-semibold">
             <span>Receipt Pending</span>
             <Clock className="w-4 h-4 text-purple-600" />
@@ -144,7 +144,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
         </div>
 
         {/* Received Liters */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-xs space-y-2">
           <div className="flex items-center justify-between text-blue-800 text-xs font-semibold">
             <span>Total Received Vol</span>
             <Scale className="w-4 h-4 text-blue-700" />
@@ -158,7 +158,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
         </div>
 
         {/* Net Liters Variance */}
-        <div className="p-5 rounded-xl bg-white border border-border shadow-sm space-y-2">
+        <div className="p-5 rounded-xl bg-white border border-border shadow-xs space-y-2">
           <div className="flex items-center justify-between text-slate-700 text-xs font-semibold">
             <span>Net Liters Variance</span>
             <ArrowRightLeft className="w-4 h-4 text-slate-600" />
@@ -185,7 +185,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
       </div>
 
       {/* 3. Search & Filter Controls */}
-      <div className="p-5 rounded-xl bg-white border border-border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-5 rounded-xl bg-white border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Search */}
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -194,7 +194,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search vehicle, token, reception..."
-            className="w-full pl-9 pr-4 py-2.5 min-h-[44px] text-xs tabular-nums font-semibold bg-slate-50 border border-border-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900"
+            className="w-full pl-9 pr-4 py-2.5 min-h-[44px] text-xs tabular-nums font-semibold bg-slate-50 border border-border-strong rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-900"
           />
         </div>
 
@@ -210,7 +210,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
             onClick={() => setReceiptFilter('ALL')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               receiptFilter === 'ALL'
-                ? 'bg-blue-900 text-white shadow-sm'
+                ? 'bg-blue-900 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -222,7 +222,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
             onClick={() => setReceiptFilter('FINAL_RECEIPT')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               receiptFilter === 'FINAL_RECEIPT'
-                ? 'bg-emerald-800 text-white shadow-sm'
+                ? 'bg-emerald-800 text-white shadow-xs'
                 : 'bg-emerald-50 text-emerald-800 hover:bg-emerald-100 border border-emerald-200'
             }`}
           >
@@ -234,7 +234,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
             onClick={() => setReceiptFilter('RECEIPT_PENDING')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               receiptFilter === 'RECEIPT_PENDING'
-                ? 'bg-purple-900 text-white shadow-sm'
+                ? 'bg-purple-900 text-white shadow-xs'
                 : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200'
             }`}
           >
@@ -246,7 +246,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
             onClick={() => setReceiptFilter('BEFORE_RECEIPT')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               receiptFilter === 'BEFORE_RECEIPT'
-                ? 'bg-slate-800 text-white shadow-sm'
+                ? 'bg-slate-800 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -256,7 +256,7 @@ export const ContractorReceiptsReconciliation: React.FC<ContractorReceiptsReconc
       </div>
 
       {/* 4. Receipts & Reconciliation Table */}
-      <div className="p-5 sm:p-6 rounded-xl bg-white border border-border shadow-sm space-y-4">
+      <div className="p-5 sm:p-6 rounded-xl bg-white border border-border shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-muted pb-3">
           <div className="flex items-center space-x-2">
             <Receipt className="w-4 h-4 text-blue-800" />

@@ -82,7 +82,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
                 type="datetime-local"
                 value={qaOpTimestamp}
                 onChange={(e) => onQaOpTimestampChange(e.target.value)}
-                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 required
               />
               <p className="text-[10px] text-slate-700 font-medium">
@@ -133,7 +133,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
                 type="datetime-local"
                 value={qaOpTimestamp}
                 onChange={(e) => onQaOpTimestampChange(e.target.value)}
-                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 required
               />
             </div>
@@ -187,7 +187,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
                 type="datetime-local"
                 value={qaOpTimestamp}
                 onChange={(e) => onQaOpTimestampChange(e.target.value)}
-                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 required
               />
             </div>
@@ -236,7 +236,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
                 onChange={(e) => onHoldReasonChange(e.target.value)}
                 placeholder="Describe why this portion is being put on hold (e.g. pending supervisor review, re-sampling needed)..."
                 rows={3}
-                className="w-full p-3 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-amber-600"
+                className="w-full p-3 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-amber-600"
                 required
               />
             </div>
@@ -249,7 +249,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
                 type="datetime-local"
                 value={qaOpTimestamp}
                 onChange={(e) => onQaOpTimestampChange(e.target.value)}
-                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 required
               />
             </div>
@@ -296,7 +296,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
               <select
                 value={rejectionReason}
                 onChange={(e) => onRejectionReasonChange(e.target.value)}
-                className="w-full min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-rose-700"
+                className="w-full min-h-[44px] px-3.5 py-2 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-rose-700"
                 required
               >
                 <option value="">-- Select Rejection Reason --</option>
@@ -319,7 +319,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
                 onChange={(e) => onRejectionRemarksChange(e.target.value)}
                 placeholder="Detailed chemist lab observations, sample retest notes..."
                 rows={2}
-                className="w-full p-3 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-rose-700"
+                className="w-full p-3 text-xs font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-rose-700"
                 required
               />
             </div>
@@ -332,7 +332,7 @@ export const QADecisionModals: React.FC<QADecisionModalsProps> = ({
                 type="datetime-local"
                 value={qaOpTimestamp}
                 onChange={(e) => onQaOpTimestampChange(e.target.value)}
-                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full min-h-[44px] px-3.5 py-2 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                 required
               />
             </div>

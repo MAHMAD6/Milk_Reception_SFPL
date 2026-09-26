@@ -255,7 +255,7 @@ export default function SuperAdminProcurementSourcesPage() {
       )}
 
       {/* SOURCES TABLE */}
-      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
+      <div className="bg-white rounded-xl border border-border/80 shadow-xs overflow-hidden w-full max-w-full">
         <div className="p-3 sm:px-4 sm:py-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <h2 className="text-sm font-semibold text-foreground">Procurement Sources</h2>
@@ -271,7 +271,7 @@ export default function SuperAdminProcurementSourcesPage() {
             }}
             aria-label="Add procurement source"
             title="Add procurement source"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-xs transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary px-3 text-xs font-medium text-primary-foreground shadow-2xs transition-colors hover:bg-primary-hover focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             <Plus className="w-4 h-4" />
             <span>Add source</span>
@@ -392,7 +392,7 @@ export default function SuperAdminProcurementSourcesPage() {
                   value={createCode}
                   onChange={(e) => setCreateCode(e.target.value)}
                   disabled={isSubmittingCreate}
-                  className="w-full p-2.5 rounded-lg border border-border-strong uppercase tabular-nums focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong uppercase tabular-nums focus:outline-hidden focus:border-primary"
                   placeholder="e.g. ZMCC-FAISALABAD"
                 />
                 <p className="text-[10px] text-slate-400 mt-1">Code is immutable once created.</p>
@@ -406,7 +406,7 @@ export default function SuperAdminProcurementSourcesPage() {
                   value={createName}
                   onChange={(e) => setCreateName(e.target.value)}
                   disabled={isSubmittingCreate}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="e.g. Faisalabad ZMCC Center"
                 />
               </div>
@@ -417,7 +417,7 @@ export default function SuperAdminProcurementSourcesPage() {
                   value={createSourceType}
                   onChange={(e) => setCreateSourceType(e.target.value)}
                   disabled={isSubmittingCreate}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                 >
                   <option value="ZMCC">ZMCC (Direct Procurement Center)</option>
                   <option value="CONTRACTOR">CONTRACTOR (Third-Party Supplier)</option>
@@ -500,7 +500,7 @@ export default function SuperAdminProcurementSourcesPage() {
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
                   disabled={isSubmittingEdit}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="e.g. Faisalabad ZMCC Center"
                 />
               </div>

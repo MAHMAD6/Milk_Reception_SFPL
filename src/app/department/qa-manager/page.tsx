@@ -160,7 +160,7 @@ export default function QAManagerDepartmentPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <PageTransition>
         {/* Top Header Card */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-border shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-border shadow-2xs">
           <div>
             <h1 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
               <ShieldAlert className="w-6 h-6 text-amber-600" />
@@ -172,7 +172,7 @@ export default function QAManagerDepartmentPage() {
           </div>
           <button
             onClick={() => loadQueue()}
-            className="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-200 transition border border-slate-200 shadow-xs"
+            className="flex items-center justify-center gap-2 bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-xs font-semibold hover:bg-slate-200 transition border border-slate-200 shadow-2xs"
           >
             <RefreshCw className="w-4 h-4" />
             Refresh Queue
@@ -181,7 +181,7 @@ export default function QAManagerDepartmentPage() {
 
         {/* Pending Queue List */}
         {queue.length === 0 ? (
-          <div className="bg-white rounded-xl border border-border p-12 text-center text-slate-500 space-y-2 shadow-xs">
+          <div className="bg-white rounded-xl border border-border p-12 text-center text-slate-500 space-y-2 shadow-2xs">
             <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto" />
             <p className="text-sm font-semibold text-slate-800">No Quality Exceptions Pending</p>
             <p className="text-xs text-slate-500">All laboratory testing decisions are currently in compliance or resolved.</p>
@@ -191,7 +191,7 @@ export default function QAManagerDepartmentPage() {
             {queue.map((item) => (
               <div
                 key={item.portionId}
-                className="bg-white rounded-xl border border-border p-6 shadow-xs space-y-4"
+                className="bg-white rounded-xl border border-border p-6 shadow-2xs space-y-4"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-3">
@@ -291,7 +291,7 @@ export default function QAManagerDepartmentPage() {
                       setReason('');
                       setSubmitError(null);
                     }}
-                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition shadow-xs"
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 transition shadow-2xs"
                   >
                     <XCircle className="w-4 h-4" /> Reject Milk (Uphold Spec)
                   </button>
@@ -305,7 +305,7 @@ export default function QAManagerDepartmentPage() {
                       setSubmitError(null);
                     }}
                     title={item.vehicleExited ? 'Vehicle has already exited the plant; physical admission cannot be granted.' : undefined}
-                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition shadow-xs ${
+                    className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-semibold transition shadow-2xs ${
                       item.vehicleExited
                         ? 'bg-slate-200 text-slate-400 cursor-not-allowed border border-slate-300'
                         : 'bg-emerald-900 text-white hover:bg-emerald-950'

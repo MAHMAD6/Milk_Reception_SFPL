@@ -104,14 +104,14 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
     <div className="space-y-4">
       {/* Global Source Selector if user is NOT source-bound (e.g. Admin) */}
       {!isSourceBound && availableSources.length > 0 && (
-        <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-300/80 text-xs space-y-1.5 shadow-sm">
+        <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-300/80 text-xs space-y-1.5 shadow-xs">
           <label className="block font-semibold text-amber-950">
             Select Operating Procurement Source (Admin Override):
           </label>
           <select
             value={selectedSourceId}
             onChange={(e) => onSelectSourceId(e.target.value)}
-            className="w-full h-11 px-3.5 font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-hover"
+            className="w-full h-11 px-3.5 font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-primary-hover"
           >
             <option value="">-- Select Procurement Source --</option>
             {availableSources.map((s) => (
@@ -131,7 +131,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
       )}
 
       {/* Vehicle Registration & Timestamp Card */}
-      <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-4">
+      <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-4">
         <div className="flex items-center space-x-2 border-b border-slate-100 pb-2">
           <Truck className="w-4 h-4 text-primary-hover" />
           <h3 className="text-xs font-semibold text-foreground">
@@ -150,7 +150,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               value={vehicleNumber}
               onChange={(e) => onVehicleNumberChange(e.target.value)}
               placeholder="e.g. KBL-8492"
-              className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+              className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition ${
                 vehicleNumberError ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500' : 'border-border-strong'
               }`}
               required
@@ -174,7 +174,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               value={rawMilkDispatchNoteNumber || ''}
               onChange={(e) => onRawMilkDispatchNoteNumberChange?.(e.target.value.replace(/[^0-9]/g, ''))}
               placeholder="e.g. 008124"
-              className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
+              className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition"
             />
           </div>
 
@@ -189,7 +189,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               value={dispatchOpDatetime}
               max={maxDatetime}
               onChange={(e) => onDispatchOpDatetimeChange(e.target.value)}
-              className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
+              className="w-full h-11 px-3.5 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition"
               required
             />
           </div>
@@ -197,7 +197,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
       </div>
 
       {/* Whole-Vehicle Dispatch Quantity Section */}
-      <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-3.5">
+      <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-3.5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-2 gap-1">
           <label className="text-xs font-semibold text-foreground">
             {sourceType === 'ZMCC' ? 'Measured Tank / Vehicle Issue' : 'Measured Whole-Vehicle Dispatch Quantity'} *
@@ -223,7 +223,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                   value={vehicleQuantity.value}
                   onChange={(e) => onVehicleQuantityValueChange(e.target.value)}
                   placeholder="e.g. 19500"
-                  className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition ${
+                  className={`w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition ${
                     vehicleQuantityError ? 'border-rose-500 bg-rose-50/20 ring-1 ring-rose-500' : 'border-border-strong'
                   }`}
                   required
@@ -238,7 +238,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                   id="vehicle-unit-select"
                   value={vehicleQuantity.unit}
                   onChange={(e) => onVehicleUnitChange(e.target.value as QuantityUnitType)}
-                  className="w-full h-11 px-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-none transition"
+                  className="w-full h-11 px-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:ring-2 focus:ring-primary-hover outline-hidden transition"
                 >
                   {vehicleAllowedUnits.map((u) => (
                     <option key={u} value={u}>
@@ -265,7 +265,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
             </div>
 
             {/* Whole-Vehicle / Composite Quality Section */}
-            <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200/90 space-y-3 shadow-xs">
+            <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-200/90 space-y-3 shadow-2xs">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-amber-200/70 pb-2">
                 <div className="flex items-center space-x-1.5">
                   <Activity className="w-4 h-4 text-amber-900" />
@@ -302,7 +302,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                     value={vehicleLr || ''}
                     onChange={(e) => onVehicleLrChange && onVehicleLrChange(e.target.value)}
                     placeholder="e.g. 28.00"
-                    className="w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-hover"
+                    className="w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-primary-hover"
                   />
                 </div>
 
@@ -319,7 +319,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                     value={vehicleFat || ''}
                     onChange={(e) => onVehicleFatChange && onVehicleFatChange(e.target.value)}
                     placeholder="e.g. 3.80"
-                    className="w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-none focus:ring-2 focus:ring-primary-hover"
+                    className="w-full h-11 px-3.5 text-sm tabular-nums font-semibold rounded-xl border border-amber-300 bg-white text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-primary-hover"
                   />
                 </div>
               </div>
@@ -328,7 +328,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
               {(previewGrossLiters !== null || previewDensity !== null || previewAt13ts !== null) && (
                 <div className="pt-3 border-t border-amber-200/70 space-y-2">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                    <div className="p-3 rounded-xl bg-white border border-blue-200 shadow-xs space-y-1">
+                    <div className="p-3 rounded-xl bg-white border border-blue-200 shadow-2xs space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-slate-600 font-sans">Gross Liters</span>
                         <span className="text-xs font-semibold text-slate-500 tabular-nums">
@@ -342,7 +342,7 @@ export const DispatchVehicleSection: React.FC<DispatchVehicleSectionProps> = ({
                       </span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 shadow-xs space-y-1">
+                    <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 shadow-2xs space-y-1">
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-semibold text-emerald-900 font-sans">Liters @ 13% TS</span>
                         <span className="text-xs font-semibold text-emerald-800 tabular-nums">

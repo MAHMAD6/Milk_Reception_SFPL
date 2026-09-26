@@ -72,9 +72,9 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Header Scope Banner */}
-      <div className="p-5 rounded-xl bg-white border border-border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="p-5 rounded-xl bg-white border border-border shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-blue-900 text-white rounded-xl shadow-sm">
+          <div className="p-2.5 bg-blue-900 text-white rounded-xl shadow-xs">
             <Building2 className="w-5 h-5" />
           </div>
           <div>
@@ -141,7 +141,7 @@ export const ContractorOverview: React.FC<ContractorOverviewProps> = ({
       </div>
 
       {/* 3. Recent Dispatches / Activity Table */}
-      <div className="p-5 sm:p-6 rounded-xl bg-white border border-border shadow-sm space-y-4">
+      <div className="p-5 sm:p-6 rounded-xl bg-white border border-border shadow-xs space-y-4">
         <div className="flex items-center justify-between border-b border-muted pb-3">
           <div className="flex items-center space-x-2">
             <Layers className="w-4 h-4 text-blue-800" />

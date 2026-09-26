@@ -73,7 +73,7 @@ export default function SuperAdminAuditPage() {
           <select
             value={tableNameFilter}
             onChange={(e) => handleFilterChange(e.target.value)}
-            className="p-2 rounded-xl border border-border-strong bg-white font-semibold focus:outline-none focus:border-primary"
+            className="p-2 rounded-xl border border-border-strong bg-white font-semibold focus:outline-hidden focus:border-primary"
           >
             <option value="">All Entities</option>
             <option value="users">users</option>
@@ -94,7 +94,7 @@ export default function SuperAdminAuditPage() {
       )}
 
       {/* AUDIT LOG TABLE */}
-      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-border/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-subtle text-slate-600 border-b border-border">

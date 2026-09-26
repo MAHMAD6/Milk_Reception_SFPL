@@ -131,7 +131,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted data-[state=open]:text-foreground"
+        className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted data-[state=open]:text-foreground"
         aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
       >
         <Bell className="h-[18px] w-[18px]" />
@@ -186,8 +186,8 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
                       type="button"
                       onClick={() => handleItemClick(item)}
                       className={cn(
-                        'flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none',
-                        isUnread && 'bg-primary/[0.03]'
+                        'flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-hidden',
+                        isUnread && 'bg-primary/3'
                       )}
                     >
                       <span

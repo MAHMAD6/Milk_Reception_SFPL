@@ -423,7 +423,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                   fetchFirstWeightQueue(e.target.value);
                 }}
                 placeholder="Search vehicle or token..."
-                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
+                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring/30 focus:border-primary"
               />
             </div>
 
@@ -458,7 +458,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       }}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                           : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
@@ -497,7 +497,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                 Select a ready vehicle from the left queue to record first weight.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-5 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-5 text-foreground">
                 <div className="pb-3 border-b border-border-strong">
                   <h3 className="text-base font-semibold text-foreground">Record First Weight (Loaded Vehicle)</h3>
                   <p className="text-xs text-slate-700 font-semibold mt-0.5">
@@ -537,7 +537,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                         value={grossInputKg}
                         onChange={(e) => setGrossInputKg(e.target.value)}
                         placeholder="e.g. 32500"
-                        className="w-full min-h-[48px] px-4 py-3 text-lg tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground shadow-inner focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full min-h-[48px] px-4 py-3 text-lg tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground shadow-inner focus:outline-hidden focus:ring-2 focus:ring-primary"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 tabular-nums font-semibold text-slate-400 text-sm">
                         kg
@@ -556,7 +556,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       min={selectedFirstVisit.min_allowed_timestamp ? toLocalDatetimeInput(selectedFirstVisit.min_allowed_timestamp) : undefined}
                       max={toLocalDatetimeInput(new Date())}
                       onChange={(e) => setGrossDateTimeInput(e.target.value)}
-                      className="w-full min-h-[48px] px-3.5 py-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full min-h-[48px] px-3.5 py-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>
@@ -605,7 +605,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                   fetchSecondWeightQueue(e.target.value);
                 }}
                 placeholder="Search vehicle or token..."
-                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-primary"
+                className="w-full min-h-[44px] pl-9 pr-3 py-2 text-xs tabular-nums font-semibold rounded-xl border border-input bg-card text-foreground focus:outline-hidden focus:ring-2 focus:ring-ring/30 focus:border-primary"
               />
             </div>
 
@@ -636,7 +636,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       }}
                       className={`p-4 rounded-xl border transition cursor-pointer space-y-2 ${
                         isSelected
-                          ? 'bg-primary/[0.04] text-foreground border-primary ring-1 ring-primary shadow-sm'
+                          ? 'bg-primary/4 text-foreground border-primary ring-1 ring-primary shadow-xs'
                           : 'bg-card text-foreground border-border hover:border-border-strong hover:bg-subtle'
                       }`}
                     >
@@ -674,7 +674,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                 Select a vehicle from the left queue to record second weight.
               </div>
             ) : (
-              <div className="p-6 rounded-xl bg-card border border-border shadow-sm space-y-5 text-foreground">
+              <div className="p-6 rounded-xl bg-card border border-border shadow-xs space-y-5 text-foreground">
                 <div className="pb-3 border-b border-border-strong">
                   <h3 className="text-base font-semibold text-foreground">Record Second Weight (After Unloading)</h3>
                   <p className="text-xs text-slate-700 font-semibold mt-0.5">
@@ -714,7 +714,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                         value={tareInputKg}
                         onChange={(e) => setTareInputKg(e.target.value)}
                         placeholder="e.g. 12200"
-                        className="w-full min-h-[48px] px-4 py-3 text-lg tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground shadow-inner focus:outline-none focus:ring-2 focus:ring-primary"
+                        className="w-full min-h-[48px] px-4 py-3 text-lg tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground shadow-inner focus:outline-hidden focus:ring-2 focus:ring-primary"
                       />
                       <span className="absolute right-4 top-1/2 -translate-y-1/2 tabular-nums font-semibold text-slate-400 text-sm">
                         kg
@@ -733,7 +733,7 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
                       min={selectedSecondVisit.min_allowed_timestamp ? toLocalDatetimeInput(selectedSecondVisit.min_allowed_timestamp) : undefined}
                       max={toLocalDatetimeInput(new Date())}
                       onChange={(e) => setTareDateTimeInput(e.target.value)}
-                      className="w-full min-h-[48px] px-3.5 py-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full min-h-[48px] px-3.5 py-3 text-xs tabular-nums font-semibold rounded-xl border border-border-strong bg-white text-foreground focus:outline-hidden focus:ring-2 focus:ring-primary"
                     />
                   </div>
                 </div>

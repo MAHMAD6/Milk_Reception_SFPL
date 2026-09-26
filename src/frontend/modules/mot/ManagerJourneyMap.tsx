@@ -332,7 +332,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
       </div>
 
       {/* Journey Header & Summary Metric Cards */}
-      <div className="p-5 bg-white rounded-xl border border-border shadow-xs space-y-4">
+      <div className="p-5 bg-white rounded-xl border border-border shadow-2xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-border pb-3">
           <div>
             <span className="text-[10px] font-semibold uppercase text-slate-500 tracking-wider">
@@ -579,7 +579,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
       </div>
 
       {/* Stops List */}
-      <div className="p-4 bg-white rounded-xl border border-border shadow-xs space-y-3">
+      <div className="p-4 bg-white rounded-xl border border-border shadow-2xs space-y-3">
         <h3 className="text-xs font-semibold text-slate-500">
           Journey Stops & Collections ({stops.length})
         </h3>

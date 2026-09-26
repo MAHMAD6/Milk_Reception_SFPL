@@ -32,7 +32,7 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
             placeholder="Search ZMCC chilling center or Plant contractor..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border focus:outline-none focus:border-primary bg-subtle"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border focus:outline-hidden focus:border-primary bg-subtle"
           />
         </div>
         <div className="flex items-center gap-1.5">
@@ -82,7 +82,7 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
             {filteredZmccs.map((z) => (
               <div
                 key={z.id}
-                className="bg-white border border-border rounded-xl p-4 shadow-sm hover:border-primary/50 transition-all flex flex-col justify-between"
+                className="bg-white border border-border rounded-xl p-4 shadow-xs hover:border-primary/50 transition-all flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
@@ -147,7 +147,7 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
 
       {/* 2. Direct Plant Contractors Table */}
       {(sourceFilter === 'ALL' || sourceFilter === 'CONTRACTORS') && (
-        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Building className="w-4 h-4 text-primary" />

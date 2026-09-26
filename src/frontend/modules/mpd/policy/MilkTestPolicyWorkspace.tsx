@@ -436,7 +436,7 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
   return (
     <div className="space-y-6">
       {/* HEADER BANNER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-border shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-border shadow-2xs">
         <div className="flex items-center gap-2.5">
           <div className="p-2 bg-primary text-white rounded-xl">
             <FlaskConical className="w-5 h-5" />
@@ -466,7 +466,7 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
               setModalAcceptableOption('');
               setIsAddModalOpen(true);
             }}
-            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-primary text-white hover:bg-primary-hover transition shadow-xs"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-xl bg-primary text-white hover:bg-primary-hover transition shadow-2xs"
           >
             <Plus className="w-4 h-4" />
             <span>Assign Test</span>
@@ -486,7 +486,7 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
               onClick={() => setActiveStation(station)}
               className={`flex flex-col p-3.5 rounded-xl border text-left transition ${
                 isSelected
-                  ? 'bg-primary text-white border-primary shadow-sm'
+                  ? 'bg-primary text-white border-primary shadow-xs'
                   : 'bg-white text-slate-800 border-border hover:bg-subtle'
               }`}
             >
@@ -522,7 +522,7 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
             placeholder="Search assigned tests..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-border bg-white focus:outline-hidden focus:ring-2 focus:ring-primary"
           />
         </div>
         <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
@@ -539,7 +539,7 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
       </div>
 
       {/* POLICY ASSIGNMENT & CRITERIA TABLE */}
-      <div className="bg-white rounded-xl border border-border overflow-hidden shadow-xs">
+      <div className="bg-white rounded-xl border border-border overflow-hidden shadow-2xs">
         {loading ? (
           <div className="p-12 text-center text-xs font-semibold text-slate-600">
             <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-primary" />

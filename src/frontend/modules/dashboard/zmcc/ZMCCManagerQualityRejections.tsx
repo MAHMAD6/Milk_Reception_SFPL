@@ -285,7 +285,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
   return (
     <div className="space-y-6">
       {/* 1. Header & Mode Switch */}
-      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-border/80">
           <div className="flex items-center space-x-2.5">
             <div className="p-2 rounded-lg bg-purple-800/10 text-purple-800">
@@ -309,7 +309,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
                 onClick={() => setViewMode('ZMCC_LAB')}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
                   viewMode === 'ZMCC_LAB'
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -320,7 +320,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
                 onClick={() => setViewMode('PLANT_QA')}
                 className={`px-3 py-1 text-xs font-semibold rounded-md transition-all ${
                   viewMode === 'PLANT_QA'
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -424,7 +424,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
       </div>
 
       {/* 2. Filters & Controls */}
-      <div className="p-4 rounded-xl bg-card border border-border/80 shadow-sm space-y-3">
+      <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -433,7 +433,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search vehicle #, token #, supplier..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-none"
+              className="w-full pl-9 pr-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-hidden"
             />
           </div>
 
@@ -474,7 +474,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
                 onClick={() => setLabFilter(opt.id as any)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   labFilter === opt.id
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-200/70 border border-slate-200'
                 }`}
               >
@@ -491,7 +491,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
                 onClick={() => setPlantFilterState(opt.id)}
                 className={`px-3 py-1 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                   plantFilterState === opt.id
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'bg-slate-50 text-slate-600 hover:bg-slate-200/70 border border-slate-200'
                 }`}
               >
@@ -566,7 +566,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
             return (
               <div
                 key={session.id}
-                className={`p-4 rounded-xl bg-card border shadow-xs space-y-3 transition-all ${
+                className={`p-4 rounded-xl bg-card border shadow-2xs space-y-3 transition-all ${
                   isRejected
                     ? 'border-red-300 bg-red-50/20'
                     : session.manager_review_status === 'APPROVED'
@@ -601,7 +601,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
                       <button
                         type="button"
                         onClick={() => openReviewModal(session)}
-                        className="flex items-center space-x-1 px-3 py-1 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 shadow-xs transition-all"
+                        className="flex items-center space-x-1 px-3 py-1 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary/90 shadow-2xs transition-all"
                       >
                         <ShieldCheck className="w-3.5 h-3.5" />
                         <span>
@@ -778,7 +778,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
             return (
               <div
                 key={`${item.visitId}-${item.portionNumber}`}
-                className={`p-4 rounded-xl bg-card border shadow-xs space-y-3 transition-all ${
+                className={`p-4 rounded-xl bg-card border shadow-2xs space-y-3 transition-all ${
                   isRejected
                     ? 'border-red-300 bg-red-50/20'
                     : isHold
@@ -1045,7 +1045,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
                   placeholder="Enter substantive managerial justification for this decision (minimum 3 characters)..."
                   rows={3}
                   required
-                  className="w-full p-2.5 text-xs font-medium rounded-xl bg-subtle border border-border text-foreground focus:ring-2 focus:ring-primary outline-none"
+                  className="w-full p-2.5 text-xs font-medium rounded-xl bg-subtle border border-border text-foreground focus:ring-2 focus:ring-primary outline-hidden"
                 />
                 <span className="text-xs text-slate-400 font-sans block">
                   Mandatory audit justification recorded in the official governance log.
@@ -1064,7 +1064,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
                 <button
                   type="submit"
                   disabled={reviewSubmitting || reviewReason.trim().length < 3}
-                  className="px-4 py-2 text-xs font-semibold bg-primary text-white rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 shadow-xs flex items-center gap-1.5"
+                  className="px-4 py-2 text-xs font-semibold bg-primary text-white rounded-xl hover:bg-primary/90 transition-all disabled:opacity-50 shadow-2xs flex items-center gap-1.5"
                 >
                   {reviewSubmitting && <RefreshCw className="w-3.5 h-3.5 animate-spin" />}
                   <span>{reviewSubmitting ? 'Recording...' : 'Submit Decision'}</span>

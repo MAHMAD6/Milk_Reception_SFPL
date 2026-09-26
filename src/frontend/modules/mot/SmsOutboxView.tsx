@@ -60,7 +60,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
   return (
     <div className="space-y-4">
       {/* Header & Controls */}
-      <div className="p-4 bg-white rounded-xl border border-border shadow-xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+      <div className="p-4 bg-white rounded-xl border border-border shadow-2xs flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div className="flex items-center space-x-3">
           <div className="p-2.5 bg-blue-50 text-primary rounded-xl">
             <Phone className="w-5 h-5" />
@@ -103,7 +103,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
       )}
 
       {/* Outbox Table */}
-      <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
@@ -138,7 +138,7 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = ({ currentUser }) => 
                       </div>
                     </td>
                     <td className="p-3 max-w-xs">
-                      <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-[11px] tabular-nums text-slate-700 whitespace-pre-line break-words">
+                      <div className="p-2 rounded-lg bg-slate-50 border border-slate-200 text-[11px] tabular-nums text-slate-700 whitespace-pre-line wrap-break-word">
                         {item.message_body}
                       </div>
                     </td>

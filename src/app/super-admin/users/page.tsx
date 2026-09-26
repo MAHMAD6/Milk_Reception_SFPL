@@ -438,7 +438,7 @@ export default function SuperAdminUsersPage() {
       )}
 
       {/* USERS TABLE */}
-      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden w-full max-w-full">
+      <div className="bg-white rounded-xl border border-border/80 shadow-xs overflow-hidden w-full max-w-full">
         <div className="p-3 sm:px-4 sm:py-3 border-b border-border flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <h2 className="text-sm font-semibold text-foreground">Users</h2>
@@ -621,7 +621,7 @@ export default function SuperAdminUsersPage() {
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="e.g. john.doe"
                   disabled={isSubmittingCreate}
                 />
@@ -638,7 +638,7 @@ export default function SuperAdminUsersPage() {
                   maxLength={254}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="e.g. john.doe@example.com"
                   disabled={isSubmittingCreate}
                 />
@@ -653,7 +653,7 @@ export default function SuperAdminUsersPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="e.g. John Doe"
                   disabled={isSubmittingCreate}
                 />
@@ -669,7 +669,7 @@ export default function SuperAdminUsersPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="At least 8 characters"
                   disabled={isSubmittingCreate}
                 />
@@ -683,7 +683,7 @@ export default function SuperAdminUsersPage() {
                   id="create-role"
                   value={role}
                   onChange={(e) => handleCreateRoleChange(e.target.value as CreatableRole)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   disabled={isSubmittingCreate}
                 >
                   {CREATABLE_ROLES.map((r) => (
@@ -704,7 +704,7 @@ export default function SuperAdminUsersPage() {
                     required
                     value={procurementSourceId}
                     onChange={(e) => setProcurementSourceId(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                     disabled={isSubmittingCreate}
                   >
                     <option value="">Select Assigned Source...</option>
@@ -818,7 +818,7 @@ export default function SuperAdminUsersPage() {
                   maxLength={254}
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder={showEditModal.email || 'e.g. user@example.com'}
                   disabled={isSubmittingEdit}
                 />
@@ -833,7 +833,7 @@ export default function SuperAdminUsersPage() {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="e.g. John Doe"
                   disabled={isSubmittingEdit}
                 />
@@ -847,7 +847,7 @@ export default function SuperAdminUsersPage() {
                   id="edit-role"
                   value={editRole}
                   onChange={(e) => handleEditRoleChange(e.target.value as CreatableRole)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   disabled={isSubmittingEdit}
                 >
                   {CREATABLE_ROLES.map((r) => (
@@ -868,7 +868,7 @@ export default function SuperAdminUsersPage() {
                     required
                     value={editProcurementSourceId}
                     onChange={(e) => setEditProcurementSourceId(e.target.value)}
-                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                    className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                     disabled={isSubmittingEdit}
                   >
                     <option value="">Select Assigned Source...</option>
@@ -1075,7 +1075,7 @@ export default function SuperAdminUsersPage() {
                   required
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="At least 8 characters"
                   disabled={isSubmittingReset}
                 />
@@ -1091,7 +1091,7 @@ export default function SuperAdminUsersPage() {
                   required
                   value={confirmNewPassword}
                   onChange={(e) => setConfirmNewPassword(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-none focus:border-primary"
+                  className="w-full p-2.5 rounded-lg border border-border-strong focus:outline-hidden focus:border-primary"
                   placeholder="Retype new password"
                   disabled={isSubmittingReset}
                 />

@@ -17,7 +17,7 @@ export default function SuperAdminMasterDataPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Link
           href="/super-admin/procurement-sources"
-          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-sm"
+          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-xs"
         >
           <div className="p-2.5 bg-blue-50 text-primary w-fit rounded-lg group-hover:bg-primary group-hover:text-white transition">
             <Truck className="w-5 h-5" />
@@ -28,7 +28,7 @@ export default function SuperAdminMasterDataPage() {
 
         <Link
           href="/super-admin/silos"
-          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-sm"
+          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-xs"
         >
           <div className="p-2.5 bg-blue-50 text-primary w-fit rounded-lg group-hover:bg-primary group-hover:text-white transition">
             <Database className="w-5 h-5" />
@@ -39,7 +39,7 @@ export default function SuperAdminMasterDataPage() {
 
         <Link
           href="/super-admin/lab-tests"
-          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-sm"
+          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-xs"
         >
           <div className="p-2.5 bg-blue-50 text-primary w-fit rounded-lg group-hover:bg-primary group-hover:text-white transition">
             <FlaskConical className="w-5 h-5" />
@@ -50,7 +50,7 @@ export default function SuperAdminMasterDataPage() {
 
         <Link
           href="/super-admin/zmcc-master-data"
-          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-sm"
+          className="p-5 bg-white rounded-xl border border-border hover:border-primary transition space-y-2 group shadow-xs"
         >
           <div className="p-2.5 bg-blue-50 text-primary w-fit rounded-lg group-hover:bg-primary group-hover:text-white transition">
             <Store className="w-5 h-5" />

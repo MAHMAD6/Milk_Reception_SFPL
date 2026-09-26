@@ -85,7 +85,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
   return (
     <div className="space-y-6">
       {/* 1. Filter & Search Controls */}
-      <div className="p-5 rounded-xl bg-white border border-border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-5 rounded-xl bg-white border border-border shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Search */}
         <div className="relative w-full md:w-80">
           <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -94,7 +94,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search vehicle, token, reception..."
-            className="w-full pl-9 pr-4 py-2.5 min-h-[44px] text-xs tabular-nums font-semibold bg-slate-50 border border-border-strong rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-900"
+            className="w-full pl-9 pr-4 py-2.5 min-h-[44px] text-xs tabular-nums font-semibold bg-slate-50 border border-border-strong rounded-xl focus:outline-hidden focus:ring-2 focus:ring-blue-900"
           />
         </div>
 
@@ -110,7 +110,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
             onClick={() => setStageFilter('ALL_ACTIVE')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               stageFilter === 'ALL_ACTIVE'
-                ? 'bg-blue-900 text-white shadow-sm'
+                ? 'bg-blue-900 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -122,7 +122,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
             onClick={() => setStageFilter('GATE')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               stageFilter === 'GATE'
-                ? 'bg-blue-900 text-white shadow-sm'
+                ? 'bg-blue-900 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -134,7 +134,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
             onClick={() => setStageFilter('QA')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               stageFilter === 'QA'
-                ? 'bg-blue-900 text-white shadow-sm'
+                ? 'bg-blue-900 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -146,7 +146,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
             onClick={() => setStageFilter('SCALE')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               stageFilter === 'SCALE'
-                ? 'bg-blue-900 text-white shadow-sm'
+                ? 'bg-blue-900 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -158,7 +158,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
             onClick={() => setStageFilter('UNLOADING')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               stageFilter === 'UNLOADING'
-                ? 'bg-blue-900 text-white shadow-sm'
+                ? 'bg-blue-900 text-white shadow-xs'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
             }`}
           >
@@ -170,7 +170,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
             onClick={() => setStageFilter('RECEIPT_PENDING')}
             className={`px-3 py-1.5 min-h-[38px] rounded-lg text-xs font-semibold whitespace-nowrap transition shrink-0 ${
               stageFilter === 'RECEIPT_PENDING'
-                ? 'bg-purple-900 text-white shadow-sm'
+                ? 'bg-purple-900 text-white shadow-xs'
                 : 'bg-purple-50 text-purple-800 hover:bg-purple-100 border border-purple-200'
             }`}
           >
@@ -182,11 +182,11 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
       {/* 2. Active Tanker Cards List */}
       <div className="space-y-4">
         {isLoading ? (
-          <div className="py-16 text-center text-xs font-semibold text-slate-500 bg-white rounded-xl border border-border shadow-sm">
+          <div className="py-16 text-center text-xs font-semibold text-slate-500 bg-white rounded-xl border border-border shadow-xs">
             Loading active pipeline visits...
           </div>
         ) : filteredVisits.length === 0 ? (
-          <div className="py-16 px-4 rounded-xl bg-white border border-dashed border-slate-200 text-center space-y-2 shadow-sm">
+          <div className="py-16 px-4 rounded-xl bg-white border border-dashed border-slate-200 text-center space-y-2 shadow-xs">
             <Truck className="w-10 h-10 text-slate-300 mx-auto" />
             <h4 className="text-sm font-semibold text-slate-700">No Active Tankers in Pipeline</h4>
             <p className="text-xs text-slate-500 max-w-sm mx-auto">
@@ -197,7 +197,7 @@ export const ContractorLivePipeline: React.FC<ContractorLivePipelineProps> = ({
           filteredVisits.map((v) => (
             <div
               key={v.visitId}
-              className="p-5 sm:p-6 rounded-xl bg-white border border-border shadow-sm space-y-4 hover:border-blue-300 transition"
+              className="p-5 sm:p-6 rounded-xl bg-white border border-border shadow-xs space-y-4 hover:border-blue-300 transition"
             >
               {/* Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">

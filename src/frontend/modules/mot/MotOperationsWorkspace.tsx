@@ -635,9 +635,9 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
   return (
     <div className="space-y-5">
       {/* Header & ZMCC Selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white rounded-xl border border-border shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-white rounded-xl border border-border shadow-2xs">
         <div className="flex items-center space-x-3">
-          <div className="p-2.5 bg-primary text-white rounded-xl shadow-xs">
+          <div className="p-2.5 bg-primary text-white rounded-xl shadow-2xs">
             <Truck className="w-5 h-5" />
           </div>
           <div>
@@ -659,7 +659,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               id="zmcc-select"
               value={selectedZmccId}
               onChange={(e) => setSelectedZmccId(e.target.value)}
-              className="text-xs font-semibold border border-border rounded-xl px-3 py-2 bg-subtle text-foreground focus:ring-2 focus:ring-primary focus:outline-none"
+              className="text-xs font-semibold border border-border rounded-xl px-3 py-2 bg-subtle text-foreground focus:ring-2 focus:ring-primary focus:outline-hidden"
             >
               {sources.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -722,7 +722,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
       {activeTab === 'DISPATCH' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Dispatch Form */}
-          <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-border shadow-xs space-y-4">
+          <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-border shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
                 <h2 className="text-sm font-semibold text-foreground">Physical Assign & Departure</h2>
@@ -865,7 +865,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
           </div>
 
           {/* Quick Rules & Architecture info panel */}
-          <div className="bg-white p-5 rounded-xl border border-border shadow-xs space-y-3 h-fit">
+          <div className="bg-white p-5 rounded-xl border border-border shadow-2xs space-y-3 h-fit">
             <h3 className="text-xs font-semibold text-foreground">
               Operational Rules
             </h3>
@@ -901,7 +901,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 2: ACTIVE JOURNEYS */}
       {activeTab === 'ACTIVE_JOURNEYS' && (
-        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Active Collection Journeys</h2>
@@ -1004,7 +1004,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 3: JOURNEY HISTORY */}
       {activeTab === 'JOURNEY_HISTORY' && (
-        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden space-y-3">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3">
           <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Journey Historical Ledger</h2>
@@ -1159,7 +1159,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 4: MOT PROFILES (SUPER ADMIN & ZMCC MANAGER ONLY) */}
       {activeTab === 'PROFILES' && !isPheOperator && (
-        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden space-y-3">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3">
           <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-foreground">MOT Drivers & Profiles</h2>
@@ -1258,7 +1258,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 5: MOT VEHICLES (SUPER ADMIN & ZMCC MANAGER ONLY) */}
       {activeTab === 'VEHICLES' && !isPheOperator && (
-        <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden space-y-3">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3">
           <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-foreground">MOT Vehicles Fleet</h2>

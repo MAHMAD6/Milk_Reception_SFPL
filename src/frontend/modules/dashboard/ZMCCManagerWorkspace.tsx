@@ -363,7 +363,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
     const startItem = (reportingPage - 1) * 20 + 1;
     const endItem = Math.min(reportingPage * 20, reportingTotalRecords);
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-border rounded-xl text-xs shadow-xs mt-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 bg-white border border-border rounded-xl text-xs shadow-2xs mt-4">
         <div className="text-slate-600 font-medium">
           Showing visits <span className="font-semibold text-slate-900">{startItem}</span> to{' '}
           <span className="font-semibold text-slate-900">{endItem}</span> of{' '}
@@ -502,13 +502,13 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
         {activeTab === 'HISTORY' && (
           <div id="tabpanel-HISTORY" role="tabpanel" aria-labelledby="tab-HISTORY" className="space-y-6">
             {/* Secondary Sub-Navigation for History View */}
-            <div className="flex items-center gap-2 p-1.5 bg-card border border-border rounded-xl shadow-xs w-fit">
+            <div className="flex items-center gap-2 p-1.5 bg-card border border-border rounded-xl shadow-2xs w-fit">
               <button
                 type="button"
                 onClick={() => setHistoryView('PLANT_HISTORY')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'PLANT_HISTORY'
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'text-slate-700 hover:bg-muted'
                 }`}
               >
@@ -519,7 +519,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
                 onClick={() => setHistoryView('QUALITY_REJECTIONS')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'QUALITY_REJECTIONS'
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'text-slate-700 hover:bg-muted'
                 }`}
               >
@@ -530,7 +530,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
                 onClick={() => setHistoryView('ARRIVAL_CORRECTIONS')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'ARRIVAL_CORRECTIONS'
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'text-slate-700 hover:bg-muted'
                 }`}
               >
@@ -541,7 +541,7 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
                 onClick={() => setHistoryView('LAB_CORRECTIONS')}
                 className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   historyView === 'LAB_CORRECTIONS'
-                    ? 'bg-primary text-white shadow-xs'
+                    ? 'bg-primary text-white shadow-2xs'
                     : 'text-slate-700 hover:bg-muted'
                 }`}
               >

@@ -37,7 +37,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
   return (
     <div className="space-y-6">
       {/* Governance Banner */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm">
+      <div className="bg-white border border-border rounded-xl p-4 shadow-xs">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-700 shrink-0">
             <ShieldAlert className="w-4 h-4" />
@@ -62,7 +62,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
             placeholder="Search vehicle, source, manager, or parameter..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border focus:outline-none focus:border-primary bg-subtle"
+            className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border focus:outline-hidden focus:border-primary bg-subtle"
           />
         </div>
         <div className="flex items-center gap-1.5">
@@ -94,7 +94,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
       </div>
 
       {/* Overrides Table */}
-      <div className="bg-white border border-border rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white border border-border rounded-xl overflow-hidden shadow-xs">
         <div className="p-4 border-b border-border flex items-center justify-between">
           <div className="flex items-center gap-2">
             <UserCheck className="w-4 h-4 text-primary" />

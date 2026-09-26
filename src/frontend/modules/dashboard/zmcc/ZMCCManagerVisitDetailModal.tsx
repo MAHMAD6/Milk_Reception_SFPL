@@ -79,7 +79,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 text-xs">
           {/* 1. Dispatch Details */}
-          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
+          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-2xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <FileText className="w-4 h-4 text-primary" />
               <h3 className="text-xs font-semibold text-foreground">
@@ -158,7 +158,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
           </div>
 
           {/* 2. Weight & Quantity */}
-          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
+          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-2xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <Scale className="w-4 h-4 text-primary" />
               <h3 className="text-xs font-semibold text-foreground">
@@ -240,7 +240,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
           </div>
 
           {/* 3. Portion Quality Results */}
-          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
+          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-2xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <FlaskConical className="w-4 h-4 text-primary" />
               <h3 className="text-xs font-semibold text-foreground">
@@ -420,7 +420,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
           </div>
 
           {/* 4. Receipt Details */}
-          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-xs">
+          <div className="p-5 rounded-xl bg-card border border-border space-y-4 shadow-2xs">
             <div className="flex items-center space-x-2 border-b border-border/60 pb-2">
               <Receipt className="w-4 h-4 text-primary" />
               <h3 className="text-xs font-semibold text-foreground">
@@ -500,7 +500,7 @@ export const ZMCCManagerVisitDetailModal: React.FC<ZMCCManagerVisitDetailModalPr
 
           <button
             onClick={onClose}
-            className="min-h-[44px] min-w-[80px] px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-xs flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary"
+            className="min-h-[44px] min-w-[80px] px-4 py-2 rounded-xl bg-primary text-white text-xs font-semibold hover:bg-primary/90 transition-all shadow-2xs flex items-center justify-center focus:outline-hidden focus:ring-2 focus:ring-primary"
           >
             Close
           </button>

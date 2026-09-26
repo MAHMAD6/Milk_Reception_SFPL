@@ -60,7 +60,7 @@ export default function SuperAdminSopRulesPage() {
       )}
 
       {/* SOP RULES TABLE */}
-      <div className="bg-white rounded-xl border border-border/80 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-border/80 shadow-xs overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-subtle text-slate-600 border-b border-border">

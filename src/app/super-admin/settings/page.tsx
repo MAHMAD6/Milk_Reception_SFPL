@@ -14,7 +14,7 @@ export default function SuperAdminSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="bg-white p-5 rounded-xl border border-border shadow-sm space-y-3">
+        <div className="bg-white p-5 rounded-xl border border-border shadow-xs space-y-3">
           <h2 className="text-sm font-semibold text-foreground flex items-center space-x-2">
             <Server className="w-4 h-4 text-primary" />
             <span>Database Connection & Security</span>
@@ -27,7 +27,7 @@ export default function SuperAdminSettingsPage() {
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-xl border border-border shadow-sm space-y-3">
+        <div className="bg-white p-5 rounded-xl border border-border shadow-xs space-y-3">
           <h2 className="text-sm font-semibold text-foreground flex items-center space-x-2">
             <ShieldCheck className="w-4 h-4 text-primary" />
             <span>Administrative Safeguards</span>

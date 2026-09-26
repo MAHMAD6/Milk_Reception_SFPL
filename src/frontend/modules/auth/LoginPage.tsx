@@ -179,7 +179,7 @@ export const LoginPage: React.FC = () => {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-            className="mx-auto w-full max-w-[400px] rounded-xl border bg-card p-6 shadow-sm sm:p-8"
+            className="mx-auto w-full max-w-[400px] rounded-xl border bg-card p-6 shadow-xs sm:p-8"
             aria-labelledby="sign-in-heading"
           >
             <div className="space-y-1.5">
@@ -244,7 +244,7 @@ export const LoginPage: React.FC = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
                     aria-pressed={showPassword}
-                    className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -285,7 +285,7 @@ export const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="scrollbar-thin max-h-[560px] space-y-5 overflow-y-auto rounded-xl border bg-card p-3 shadow-xs">
+            <div className="scrollbar-thin max-h-[560px] space-y-5 overflow-y-auto rounded-xl border bg-card p-3 shadow-2xs">
               {devGroups.map((group) => (
                 <div key={group.group}>
                   <p className="px-2 pb-1.5 pt-1 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -303,8 +303,8 @@ export const LoginPage: React.FC = () => {
                             disabled={isSubmitting}
                             aria-label={`Sign in as ${item.label}`}
                             className={cn(
-                              'group flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait',
-                              active ? 'border-primary/30 bg-primary/[0.05]' : 'border-transparent hover:bg-muted'
+                              'group flex w-full items-center gap-3 rounded-lg border px-3 py-2 text-left transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-wait',
+                              active ? 'border-primary/30 bg-primary/5' : 'border-transparent hover:bg-muted'
                             )}
                           >
                             <span className="min-w-0 flex-1">

@@ -108,7 +108,7 @@ export default function SuperAdminOperationsPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search Vehicle / Visit #..."
-              className="pl-9 pr-3 py-1.5 rounded-xl border border-border-strong text-xs bg-white focus:outline-none focus:border-primary w-64"
+              className="pl-9 pr-3 py-1.5 rounded-xl border border-border-strong text-xs bg-white focus:outline-hidden focus:border-primary w-64"
             />
           </div>
           <button
@@ -139,7 +139,7 @@ export default function SuperAdminOperationsPage() {
           </div>
         ) : (
           visits.map((v) => (
-            <div key={v.id} className="bg-white rounded-xl border border-border/80 p-5 space-y-4 shadow-sm">
+            <div key={v.id} className="bg-white rounded-xl border border-border/80 p-5 space-y-4 shadow-xs">
               <div className="flex items-center justify-between border-b border-border/60 pb-3">
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-blue-50 text-primary rounded-lg">

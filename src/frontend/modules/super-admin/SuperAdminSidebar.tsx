@@ -94,7 +94,7 @@ export const SuperAdminSidebar: React.FC<SuperAdminSidebarProps> = ({
       {persistent ? (
         <aside
           data-app-sidebar
-          className="fixed inset-y-0 left-0 z-sidebar hidden w-[var(--sidebar-width)] border-r bg-card lg:block"
+          className="fixed inset-y-0 left-0 z-sidebar hidden w-(--sidebar-width) border-r bg-card lg:block"
         >
           <NavPanel sections={SECTIONS} isActive={isActive} caption={caption} />
         </aside>

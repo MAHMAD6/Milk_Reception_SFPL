@@ -988,7 +988,7 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
   return (
     <form onSubmit={handleSubmitDispatch} className="space-y-6">
       {/* Top Header Card with Operating Source & Draft Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs">
         <div className="flex items-center space-x-3">
           <div className="p-2.5 rounded-xl bg-primary-hover text-white">
             <span className="font-semibold text-sm tabular-nums">MPD</span>
@@ -1120,7 +1120,7 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
           </div>
 
           {/* Final Dispatch Summary & Submission Footer */}
-          <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-3.5">
+          <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-3.5">
             <div className="flex items-center justify-between text-xs font-semibold text-foreground">
               <span>
                 Portions: <span className="tabular-nums text-primary-hover">{portions.length}</span> ({savedCount} Saved)

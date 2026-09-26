@@ -659,7 +659,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 value={queueSearch}
                 onChange={(e) => setQueueSearch(e.target.value)}
                 placeholder="Search token, vehicle, supplier..."
-                className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
             <button
@@ -687,7 +687,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
               {filteredQueue.map((item) => (
                 <div
                   key={`${item.queue_type}-${item.arrival_id}`}
-                  className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between hover:border-primary transition-colors"
+                  className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col justify-between hover:border-primary transition-colors"
                 >
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
@@ -764,7 +764,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                       <button
                         onClick={() => handleStartOrResume(item)}
                         disabled={loadingSession}
-                        className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-xl hover:bg-primary-hover transition-colors shadow-sm"
+                        className="flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-xs font-semibold rounded-xl hover:bg-primary-hover transition-colors shadow-xs"
                       >
                         {item.lab_session_status === 'IN_PROGRESS' ? 'Resume Testing' : 'Start Testing'}
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -784,7 +784,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
       {activeTab === 'TESTING' && canTest && activeSession && (
         <div className="space-y-6">
           {/* Active Session Card */}
-          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+          <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-4">
               <div>
                 <div className="flex items-center gap-2">
@@ -841,7 +841,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                           value={draftQuantityValue}
                           onChange={(e) => setDraftQuantityValue(e.target.value)}
                           placeholder="e.g. 5000"
-                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs tabular-nums focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full px-3 py-1.5 border border-slate-300 rounded-lg text-xs tabular-nums focus:outline-hidden focus:ring-1 focus:ring-primary"
                         />
                       </div>
                       <div className="w-28">
@@ -851,7 +851,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                         <select
                           value={draftQuantityUnit}
                           onChange={(e) => setDraftQuantityUnit(e.target.value as 'KG' | 'LITER')}
-                          className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-primary"
+                          className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs font-semibold focus:outline-hidden focus:ring-1 focus:ring-primary"
                         >
                           <option value="KG">KG</option>
                           <option value="LITER">Liters</option>
@@ -1021,7 +1021,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                                   queueLiveEvaluation(next);
                                 }}
                                 placeholder="Enter value"
-                                className="w-32 px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs tabular-nums focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-32 px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs tabular-nums focus:outline-hidden focus:ring-1 focus:ring-primary"
                               />
                             ) : options && options.length > 0 ? (
                               <select
@@ -1034,7 +1034,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                                   setDraftValues(next);
                                   queueLiveEvaluation(next);
                                 }}
-                                className="w-36 px-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-36 px-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
                               >
                                 <option value="">-- Select --</option>
                                 {options.map((opt: any) => (
@@ -1056,7 +1056,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                                   queueLiveEvaluation(next);
                                 }}
                                 placeholder="Result text"
-                                className="w-36 px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-36 px-2.5 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
                               />
                             )}
                           </td>
@@ -1096,7 +1096,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 onChange={(e) => setDraftRemarks(e.target.value)}
                 rows={2}
                 placeholder="Any observations, organoleptic notes, or smell/taste checks..."
-                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -1116,7 +1116,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 <button
                   type="button"
                   onClick={() => openCompleteModal('REJECTED')}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 bg-rose-600 text-white text-xs font-semibold rounded-xl hover:bg-rose-700 transition-colors shadow-sm"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 bg-rose-600 text-white text-xs font-semibold rounded-xl hover:bg-rose-700 transition-colors shadow-xs"
                 >
                   <XCircle className="w-4 h-4" />
                   Reject Milk
@@ -1124,7 +1124,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 <button
                   type="button"
                   onClick={() => openCompleteModal('ACCEPTED')}
-                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-sm"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-5 py-2.5 bg-emerald-600 text-white text-xs font-semibold rounded-xl hover:bg-emerald-700 transition-colors shadow-xs"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   Accept Milk
@@ -1148,7 +1148,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                   value={historySearch}
                   onChange={(e) => { setHistorySearch(e.target.value); setHistoryPage(1); }}
                   placeholder="Search token, vehicle..."
-                  className="pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="pl-9 pr-4 py-2 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
                 />
               </div>
 
@@ -1156,13 +1156,13 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 type="date"
                 value={historyDate}
                 onChange={(e) => { setHistoryDate(e.target.value); setHistoryPage(1); }}
-                className="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                className="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
               />
 
               <select
                 value={historyDecision}
                 onChange={(e) => { setHistoryDecision(e.target.value); setHistoryPage(1); }}
-                className="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                className="px-3 py-2 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
               >
                 <option value="ALL">All Decisions</option>
                 <option value="ACCEPTED">Accepted</option>
@@ -1191,7 +1191,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
             </div>
           ) : (
             <>
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
@@ -1291,7 +1291,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                               <button
                                 type="button"
                                 onClick={() => openHistoricalReceiveModal(item)}
-                                className="px-2 py-0.5 text-xs font-semibold text-white bg-primary rounded hover:bg-primary-hover shadow-sm"
+                                className="px-2 py-0.5 text-xs font-semibold text-white bg-primary rounded hover:bg-primary-hover shadow-xs"
                               >
                                 Receive
                               </button>
@@ -1440,12 +1440,12 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                   </div>
                 ) : tanks.length === 0 ? (
                   <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                     <span>No active ZMCC tank configured. Please contact administrator before accepting milk.</span>
                   </div>
                 ) : tanks.length > 1 ? (
                   <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center gap-2">
-                    <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                    <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                     <span>Configuration error: Multiple active tanks found. Only one active tank is permitted per ZMCC.</span>
                   </div>
                 ) : (
@@ -1468,7 +1468,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 value={rejectionReason}
                 onChange={(e) => setRejectionReason(e.target.value)}
                 placeholder="Explain an exception to the system result, or add an optional rejection note..."
-                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -1481,7 +1481,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 value={completionRemarks}
                 onChange={(e) => setCompletionRemarks(e.target.value)}
                 placeholder="Optional final remarks..."
-                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -1559,7 +1559,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 value={correctionReason}
                 onChange={(e) => setCorrectionReason(e.target.value)}
                 placeholder="Reason for changing lab results or decision..."
-                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+                className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-2 focus:ring-primary"
               />
             </div>
 
@@ -1572,7 +1572,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 <select
                   value={correctionDecision}
                   onChange={(e) => setCorrectionDecision(e.target.value as any)}
-                  className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
                 >
                   <option value="ACCEPTED">ACCEPTED</option>
                   <option value="REJECTED">REJECTED</option>
@@ -1590,7 +1590,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                     value={correctionRejectionReason}
                     onChange={(e) => setCorrectionRejectionReason(e.target.value)}
                     placeholder="Reason for rejection..."
-                    className="w-full p-2.5 border border-rose-300 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    className="w-full p-2.5 border border-rose-300 rounded-xl text-xs focus:outline-hidden focus:ring-1 focus:ring-rose-500"
                   />
                 </div>
               )}
@@ -1609,7 +1609,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                   value={correctionQuantityValue}
                   onChange={(e) => setCorrectionQuantityValue(e.target.value)}
                   placeholder="e.g. 5000"
-                  className="w-full p-2.5 border border-slate-300 rounded-xl text-xs tabular-nums focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="w-full p-2.5 border border-slate-300 rounded-xl text-xs tabular-nums focus:outline-hidden focus:ring-2 focus:ring-primary"
                 />
               </div>
               <div>
@@ -1622,7 +1622,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                     onClick={() => setCorrectionQuantityUnit('KG')}
                     className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
                       correctionQuantityUnit === 'KG'
-                        ? 'bg-primary text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-xs'
                         : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
                     }`}
                   >
@@ -1633,7 +1633,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                     onClick={() => setCorrectionQuantityUnit('LITER')}
                     className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
                       correctionQuantityUnit === 'LITER'
-                        ? 'bg-primary text-white shadow-sm'
+                        ? 'bg-primary text-white shadow-xs'
                         : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'
                     }`}
                   >
@@ -1821,12 +1821,12 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
             <div className="space-y-2">
               {historicalTanks.length === 0 ? (
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>No active ZMCC tank configured. Please configure an active tank first.</span>
                 </div>
               ) : historicalTanks.length > 1 ? (
                 <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-800 font-semibold flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+                  <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
                   <span>Configuration error: Multiple active tanks found. Only one active tank is permitted per ZMCC.</span>
                 </div>
               ) : (

@@ -13,7 +13,7 @@ export const MpdPolicyScreen: React.FC<MpdPolicyScreenProps> = ({ currentUser })
   return (
     <div className="space-y-6">
       {/* Policy Workspace Wrapper */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm">
+      <div className="bg-white border border-border rounded-xl p-4 shadow-xs">
         <div className="flex items-start gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-primary shrink-0">
             <Sliders className="w-4 h-4" />
@@ -30,7 +30,7 @@ export const MpdPolicyScreen: React.FC<MpdPolicyScreenProps> = ({ currentUser })
       </div>
 
       {/* Embedded MilkTestPolicyWorkspace */}
-      <div className="bg-white border border-border rounded-xl p-4 shadow-sm">
+      <div className="bg-white border border-border rounded-xl p-4 shadow-xs">
         <MilkTestPolicyWorkspace currentUser={currentUser ?? null} />
       </div>
     </div>

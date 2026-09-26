@@ -189,7 +189,7 @@ export default function QAHeadDepartmentPage() {
       <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
         <PageTransition>
         {/* Header Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-border shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-border shadow-2xs">
           <div>
             <h1 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
               <ShieldCheck className="w-6 h-6 text-emerald-900" />
@@ -204,7 +204,7 @@ export default function QAHeadDepartmentPage() {
               setFormTestingPoint(selectedPoint);
               setIsModalOpen(true);
             }}
-            className="flex items-center justify-center gap-2 bg-emerald-900 text-white px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-emerald-950 transition shadow-xs"
+            className="flex items-center justify-center gap-2 bg-emerald-900 text-white px-4 py-2.5 rounded-lg text-xs font-semibold hover:bg-emerald-950 transition shadow-2xs"
           >
             <Plus className="w-4 h-4" />
             Create SOP Rule Version
@@ -219,7 +219,7 @@ export default function QAHeadDepartmentPage() {
               onClick={() => setSelectedPoint(tp.value)}
               className={`px-4 py-2 rounded-lg text-xs font-semibold whitespace-nowrap transition border ${
                 selectedPoint === tp.value
-                  ? 'bg-emerald-900 text-white border-emerald-900 shadow-xs'
+                  ? 'bg-emerald-900 text-white border-emerald-900 shadow-2xs'
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
               }`}
             >
@@ -229,7 +229,7 @@ export default function QAHeadDepartmentPage() {
         </div>
 
         {/* Rules Table */}
-        <div className="bg-white rounded-xl border border-border overflow-hidden shadow-xs">
+        <div className="bg-white rounded-xl border border-border overflow-hidden shadow-2xs">
           <div className="px-6 py-4 border-b border-border flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-800">
               Active & Historic SOP Rules for {TESTING_POINTS.find((tp) => tp.value === selectedPoint)?.label}

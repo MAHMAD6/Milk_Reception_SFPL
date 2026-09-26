@@ -163,7 +163,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
             id="btn-summary-accordion-toggle"
             aria-expanded={isMobileExpanded}
             onClick={() => setIsMobileExpanded((prev) => !prev)}
-            className="w-full flex items-center justify-between p-4 rounded-xl bg-white border border-border-strong shadow-sm text-left transition hover:bg-slate-50"
+            className="w-full flex items-center justify-between p-4 rounded-xl bg-white border border-border-strong shadow-xs text-left transition hover:bg-slate-50"
           >
             <div className="flex items-center space-x-2.5">
               <div className="p-2 rounded-xl bg-primary-hover text-white">
@@ -190,7 +190,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
       {/* Summary Content Body */}
       <div className={`space-y-4 ${isCollapsible ? (isMobileExpanded ? 'block' : 'hidden lg:block') : 'block'}`}>
         {/* Single Unified Dispatch Summary Card */}
-        <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-4">
+        <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
             <div className="flex items-center space-x-2">
               <Calculator className="w-4 h-4 text-primary-hover" />
@@ -264,7 +264,7 @@ export const DispatchSummaryPanel: React.FC<DispatchSummaryPanelProps> = ({
         </div>
 
         {/* Compact Portion Breakdown List */}
-        <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-sm space-y-3">
+        <div className="p-4 sm:p-5 rounded-xl bg-white border border-border-strong shadow-xs space-y-3">
           <h4 className="text-xs font-semibold text-foreground">
             Portion Details
           </h4>

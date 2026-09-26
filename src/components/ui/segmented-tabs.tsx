@@ -74,14 +74,14 @@ export function SegmentedTabs<T extends string>({ tabs, value, onValueChange, la
             onClick={() => onValueChange(tab.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
-              'relative inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+              'relative inline-flex h-8 shrink-0 items-center gap-2 rounded-md px-3 text-sm font-medium transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
               active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'
             )}
           >
             {active ? (
               <motion.span
                 layoutId={`segmented-tab-${id}`}
-                className="absolute inset-0 rounded-md border bg-card shadow-xs"
+                className="absolute inset-0 rounded-md border bg-card shadow-2xs"
                 transition={{ type: 'spring', stiffness: 500, damping: 40 }}
               />
             ) : null}

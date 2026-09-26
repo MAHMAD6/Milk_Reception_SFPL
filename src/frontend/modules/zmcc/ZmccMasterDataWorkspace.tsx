@@ -649,7 +649,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
   return (
     <div className="space-y-6 max-w-full overflow-x-hidden">
       {/* Header Banner */}
-      <div className="bg-white p-5 rounded-xl border border-border shadow-xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white p-5 rounded-xl border border-border shadow-2xs flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="p-2 bg-blue-50 text-primary rounded-xl border border-blue-200">
@@ -676,7 +676,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
               <select
                 value={selectedZmccId}
                 onChange={(e) => handleZmccChange(e.target.value)}
-                className="bg-transparent text-xs font-semibold text-foreground focus:outline-none cursor-pointer min-h-[36px]"
+                className="bg-transparent text-xs font-semibold text-foreground focus:outline-hidden cursor-pointer min-h-[36px]"
                 aria-label="Select Target ZMCC"
               >
                 {sources.map((s) => (
@@ -729,7 +729,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
       )}
 
       {/* Toolbar: Filters, Search, Add Button */}
-      <div className="bg-white p-4 rounded-xl border border-border flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-xs">
+      <div className="bg-white p-4 rounded-xl border border-border flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs">
         <div className="flex flex-wrap items-center gap-2.5 flex-1">
           {/* Search */}
           <div className="relative flex-1 min-w-[200px] max-w-sm">
@@ -739,7 +739,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search code or name..."
-              className="w-full pl-9 pr-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-medium text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full pl-9 pr-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-medium text-foreground placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-primary"
             />
           </div>
 
@@ -747,7 +747,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-primary"
             aria-label="Filter by Status"
           >
             <option value="all">All Statuses</option>
@@ -764,7 +764,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
                   setRouteFilter(e.target.value);
                   setAreaFilter('');
                 }}
-                className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-primary"
                 aria-label="Filter by Route"
               >
                 <option value="">All Routes</option>
@@ -778,7 +778,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
               <select
                 value={areaFilter}
                 onChange={(e) => setAreaFilter(e.target.value)}
-                className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary"
+                className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-primary"
                 aria-label="Filter by Area"
               >
                 <option value="">All Areas</option>
@@ -798,7 +798,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
             <select
               value={routeFilter}
               onChange={(e) => setRouteFilter(e.target.value)}
-              className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-primary"
               aria-label="Filter Areas by Route"
             >
               <option value="">All Routes</option>
@@ -818,7 +818,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           <button
             type="button"
             onClick={handleOpenCreateModal}
-            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-primary text-white rounded-xl text-xs font-semibold hover:bg-primary-hover transition shadow-xs shrink-0"
+            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-primary text-white rounded-xl text-xs font-semibold hover:bg-primary-hover transition shadow-2xs shrink-0"
           >
             <Plus className="w-4 h-4" />
             <span>
@@ -845,7 +845,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
               });
               setModalType('REGISTER_SUBSTITUTE_VEHICLE');
             }}
-            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-amber-600 text-white rounded-xl text-xs font-semibold hover:bg-amber-700 transition shadow-xs shrink-0"
+            className="flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-amber-600 text-white rounded-xl text-xs font-semibold hover:bg-amber-700 transition shadow-2xs shrink-0"
           >
             <Truck className="w-4 h-4" />
             <span>Register Substitute Vehicle</span>
@@ -854,7 +854,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
       </div>
 
       {/* Main Content Table */}
-      <div className="bg-white rounded-xl border border-border shadow-xs overflow-hidden">
+      <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden">
         {loading ? (
           <div className="p-12 text-center flex flex-col items-center justify-center text-slate-500 space-y-2">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -2042,7 +2042,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`px-5 py-2 min-h-[44px] rounded-xl text-xs font-semibold text-white transition shadow-xs flex items-center gap-2 ${
+                  className={`px-5 py-2 min-h-[44px] rounded-xl text-xs font-semibold text-white transition shadow-2xs flex items-center gap-2 ${
                     modalType === 'TOGGLE_ACTIVE' && activeRecord?.is_active
                       ? 'bg-rose-600 hover:bg-rose-700'
                       : 'bg-primary hover:bg-primary-hover'

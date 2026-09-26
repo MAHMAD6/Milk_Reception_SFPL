@@ -98,7 +98,7 @@ export const ZMCCManagerHistoryReports: React.FC<ZMCCManagerHistoryReportsProps>
   return (
     <div className="space-y-6">
       {/* 1. Header & Quick Actions */}
-      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-border/80">
           <div className="flex items-center space-x-2.5">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -166,7 +166,7 @@ export const ZMCCManagerHistoryReports: React.FC<ZMCCManagerHistoryReportsProps>
       </div>
 
       {/* 2. Filters & Search Bar */}
-      <div className="p-4 rounded-xl bg-card border border-border/80 shadow-sm space-y-3">
+      <div className="p-4 rounded-xl bg-card border border-border/80 shadow-xs space-y-3">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Search */}
           <div className="relative flex-1 max-w-sm">
@@ -176,7 +176,7 @@ export const ZMCCManagerHistoryReports: React.FC<ZMCCManagerHistoryReportsProps>
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search vehicle #, token #, silo, date..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-none"
+              className="w-full pl-9 pr-3 py-1.5 text-xs font-semibold rounded-lg bg-subtle border border-border/80 text-foreground focus:ring-2 focus:ring-primary outline-hidden"
             />
           </div>
 
@@ -217,7 +217,7 @@ export const ZMCCManagerHistoryReports: React.FC<ZMCCManagerHistoryReportsProps>
             <select
               value={lifecycleFilter}
               onChange={(e) => setLifecycleFilter(e.target.value as HistoryLifecycleFilter)}
-              className="px-2 py-1 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-700 outline-none"
+              className="px-2 py-1 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-700 outline-hidden"
             >
               <option value="ALL">All Stages</option>
               <option value="IN_TRANSIT">In Transit</option>
@@ -234,7 +234,7 @@ export const ZMCCManagerHistoryReports: React.FC<ZMCCManagerHistoryReportsProps>
             <select
               value={qaFilter}
               onChange={(e) => setQaFilter(e.target.value as HistoryQAFilter)}
-              className="px-2 py-1 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-700 outline-none"
+              className="px-2 py-1 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-700 outline-hidden"
             >
               <option value="ALL">All QA</option>
               <option value="ACCEPTED">Accepted</option>
@@ -250,7 +250,7 @@ export const ZMCCManagerHistoryReports: React.FC<ZMCCManagerHistoryReportsProps>
             <select
               value={receiptFilter}
               onChange={(e) => setReceiptFilter(e.target.value as HistoryReceiptFilter)}
-              className="px-2 py-1 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-700 outline-none"
+              className="px-2 py-1 text-xs font-semibold rounded bg-slate-50 border border-slate-200 text-slate-700 outline-hidden"
             >
               <option value="ALL">All Receipts</option>
               <option value="FINAL_RECEIPT_EXISTS">Final Receipt Exists</option>
@@ -296,7 +296,7 @@ export const ZMCCManagerHistoryReports: React.FC<ZMCCManagerHistoryReportsProps>
 
       {/* 6. Historical Transactions Table */}
       {!isLoading && !error && filteredItems.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-border/80 bg-card shadow-sm">
+        <div className="overflow-x-auto rounded-xl border border-border/80 bg-card shadow-xs">
           <table className="w-full text-left text-xs tabular-nums">
             <thead className="bg-slate-50 text-[10px] font-sans font-semibold uppercase tracking-wider text-slate-600 border-b border-border/80">
               <tr>

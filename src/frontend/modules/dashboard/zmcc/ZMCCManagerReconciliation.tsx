@@ -130,7 +130,7 @@ export const ZMCCManagerReconciliation: React.FC<ZMCCManagerReconciliationProps>
       <SupplyChainLossCard />
 
       {/* 1. Header & Summary Banner */}
-      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-sm space-y-4">
+      <div className="p-5 rounded-xl bg-card border border-border/80 shadow-xs space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-border/80">
           <div className="flex items-center space-x-2.5">
             <div className="p-2 rounded-lg bg-primary/10 text-primary">
@@ -230,7 +230,7 @@ export const ZMCCManagerReconciliation: React.FC<ZMCCManagerReconciliationProps>
                   onClick={() => setFilterState(opt.id)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-all ${
                     active
-                      ? 'bg-primary text-white shadow-xs'
+                      ? 'bg-primary text-white shadow-2xs'
                       : 'bg-subtle text-slate-700 hover:bg-muted border border-border/80'
                   }`}
                 >
@@ -249,7 +249,7 @@ export const ZMCCManagerReconciliation: React.FC<ZMCCManagerReconciliationProps>
               aria-label="Search current page vehicle or token"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-subtle border border-border text-xs text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary"
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg bg-subtle border border-border text-xs text-foreground placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-primary"
             />
           </div>
         </div>
@@ -291,7 +291,7 @@ export const ZMCCManagerReconciliation: React.FC<ZMCCManagerReconciliationProps>
 
       {/* 6. Canonical Reconciliation Table */}
       {!isLoading && !error && filteredItems.length > 0 && (
-        <div className="bg-card border border-border rounded-xl shadow-xs overflow-hidden">
+        <div className="bg-card border border-border rounded-xl shadow-2xs overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse">
               <thead>
