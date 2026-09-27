@@ -25,35 +25,36 @@ interface NotificationBellProps {
 }
 
 export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  // Open state and feed are tied to the user they belong to, so switching users never shows stale data.
+  const [openForUserId, setOpenForUserId] = useState<string | null>(null);
+  const [feedOwnerId, setFeedOwnerId] = useState<string | null>(null);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  const fetchNotifications = useCallback(async () => {
-    if (!currentUser) return;
-    try {
-      const res = await fetch('/api/notifications');
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications(data?.notifications || []);
-        setUnreadCount(Number(data?.unreadCount || 0));
-      } else if (res.status === 401) {
-        setNotifications([]);
-        setUnreadCount(0);
-      }
-    } catch (_err) {
-      // Ignore network errors during polling
-    }
+  const fetchNotifications = useCallback(() => {
+    if (!currentUser) return Promise.resolve();
+    const ownerId = currentUser.id;
+    return fetch('/api/notifications')
+      .then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setNotifications(data?.notifications || []);
+          setUnreadCount(Number(data?.unreadCount || 0));
+          setFeedOwnerId(ownerId);
+        } else if (res.status === 401) {
+          setNotifications([]);
+          setUnreadCount(0);
+        }
+      })
+      .catch(() => {
+        // Ignore network errors during polling
+      });
   }, [currentUser]);
 
   useEffect(() => {
-    if (!currentUser) {
-      setNotifications([]);
-      setUnreadCount(0);
-      setIsOpen(false);
-      return;
-    }
+    // Without a user the bell renders nothing; a later user only sees a feed fetched for them.
+    if (!currentUser) return;
 
     fetchNotifications();
     const interval = window.setInterval(fetchNotifications, 60000);
@@ -61,7 +62,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
     const handleLoggedOut = () => {
       setNotifications([]);
       setUnreadCount(0);
-      setIsOpen(false);
+      setOpenForUserId(null);
       clearInterval(interval);
     };
 
@@ -112,7 +113,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
       }
     }
 
-    setIsOpen(false);
+    setOpenForUserId(null);
 
     if (
       item.deepLink &&
@@ -128,16 +129,22 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
     return null;
   }
 
+  const isOpen = openForUserId === currentUser.id;
+  const setIsOpen = (open: boolean) => setOpenForUserId(open ? currentUser.id : null);
+  const ownsFeed = feedOwnerId === currentUser.id;
+  const visibleNotifications = ownsFeed ? notifications : [];
+  const visibleUnreadCount = ownsFeed ? unreadCount : 0;
+
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger
         className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted data-[state=open]:text-foreground"
-        aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
+        aria-label={visibleUnreadCount > 0 ? `Notifications, ${visibleUnreadCount} unread` : 'Notifications'}
       >
         <Bell className="h-[18px] w-[18px]" />
-        {unreadCount > 0 && (
+        {visibleUnreadCount > 0 && (
           <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-card">
-            {unreadCount > 99 ? '99+' : unreadCount}
+            {visibleUnreadCount > 99 ? '99+' : visibleUnreadCount}
           </span>
         )}
       </PopoverTrigger>
@@ -146,13 +153,13 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
         <div className="flex items-center justify-between border-b px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-foreground">Notifications</span>
-            {unreadCount > 0 && (
+            {visibleUnreadCount > 0 && (
               <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[11px] font-medium text-primary">
-                {unreadCount} new
+                {visibleUnreadCount} new
               </span>
             )}
           </div>
-          {unreadCount > 0 && (
+          {visibleUnreadCount > 0 && (
             <button
               type="button"
               onClick={handleMarkAllRead}
@@ -166,7 +173,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
         </div>
 
         <div className="scrollbar-thin max-h-[360px] overflow-y-auto">
-          {notifications.length === 0 ? (
+          {visibleNotifications.length === 0 ? (
             <div className="px-6 py-10 text-center">
               <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                 <Inbox className="h-5 w-5" />
@@ -176,7 +183,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
             </div>
           ) : (
             <ul className="divide-y">
-              {notifications.map((item) => {
+              {visibleNotifications.map((item) => {
                 const isUnread = !item.readAt;
                 const isHighPriority = item.priority === 'HIGH' || item.priority === 'URGENT';
 

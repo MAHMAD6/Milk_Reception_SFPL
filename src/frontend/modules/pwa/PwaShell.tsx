@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Download, RefreshCw, ShieldAlert, WifiOff } from 'lucide-react';
+import { useIsClient, useOnlineStatus } from '@/frontend/hooks/useOnlineStatus';
 
 function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
   const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
@@ -13,23 +14,17 @@ function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
 }
 
 export function PwaShell() {
-  const [mounted, setMounted] = useState(false);
-  const [online, setOnline] = useState(true);
+  const mounted = useIsClient();
+  const online = useOnlineStatus();
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [authExpired, setAuthExpired] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    setOnline(navigator.onLine);
-    const on = () => setOnline(true);
-    const off = () => setOnline(false);
     const sync = (event: Event) =>
       setSyncing(Boolean((event as CustomEvent<{ syncing?: boolean }>).detail?.syncing));
     const expired = () => setAuthExpired(true);
 
-    window.addEventListener('online', on);
-    window.addEventListener('offline', off);
     window.addEventListener('milk-sync-state', sync);
     window.addEventListener('milk-auth-expired', expired);
 
@@ -103,8 +98,6 @@ export function PwaShell() {
     window.addEventListener('milk-user-logged-out', handleLoggedOut);
 
     return () => {
-      window.removeEventListener('online', on);
-      window.removeEventListener('offline', off);
       window.removeEventListener('milk-sync-state', sync);
       window.removeEventListener('milk-auth-expired', expired);
       window.removeEventListener('milk-user-logged-out', handleLoggedOut);

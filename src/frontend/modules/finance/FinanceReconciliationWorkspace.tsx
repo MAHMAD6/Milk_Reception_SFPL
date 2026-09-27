@@ -61,17 +61,20 @@ export function FinanceReconciliationWorkspace() {
   const [mappingError, setMappingError] = useState<string | null>(null);
   const [mappingSuccess, setMappingSuccess] = useState<string | null>(null);
 
-  const loadPendingSuppliers = useCallback(async () => {
-    try {
-      const res = await fetch('/api/zmcc/local-suppliers?erp_mapping_status=PENDING');
-      if (res.ok) {
-        const data = await res.json();
-        setPendingSuppliers(data.suppliers || []);
-      }
-    } catch {
-      // Non-blocking background fetch
-    }
-  }, []);
+  const loadPendingSuppliers = useCallback(
+    () =>
+      fetch('/api/zmcc/local-suppliers?erp_mapping_status=PENDING')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setPendingSuppliers(data.suppliers || []);
+          }
+        })
+        .catch(() => {
+          // Non-blocking background fetch
+        }),
+    []
+  );
 
   useEffect(() => {
     Promise.all([
