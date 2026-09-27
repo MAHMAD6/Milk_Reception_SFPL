@@ -135,7 +135,7 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
 
   // ZMCC Lab Sessions State
   const [labSessions, setLabSessions] = useState<ZmccLabSessionItem[]>([]);
-  const [labLoading, setLabLoading] = useState<boolean>(false);
+  const [labRefreshing, setLabLoading] = useState<boolean>(false);
   const [labError, setLabError] = useState<string | null>(null);
   const [labFilter, setLabFilter] = useState<'ALL' | 'PENDING_REVIEW' | 'REJECTED' | 'REVIEWED_EXITED' | 'APPROVED'>('ALL');
 
@@ -148,34 +148,49 @@ export const ZMCCManagerQualityRejections: React.FC<ZMCCManagerQualityRejections
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string | null>(null);
 
   // Fetch ZMCC Lab History
-  const fetchLabSessions = useCallback(async () => {
+  // Filters whose lab-session request last settled; any other key means a fetch is in flight.
+  const labRequestKey = `${currentFromDate}|${searchQuery}`;
+  const [loadedLabKey, setLoadedLabKey] = useState<string | null>(null);
+
+  const loadLabSessions = useCallback(() => {
+    const params = new URLSearchParams();
+    params.set('pageSize', '100');
+    if (currentFromDate) params.set('date', currentFromDate);
+    if (searchQuery) params.set('search', searchQuery);
+    const key = `${currentFromDate}|${searchQuery}`;
+
+    return fetch(`/api/zmcc/lab/history?${params.toString()}`)
+      .then(async (res) => {
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || `HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        setLabSessions(data.items || []);
+        setLabError(null);
+      })
+      .catch((err) => {
+        setLabError(getErrorMessage(err) || 'Failed to fetch ZMCC lab sessions.');
+      })
+      .finally(() => {
+        setLabLoading(false);
+        setLoadedLabKey(key);
+      });
+  }, [currentFromDate, searchQuery]);
+
+  const labLoading = labRefreshing || (viewMode === 'ZMCC_LAB' && loadedLabKey !== labRequestKey);
+
+  const fetchLabSessions = () => {
     setLabLoading(true);
     setLabError(null);
-    try {
-      const params = new URLSearchParams();
-      params.set('pageSize', '100');
-      if (currentFromDate) params.set('date', currentFromDate);
-      if (searchQuery) params.set('search', searchQuery);
-
-      const res = await fetch(`/api/zmcc/lab/history?${params.toString()}`);
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || `HTTP ${res.status}`);
-      }
-      const data = await res.json();
-      setLabSessions(data.items || []);
-    } catch (err) {
-      setLabError(getErrorMessage(err) || 'Failed to fetch ZMCC lab sessions.');
-    } finally {
-      setLabLoading(false);
-    }
-  }, [currentFromDate, searchQuery]);
+    return loadLabSessions();
+  };
 
   useEffect(() => {
     if (viewMode === 'ZMCC_LAB') {
-      fetchLabSessions();
+      loadLabSessions();
     }
-  }, [viewMode, fetchLabSessions]);
+  }, [viewMode, loadLabSessions]);
 
   // Derived Plant portion quality items
   const plantItems = useMemo(() => deriveQualityRejectionItems(logs), [logs]);
