@@ -345,6 +345,7 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
 
   /** Discards the current draft and starts a fresh work item (user actions only). */
   const restartDispatchWorkItem = (targetSourceId: string) => {
+    if (!currentUser || !targetSourceId) return;
     setRestartingWorkItem(true);
     initializeDispatchWorkItem(targetSourceId, true);
   };

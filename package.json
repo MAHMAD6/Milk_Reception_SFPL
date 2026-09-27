@@ -10,7 +10,7 @@
     "build": "next build",
     "start": "next start",
     "postinstall": "prisma generate",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings=0",
     "typecheck": "node node_modules/typescript-7/bin/tsc --noEmit",
     "db:seed": "prisma db seed",
     "db:studio": "prisma studio",
