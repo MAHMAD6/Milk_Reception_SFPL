@@ -12,6 +12,8 @@
     "postinstall": "prisma generate",
     "lint": "eslint .",
     "typecheck": "node node_modules/typescript-7/bin/tsc --noEmit",
+    "test": "node --import tsx --test \"tests/unit/**/*.test.ts\"",
+    "test:integration": "node --import tsx --test \"tests/integration/**/*.test.ts\"",
     "db:seed": "prisma db seed",
     "db:migrate": "prisma migrate deploy",
     "db:drift": "prisma migrate diff --from-config-datasource --to-schema prisma/schema.prisma --exit-code",
