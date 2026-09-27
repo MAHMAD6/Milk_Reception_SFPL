@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Building2, Building, CheckCircle2, Search, ShieldCheck } from 'lucide-react';
+import { Building2, Building, CheckCircle2, Search } from 'lucide-react';
 import type { ZmccCenterTelemetry, PlantContractorTelemetry } from '../types';
+import { formatMetric, NO_DATA } from '../format';
 
 interface MpdSourcesScreenProps {
   zmccs: ZmccCenterTelemetry[];
@@ -90,22 +91,22 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
                       {z.code}
                     </span>
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      <CheckCircle2 className="w-3 h-3" /> Live
+                      <CheckCircle2 className="w-3 h-3" /> Active
                     </span>
                   </div>
                   <h3 className="text-sm font-semibold text-foreground">{z.name}</h3>
 
                   <div className="mt-3 grid grid-cols-2 gap-2 bg-subtle p-2.5 rounded-lg border border-border">
                     <div>
-                      <div className="text-xs text-slate-500 font-medium">Daily Intake</div>
+                      <div className="text-xs text-slate-500 font-medium">Received today</div>
                       <div className="tabular-nums font-semibold text-slate-800 text-xs">
                         {z.intakeLiters.toLocaleString()} L
                       </div>
                     </div>
                     <div>
-                      <div className="text-xs text-slate-500 font-medium">Fat / LR</div>
+                      <div className="text-xs text-slate-500 font-medium">Dispatch Fat / LR</div>
                       <div className="tabular-nums font-semibold text-slate-800 text-xs">
-                        {z.avgFatPercent}% | {z.avgLr}
+                        {formatMetric(z.avgFatPercent, '%')} | {formatMetric(z.avgLr)}
                       </div>
                     </div>
                   </div>
@@ -113,21 +114,21 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
                   {/* Silo Storage Level */}
                   <div className="mt-3">
                     <div className="flex items-center justify-between text-xs mb-1">
-                      <span className="text-slate-600 font-medium">Silo Inventory</span>
+                      <span className="text-slate-600 font-medium">Tank stock</span>
                       <span className="tabular-nums font-semibold text-slate-800">
-                        {z.siloStockLiters.toLocaleString()} L ({z.siloCapacityPercent}%)
+                        {z.siloStockLiters.toLocaleString()} L ({formatMetric(z.siloCapacityPercent, '%')})
                       </span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full ${
-                          z.siloCapacityPercent > 85
+                          (z.siloCapacityPercent ?? 0) > 85
                             ? 'bg-amber-500'
-                            : z.siloCapacityPercent > 40
+                            : (z.siloCapacityPercent ?? 0) > 40
                             ? 'bg-primary'
                             : 'bg-slate-300'
                         }`}
-                        style={{ width: `${Math.min(z.siloCapacityPercent, 100)}%` }}
+                        style={{ width: `${Math.min(z.siloCapacityPercent ?? 0, 100)}%` }}
                       />
                     </div>
                   </div>
@@ -166,16 +167,14 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
                 <tr className="bg-subtle border-b border-border text-slate-600 font-semibold">
                   <th className="py-3 px-4">Contractor Name / Code</th>
                   <th className="py-3 px-4 text-right">Delivered to Plant</th>
-                  <th className="py-3 px-4 text-center">Quality (Fat / LR)</th>
+                  <th className="py-3 px-4 text-center">Plant QA (Fat / LR)</th>
                   <th className="py-3 px-4 text-center">QA Pass Rate</th>
-                  <th className="py-3 px-4">Commercial Agreement</th>
-                  <th className="py-3 px-4 text-center">ERP Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {filteredContractors.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="py-6 text-center text-slate-500">
+                    <td colSpan={4} className="py-6 text-center text-slate-500">
                       No direct contractors found.
                     </td>
                   </tr>
@@ -190,29 +189,18 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
                         {c.deliveredLiters.toLocaleString()} L
                       </td>
                       <td className="py-3 px-4 text-center tabular-nums">
-                        <span className="font-semibold text-slate-800">{c.avgFatPercent}%</span>
+                        <span className="font-semibold text-slate-800">{formatMetric(c.avgFatPercent, '%')}</span>
                         <span className="text-slate-400 mx-1">|</span>
-                        <span className="font-semibold text-slate-800">{c.avgLr}</span>
+                        <span className="font-semibold text-slate-800">{formatMetric(c.avgLr)}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span className="inline-flex items-center gap-1 tabular-nums font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          {c.qualityPassRatePercent}%
-                        </span>
-                      </td>
-                      <td className="py-3 px-4 text-slate-700 font-medium">
-                        {c.pricingAgreement}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            c.erpStatus === 'VERIFIED'
-                              ? 'bg-blue-50 text-primary border border-blue-200'
-                              : 'bg-amber-50 text-amber-800 border border-amber-200'
-                          }`}
-                        >
-                          <ShieldCheck className="w-3 h-3" />
-                          {c.erpStatus}
-                        </span>
+                        {c.qualityPassRatePercent === null ? (
+                          <span className="text-slate-400">{NO_DATA}</span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 tabular-nums font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                            {c.qualityPassRatePercent}%
+                          </span>
+                        )}
                       </td>
                     </tr>
                   ))

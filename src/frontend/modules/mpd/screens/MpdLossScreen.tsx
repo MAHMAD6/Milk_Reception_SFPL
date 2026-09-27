@@ -2,48 +2,41 @@
 
 import React from 'react';
 import { Layers } from 'lucide-react';
-import type { MpdSummary } from '../types';
+import type { MpdLossTiers } from '../types';
+import { formatMetric } from '../format';
 
 interface MpdLossScreenProps {
-  summary: MpdSummary;
+  lossTiers: MpdLossTiers;
 }
 
-export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
+export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ lossTiers }) => {
   const tiers = [
     {
       tier: 'Tier 1',
       name: 'Field Collection Route Loss',
       scope: 'Village Shops → MOT Van → ZMCC Reception',
-      lossLiters: 320,
-      lossPercent: 0.18,
-      status: 'NORMAL',
-      details: 'Dipstick volume vs MOT van bulk dump. Accounting for can residue & temperature variation.',
+      loss: lossTiers?.tier1RouteLoss ?? null,
+      details: 'Shop collection volume vs MOT arrival volume received at the ZMCC.',
     },
     {
       tier: 'Tier 2',
       name: 'ZMCC Chilling & Storage Loss',
-      scope: 'ZMCC Reception → Silo Chilling → Tanker Dispatch',
-      lossLiters: 480,
-      lossPercent: 0.22,
-      status: 'NORMAL',
-      details: 'Piping hold-up, chiller surface stickage, and silo agitator evaporation.',
+      scope: 'ZMCC Reception → Tank Chilling → Tanker Dispatch',
+      loss: lossTiers?.tier2ZmccLoss ?? null,
+      details: 'Inward receipts vs dispatches, adjusted for the change in tank stock.',
     },
     {
       tier: 'Tier 3',
       name: 'Inter-Facility Transit Loss',
-      scope: 'ZMCC Dispatch Weighbridge → Plant Reception Weighbridge',
-      lossLiters: 1210,
-      lossPercent: 0.31,
-      status: 'MONITORED',
-      details: 'Heavy tanker transit variance. Monitored for valve leaks or unauthorized en-route drainage.',
+      scope: 'ZMCC Dispatch → Plant Reception Weighbridge',
+      loss: lossTiers?.tier3TransitLoss ?? null,
+      details: 'Dispatched tanker volume vs volume accepted at plant reception.',
     },
     {
       tier: 'Tier 4',
       name: 'Total Cumulative Supply Chain Loss',
       scope: 'End-to-End Field Purchase → Plant Silo Entry',
-      lossLiters: summary.supplyChainLossLiters || 2010,
-      lossPercent: summary.supplyChainLossPercent || 0.71,
-      status: 'DIAGNOSTIC_HEALTHY',
+      loss: lossTiers?.tier4TotalLoss ?? null,
       details: 'Compound variance across all 3 custody transfer points across division.',
     },
   ];
@@ -80,7 +73,7 @@ export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{t.tier}</span>
                 <span className="text-xs tabular-nums font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                  {t.lossPercent}% variance
+                  {formatMetric(t.loss?.lossPercent, '%')} variance
                 </span>
               </div>
               <h3 className="text-sm font-semibold text-foreground mt-2">{t.name}</h3>
@@ -91,7 +84,7 @@ export const MpdLossScreen: React.FC<MpdLossScreenProps> = ({ summary }) => {
               <div className="mt-4 p-3 rounded-lg bg-white border border-border flex items-center justify-between">
                 <span className="text-xs text-slate-600 font-medium">Shrinkage Volume</span>
                 <span className="text-base tabular-nums font-semibold text-foreground">
-                  {t.lossLiters.toLocaleString()} L
+                  {formatMetric(t.loss?.lossLiters, ' L')}
                 </span>
               </div>
             </div>

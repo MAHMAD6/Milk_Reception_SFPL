@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ShieldAlert, UserCheck, Search } from 'lucide-react';
 import type { GovernanceOverrideTelemetry } from '../types';
+import { NO_DATA } from '../format';
 
 interface MpdGovernanceScreenProps {
   overrides: GovernanceOverrideTelemetry[];
@@ -15,11 +16,9 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const filteredOverrides = overrides.filter((o) => {
-    const matchesSearch =
-      o.reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.sourceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.overruledBy.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      o.failedParameter.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = [o.reference, o.sourceName, o.overruledBy, o.failedParameter].some((field) =>
+      (field ?? '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
     const matchesStage = stageFilter === 'ALL' || o.stage === stageFilter;
     return matchesSearch && matchesStage;
   });
@@ -124,7 +123,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
               {filteredOverrides.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-6 text-center text-slate-500">
-                    No governance overrides requiring audit.
+                    No manager overrides in the last 30 days.
                   </td>
                 </tr>
               ) : (
@@ -135,7 +134,7 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
                       <div className="text-slate-500 text-xs tabular-nums">{o.id}</div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="font-semibold text-slate-800">{o.sourceName}</div>
+                      <div className="font-semibold text-slate-800">{o.sourceName ?? NO_DATA}</div>
                       <span className="inline-block px-2 py-0.5 mt-0.5 rounded text-xs tabular-nums font-semibold bg-slate-100 text-slate-700">
                         {o.stage}
                       </span>
@@ -148,13 +147,16 @@ export const MpdGovernanceScreen: React.FC<MpdGovernanceScreenProps> = ({ overri
                     </td>
                     <td className="py-3 px-4 max-w-xs">
                       <div className="text-slate-800 text-xs italic bg-subtle p-2 rounded border border-border">
-                        &quot;{o.managerJustification}&quot;
+                        {o.managerJustification ? <>&quot;{o.managerJustification}&quot;</> : NO_DATA}
+                      </div>
+                      <div className="mt-1 text-xs text-slate-500">
+                        System {o.systemOutcome ?? NO_DATA} → final {o.finalDecision ?? NO_DATA}
                       </div>
                     </td>
                     <td className="py-3 px-4">
-                      <div className="text-slate-800 font-semibold">{o.overruledBy}</div>
+                      <div className="text-slate-800 font-semibold">{o.overruledBy ?? NO_DATA}</div>
                       <div className="text-slate-500 text-xs tabular-nums">
-                        {new Date(o.timestamp).toLocaleTimeString()}
+                        {new Date(o.timestamp).toLocaleString()}
                       </div>
                     </td>
                     <td className="py-3 px-4 text-center">

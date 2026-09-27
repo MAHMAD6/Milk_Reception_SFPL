@@ -1,61 +1,83 @@
+import type { Prisma } from '@prisma/client';
 import { prisma } from '@core/db';
 import { getSupplyChainLossHierarchy } from './lossCalculationService';
+import { getTankPhysicalStock } from './zmccTankService';
 import { getPakistanCalendarDate } from '@core/business-day';
+import { isFatTestCandidate, isLrTestCandidate } from '@/backend/utils/milkTestResolvers';
+import { jsonRecord, jsonString } from '@/lib/json';
+
+/**
+ * Every figure below is computed from recorded data. A `null` means there is
+ * nothing recorded for it (today, or at all); the dashboard shows it as "—".
+ */
+
+export interface LossTierTelemetry {
+  lossLiters: number;
+  lossPercent: number;
+}
 
 export interface MpdExecutiveTelemetry {
   businessDate: string;
   calendarDate: string;
   summary: {
     totalIntakeLiters: number;
-    weightedFatPercent: number;
-    weightedLr: number;
-    weightedSnfPercent: number;
-    standardized13TsLiters: number;
+    weightedFatPercent: number | null;
+    weightedLr: number | null;
+    weightedSnfPercent: number | null;
+    standardized13TsLiters: number | null;
     inTransitLiters: number;
     inTransitTankerCount: number;
-    supplyChainLossPercent: number;
-    supplyChainLossLiters: number;
+    supplyChainLossPercent: number | null;
+    supplyChainLossLiters: number | null;
     activeZmccCount: number;
     activeContractorCount: number;
   };
+  /** Today's four-tier loss breakdown; null when the loss calculation could not run. */
+  lossTiers: {
+    tier1RouteLoss: LossTierTelemetry;
+    tier2ZmccLoss: LossTierTelemetry;
+    tier3TransitLoss: LossTierTelemetry;
+    tier4TotalLoss: LossTierTelemetry;
+  } | null;
   motRoutes: Array<{
     id: string;
-    routeCode: string;
-    routeName: string;
-    vehicleNumber: string;
-    motName: string;
+    routeCode: string | null;
+    routeName: string | null;
+    vehicleNumber: string | null;
+    motName: string | null;
     completedShops: number;
     totalShops: number;
     grossLiters: number;
-    fatPercent: number;
-    lr: number;
+    fatPercent: number | null;
+    lr: number | null;
     status: string;
     etaOrArrival: string;
   }>;
   inTransitTankers: Array<{
     id: string;
     vehicleNumber: string;
-    driverName: string;
-    sourceName: string;
-    sourceCode: string;
+    sourceName: string | null;
+    sourceCode: string | null;
     departureTime: string;
     grossLiters: number;
-    at13tsLiters: number;
-    temperatureCelsius: number;
-    fatPercent: number;
-    lr: number;
+    at13tsLiters: number | null;
+    /** Average dispatch temperature test result across the tanker's portions. */
+    temperatureCelsius: number | null;
+    fatPercent: number | null;
+    lr: number | null;
     status: string;
-    etaPlant: string;
   }>;
   zmccCenters: Array<{
     id: string;
     code: string;
     name: string;
+    /** Gross liters received into ZMCC tanks today (lab-accepted milk). */
     intakeLiters: number;
+    /** Current physical stock across the ZMCC's active tanks (inventory ledger). */
     siloStockLiters: number;
-    siloCapacityPercent: number;
-    avgFatPercent: number;
-    avgLr: number;
+    siloCapacityPercent: number | null;
+    avgFatPercent: number | null;
+    avgLr: number | null;
     dispatchedLiters: number;
     dispatchedTankerCount: number;
     isActive: boolean;
@@ -65,19 +87,19 @@ export interface MpdExecutiveTelemetry {
     code: string;
     name: string;
     deliveredLiters: number;
-    avgFatPercent: number;
-    avgLr: number;
-    qualityPassRatePercent: number;
-    pricingAgreement: string;
-    erpStatus: 'VERIFIED' | 'PENDING_ERP_MAPPING';
+    /** Mean of plant QA Fat/LR results across today's portions. */
+    avgFatPercent: number | null;
+    avgLr: number | null;
+    qualityPassRatePercent: number | null;
   }>;
   qualityFunnel: {
-    villageShopRejectedLiters: number;
-    villageShopRejectionPercent: number;
+    /** Shop-level rejection is not recorded by MOT collections, so it is always null. */
+    villageShopRejectedLiters: number | null;
+    villageShopRejectionPercent: number | null;
     zmccGateRejectedLiters: number;
-    zmccGateRejectionPercent: number;
+    zmccGateRejectionPercent: number | null;
     plantGateRejectedLiters: number;
-    plantGateRejectionPercent: number;
+    plantGateRejectionPercent: number | null;
     incidents: {
       formalinCount: number;
       ureaCount: number;
@@ -85,293 +107,569 @@ export interface MpdExecutiveTelemetry {
       cobPositiveCount: number;
     };
   };
-  governanceOverrides: Array<{
-    id: string;
-    reference: string;
-    sourceName: string;
-    stage: 'ZMCC_GATE' | 'PLANT_RECEPTION';
-    failedParameter: string;
-    failedValue: string;
-    toleranceLimit: string;
-    attendantNote: string;
-    managerJustification: string;
-    overruledBy: string;
-    timestamp: string;
-    status: 'PENDING_AUDIT' | 'APPROVED' | 'FLAGGED';
-  }>;
+  governanceOverrides: GovernanceOverride[];
   emergencySubstitutes: Array<{
     id: string;
     vehicleNumber: string;
-    vehicleType: string;
-    replacedVehicleNumber: string;
-    zmccName: string;
-    registeredBy: string;
+    vehicleType: string | null;
+    zmccName: string | null;
+    registeredBy: string | null;
     timestamp: string;
-    status: string;
+    status: 'ACTIVE' | 'INACTIVE';
   }>;
+}
+
+export type GovernanceAuditStatus = 'PENDING_AUDIT' | 'APPROVED' | 'FLAGGED';
+
+export interface GovernanceOverride {
+  /** `ZMCC-<lab session id>` or `PLANT-<portion id>`. */
+  id: string;
+  reference: string;
+  sourceName: string | null;
+  stage: 'ZMCC_GATE' | 'PLANT_RECEPTION';
+  failedParameter: string;
+  failedValue: string;
+  toleranceLimit: string;
+  systemOutcome: string | null;
+  finalDecision: string | null;
+  attendantNote: string | null;
+  managerJustification: string | null;
+  overruledBy: string | null;
+  timestamp: string;
+  status: GovernanceAuditStatus;
+}
+
+/** Manager overrides stay on the audit desk for this many days. */
+const GOVERNANCE_WINDOW_DAYS = 30;
+const GOVERNANCE_AUDIT_ACTIONS = {
+  APPROVED: 'MPD_GOVERNANCE_AUDIT_APPROVED',
+  FLAGGED: 'MPD_GOVERNANCE_AUDIT_FLAGGED',
+} as const;
+/** Manager review states that mean a human decision replaced the system result. */
+const RESOLVED_REVIEW_STATUSES = ['APPROVED', 'REJECTED', 'REVIEWED_EXITED'];
+
+type Numeric = Prisma.Decimal | number | string | null | undefined;
+
+function toNumber(value: Numeric): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : null;
+}
+
+function round(value: number, digits = 2): number {
+  return Number(value.toFixed(digits));
+}
+
+/** Weighted mean of (value, weight) pairs, ignoring missing values; null when nothing is weighted. */
+function weightedMean(pairs: Array<[number | null, number]>): number | null {
+  let sum = 0;
+  let weight = 0;
+  for (const [value, w] of pairs) {
+    if (value === null || !(w > 0)) continue;
+    sum += value * w;
+    weight += w;
+  }
+  return weight > 0 ? round(sum / weight) : null;
+}
+
+function mean(values: Array<number | null>): number | null {
+  const present = values.filter((v): v is number => v !== null);
+  return present.length > 0 ? round(present.reduce((a, b) => a + b, 0) / present.length) : null;
+}
+
+function percentOf(part: number, whole: number): number | null {
+  return whole > 0 ? round((part / whole) * 100) : null;
+}
+
+type TestLike = { testCode: string; testName: string; resultType: string };
+
+function numericResultFor(
+  results: Array<{ numeric_value: Numeric; lab_test: TestLike }>,
+  isCandidate: (code?: string | null, name?: string | null, type?: string | null) => boolean
+): number | null {
+  const match = results.find((r) => isCandidate(r.lab_test.testCode, r.lab_test.testName, r.lab_test.resultType));
+  return match ? toNumber(match.numeric_value) : null;
+}
+
+const isTemperatureTest = (test: TestLike) => test.testName.trim().toLowerCase() === 'temperature';
+
+/** Liters for a portion's dispatch quantity; KG is converted with the vehicle's dispatch density. */
+function portionLiters(
+  portion: { dispatch_quantity_value: Numeric; dispatch_quantity_unit: string | null },
+  density: number | null
+): number | null {
+  const value = toNumber(portion.dispatch_quantity_value);
+  if (value === null) return null;
+  if (portion.dispatch_quantity_unit === 'LITER') return value;
+  if (portion.dispatch_quantity_unit === 'KG' && density && density > 0) return value / density;
+  return null;
+}
+
+type IncidentKind = 'formalin' | 'urea' | 'waterLowLr' | 'cobPositive';
+
+/** Maps a failed test to the incident category it counts toward, if any. */
+function incidentKind(test: TestLike): IncidentKind | null {
+  const name = test.testName.trim().toLowerCase();
+  if (name.includes('formalin')) return 'formalin';
+  if (name === 'urea') return 'urea';
+  if (name.includes('clot on boiling')) return 'cobPositive';
+  if (isLrTestCandidate(test.testCode, test.testName, test.resultType)) return 'waterLowLr';
+  return null;
+}
+
+function formatResultValue(numericValue: Numeric, textValue: string | null, unit: string | null): string {
+  const n = toNumber(numericValue);
+  if (n !== null) return unit ? `${n} ${unit}` : String(n);
+  return textValue || '—';
+}
+
+function formatRuleLimit(
+  rule: { min_value: Numeric; max_value: Numeric; acceptable_option: string | null } | null
+): string {
+  if (!rule) return '—';
+  const min = toNumber(rule.min_value);
+  const max = toNumber(rule.max_value);
+  if (min !== null && max !== null) return `${min}–${max}`;
+  if (min !== null) return `≥ ${min}`;
+  if (max !== null) return `≤ ${max}`;
+  return rule.acceptable_option || '—';
+}
+
+function personName(user: { full_name: string | null; username: string } | null | undefined): string | null {
+  return user ? user.full_name || user.username : null;
+}
+
+async function loadAuditStatuses(
+  tableName: string,
+  recordIds: bigint[]
+): Promise<Map<string, GovernanceAuditStatus>> {
+  const statuses = new Map<string, GovernanceAuditStatus>();
+  if (recordIds.length === 0) return statuses;
+  const audits = await prisma.auditLog.findMany({
+    where: {
+      table_name: tableName,
+      record_id: { in: recordIds },
+      action: { in: Object.values(GOVERNANCE_AUDIT_ACTIONS) },
+    },
+    orderBy: { id: 'asc' },
+  });
+  // Latest audit decision wins.
+  for (const audit of audits) {
+    statuses.set(
+      audit.record_id.toString(),
+      audit.action === GOVERNANCE_AUDIT_ACTIONS.APPROVED ? 'APPROVED' : 'FLAGGED'
+    );
+  }
+  return statuses;
+}
+
+/**
+ * Manager decisions that replaced the attendant/system result within the audit window,
+ * at ZMCC lab gates and at plant reception, newest first.
+ */
+export async function listGovernanceOverrides(now: Date = new Date()): Promise<GovernanceOverride[]> {
+  const since = new Date(now.getTime() - GOVERNANCE_WINDOW_DAYS * 86400000);
+  const userSelect = { select: { full_name: true, username: true } } as const;
+
+  const [labSessions, plantPortions] = await Promise.all([
+    prisma.zmccLabSession.findMany({
+      where: { manager_review_status: { in: RESOLVED_REVIEW_STATUSES }, manager_reviewed_at: { gte: since } },
+      include: {
+        zmcc: { select: { name: true } },
+        manager_reviewer: userSelect,
+        results: { where: { is_passed: false }, include: { applied_rule: true } },
+        mot_arrival: { select: { zmcc_token: true } },
+        contractor_arrival: { select: { zmcc_token: true, vehicle_number: true } },
+        local_supplier_arrival: { select: { zmcc_token: true, vehicle_number: true } },
+      },
+      orderBy: { manager_reviewed_at: 'desc' },
+    }),
+    prisma.visitPortion.findMany({
+      where: { manager_review_status: { in: RESOLVED_REVIEW_STATUSES }, manager_reviewed_at: { gte: since } },
+      include: {
+        visit: { select: { visit_number: true, vehicle_number: true, procurement_source: { select: { name: true } } } },
+        manager_reviewer: userSelect,
+        plant_lab_results: { where: { is_passed: false }, include: { lab_test: true, applied_rule: true } },
+      },
+      orderBy: { manager_reviewed_at: 'desc' },
+    }),
+  ]);
+
+  const [labStatuses, portionStatuses] = await Promise.all([
+    loadAuditStatuses('zmcc_lab_session', labSessions.map((s) => s.id)),
+    loadAuditStatuses('visit_portion', plantPortions.map((p) => p.id)),
+  ]);
+
+  const overrides: GovernanceOverride[] = [
+    ...labSessions.map((s): GovernanceOverride => {
+      const arrival = s.mot_arrival ?? s.contractor_arrival ?? s.local_supplier_arrival;
+      const vehicle = s.contractor_arrival?.vehicle_number ?? s.local_supplier_arrival?.vehicle_number;
+      return {
+        id: `ZMCC-${s.id}`,
+        reference: [arrival?.zmcc_token, vehicle].filter(Boolean).join(' · ') || `Lab session #${s.id}`,
+        sourceName: s.zmcc?.name ?? null,
+        stage: 'ZMCC_GATE',
+        failedParameter: s.results.map((r) => r.test_name_snapshot).join(', ') || 'No failed test recorded',
+        failedValue: s.results.map((r) => formatResultValue(r.numeric_value, r.text_value, r.unit_snapshot)).join(', ') || '—',
+        toleranceLimit: s.results.map((r) => formatRuleLimit(r.applied_rule)).join(', ') || '—',
+        systemOutcome: s.system_quality_outcome,
+        finalDecision: s.final_decision ?? s.manager_requested_decision,
+        attendantNote: s.rejection_reason,
+        managerJustification: s.manager_review_reason,
+        overruledBy: personName(s.manager_reviewer),
+        timestamp: (s.manager_reviewed_at ?? s.updated_at).toISOString(),
+        status: labStatuses.get(s.id.toString()) ?? 'PENDING_AUDIT',
+      };
+    }),
+    ...plantPortions.map((p): GovernanceOverride => ({
+      id: `PLANT-${p.id}`,
+      reference: `${p.visit.visit_number} · ${p.visit.vehicle_number} · Portion ${p.portion_number}`,
+      sourceName: p.visit.procurement_source?.name ?? null,
+      stage: 'PLANT_RECEPTION',
+      failedParameter: p.plant_lab_results.map((r) => r.lab_test.testName).join(', ') || 'No failed test recorded',
+      failedValue:
+        p.plant_lab_results.map((r) => formatResultValue(r.numeric_value, r.text_value, r.lab_test.unit)).join(', ') || '—',
+      toleranceLimit: p.plant_lab_results.map((r) => formatRuleLimit(r.applied_rule)).join(', ') || '—',
+      systemOutcome: p.system_quality_outcome,
+      finalDecision: p.plant_decision ?? p.manager_requested_decision,
+      attendantNote: p.plant_rejection_reason,
+      managerJustification: p.manager_review_reason,
+      overruledBy: personName(p.manager_reviewer),
+      timestamp: (p.manager_reviewed_at ?? p.updated_at).toISOString(),
+      status: portionStatuses.get(p.id.toString()) ?? 'PENDING_AUDIT',
+    })),
+  ];
+
+  return overrides.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
+
+/** Parses a governance override id into the audited table and record. */
+export function parseGovernanceOverrideId(id: string): { tableName: 'zmcc_lab_session' | 'visit_portion'; recordId: bigint } | null {
+  const match = /^(ZMCC|PLANT)-(\d+)$/.exec(id.trim());
+  if (!match) return null;
+  return { tableName: match[1] === 'ZMCC' ? 'zmcc_lab_session' : 'visit_portion', recordId: BigInt(match[2]) };
+}
+
+/** Records an MPD/QA Head audit decision on a manager override in the audit log. */
+export async function recordGovernanceAudit(params: {
+  overrideId: string;
+  action: 'APPROVED' | 'FLAGGED';
+  remarks: string | null;
+  userId: bigint;
+}): Promise<{ status: number; error?: string; auditedAt?: string }> {
+  const parsed = parseGovernanceOverrideId(params.overrideId);
+  if (!parsed) return { status: 400, error: 'Invalid override id.' };
+
+  const exists =
+    parsed.tableName === 'zmcc_lab_session'
+      ? await prisma.zmccLabSession.count({
+          where: { id: parsed.recordId, manager_review_status: { in: RESOLVED_REVIEW_STATUSES } },
+        })
+      : await prisma.visitPortion.count({
+          where: { id: parsed.recordId, manager_review_status: { in: RESOLVED_REVIEW_STATUSES } },
+        });
+  if (!exists) return { status: 404, error: 'Override record not found.' };
+
+  const audit = await prisma.auditLog.create({
+    data: {
+      table_name: parsed.tableName,
+      record_id: parsed.recordId,
+      action: GOVERNANCE_AUDIT_ACTIONS[params.action],
+      new_values: { decision: params.action, remarks: params.remarks },
+      user_id: params.userId,
+    },
+  });
+  return { status: 200, auditedAt: audit.created_at.toISOString() };
 }
 
 export async function getMpdExecutiveTelemetry(): Promise<MpdExecutiveTelemetry> {
   const calendarDate = getPakistanCalendarDate();
+  // Same day-window convention as the supply-chain loss service, so figures agree.
   const todayStart = new Date(`${calendarDate}T00:00:00.000Z`);
   const todayEnd = new Date(`${calendarDate}T23:59:59.999Z`);
+  const today = { gte: todayStart, lte: todayEnd };
+  const substituteSince = new Date(Date.now() - GOVERNANCE_WINDOW_DAYS * 86400000);
 
-  // 1. Fetch active Procurement Sources (ZMCCs and Plant Contractors) dynamically
-  const activeSources = await prisma.procurementSource.findMany({
-    where: { is_active: true },
-    include: {
-      zmcc_tanks: true,
-      visits: {
-        where: {
-          created_at: { gte: todayStart, lte: todayEnd },
-        },
-        include: {
-          portions: {
-            include: {
-              plant_lab_results: {
-                include: { lab_test: true },
-              },
+  const [
+    activeSources,
+    tankReceipts,
+    activeJourneys,
+    inTransitVisits,
+    zmccLabSessionsToday,
+    plantPortionsToday,
+    failedResultsToday,
+    substituteAudits,
+    governanceOverrides,
+    lossData,
+  ] = await Promise.all([
+    // 1. Active procurement sources with today's dispatches
+    prisma.procurementSource.findMany({
+      where: { is_active: true },
+      include: {
+        zmcc_tanks: { where: { is_active: true } },
+        visits: {
+          // Unsubmitted drafts and cancelled visits are not dispatches.
+          where: { created_at: today, current_status: { notIn: ['DRAFT_DISPATCH', 'CANCELLED'] } },
+          include: {
+            portions: {
+              include: { plant_lab_results: { include: { lab_test: true } } },
             },
           },
         },
       },
-    },
-    orderBy: { name: 'asc' },
-  });
-
-  // 2. Fetch Active MOT Journeys for Today
-  const activeJourneys = await prisma.motJourney.findMany({
-    where: {
-      operational_date: { gte: todayStart, lte: todayEnd },
-    },
-    include: {
-      zmcc: true,
-      route: true,
-      mot_vehicle: true,
-      mot_profile: true,
-      summary: true,
-      collections: true,
-    },
-    orderBy: { created_at: 'desc' },
-  });
-
-  // 3. Fetch In-Transit Tankers (Status: DISPATCHED or IN_TRANSIT)
-  const inTransitVisits = await prisma.vehicleVisit.findMany({
-    where: {
-      current_status: { in: ['DISPATCHED', 'IN_TRANSIT', 'GATE_ENTRY_PENDING', 'WEIGHMENT_GROSS_PENDING'] },
-    },
-    include: {
-      procurement_source: true,
-      portions: {
-        include: {
-          dispatch_lab_results: {
-            include: { lab_test: true },
-          },
-        },
+      orderBy: { name: 'asc' },
+    }),
+    // 2. Milk received into ZMCC tanks today
+    prisma.zmccTankReceipt.findMany({
+      where: { received_at: today },
+      select: { zmcc_id: true, gross_liters: true, lr: true, fat: true, snf: true, at_13ts_liters: true },
+    }),
+    // 3. Today's MOT journeys
+    prisma.motJourney.findMany({
+      where: { operational_date: today },
+      include: {
+        route: true,
+        mot_vehicle: true,
+        mot_profile: true,
+        summary: true,
+        _count: { select: { stops: true, collections: true } },
       },
-    },
-    orderBy: { created_at: 'desc' },
+      orderBy: { created_at: 'desc' },
+    }),
+    // 4. Tankers dispatched but not yet weighed in at the plant
+    prisma.vehicleVisit.findMany({
+      where: {
+        current_status: { in: ['DISPATCHED', 'IN_TRANSIT', 'GATE_ENTRY_PENDING', 'WEIGHMENT_GROSS_PENDING'] },
+      },
+      include: {
+        procurement_source: true,
+        dispatch_lab_results: { include: { lab_test: true } },
+      },
+      orderBy: { created_at: 'desc' },
+    }),
+    // 5. ZMCC lab decisions made today
+    prisma.zmccLabSession.findMany({
+      where: { status: 'COMPLETED', completed_at: today },
+      select: { final_decision: true, decision: true, gross_liters: true },
+    }),
+    // 6. Plant reception decisions made today
+    prisma.visitPortion.findMany({
+      where: { plant_decided_at: today, plant_decision: { in: ['ACCEPTED', 'REJECTED'] } },
+      select: {
+        plant_decision: true,
+        dispatch_quantity_value: true,
+        dispatch_quantity_unit: true,
+        visit: { select: { vehicle_dispatch_density: true } },
+      },
+    }),
+    // 7. Failed tests recorded today at dispatch, plant and ZMCC labs
+    Promise.all([
+      prisma.dispatchLabResult.findMany({ where: { is_passed: false, created_at: today }, select: { lab_test: true } }),
+      prisma.plantLabResult.findMany({ where: { is_passed: false, created_at: today }, select: { lab_test: true } }),
+      prisma.zmccLabResult.findMany({ where: { is_passed: false, created_at: today }, select: { lab_test: true } }),
+    ]),
+    // 8. Emergency substitute vehicles registered recently
+    prisma.auditLog.findMany({
+      where: { table_name: 'mot_vehicle', action: 'EMERGENCY_SUBSTITUTE_VEHICLE_REGISTERED', created_at: { gte: substituteSince } },
+      include: { user: { select: { full_name: true, username: true } } },
+      orderBy: { created_at: 'desc' },
+    }),
+    listGovernanceOverrides(),
+    getSupplyChainLossHierarchy({ period: 'today' }).catch(() => null),
+  ]);
+
+  // ZMCC centers
+  const zmccSources = activeSources.filter((s) => s.source_type === 'ZMCC');
+  const tankStocks = new Map<string, number>();
+  await Promise.all(
+    zmccSources.flatMap((z) => z.zmcc_tanks).map(async (t) => tankStocks.set(t.id.toString(), await getTankPhysicalStock(t.id)))
+  );
+
+  const zmccCenters = zmccSources.map((zmcc) => {
+    const received = tankReceipts.filter((r) => r.zmcc_id === zmcc.id);
+    const dispatched = zmcc.visits.map((v) => ({
+      liters: toNumber(v.vehicle_dispatch_gross_liters) ?? 0,
+      fat: toNumber(v.vehicle_dispatch_fat),
+      lr: toNumber(v.vehicle_dispatch_lr),
+    }));
+    const stock = zmcc.zmcc_tanks.reduce((sum, t) => sum + (tankStocks.get(t.id.toString()) ?? 0), 0);
+    const capacity = zmcc.zmcc_tanks.reduce((sum, t) => sum + (toNumber(t.capacity_liters) ?? 0), 0);
+
+    return {
+      id: zmcc.id.toString(),
+      code: zmcc.code,
+      name: zmcc.name,
+      intakeLiters: round(received.reduce((sum, r) => sum + (toNumber(r.gross_liters) ?? 0), 0)),
+      siloStockLiters: round(stock),
+      siloCapacityPercent: capacity > 0 ? Math.round((stock / capacity) * 100) : null,
+      avgFatPercent: weightedMean(dispatched.map((d) => [d.fat, d.liters])),
+      avgLr: weightedMean(dispatched.map((d) => [d.lr, d.liters])),
+      dispatchedLiters: round(dispatched.reduce((sum, d) => sum + d.liters, 0)),
+      dispatchedTankerCount: dispatched.length,
+      isActive: zmcc.is_active,
+    };
   });
 
-  // 4. Fetch Supply Chain Loss Summary
-  let lossSummary = {
-    tier4TotalLoss: { lossLiters: 0, lossPercent: 0 },
-  };
-  try {
-    const lossData = await getSupplyChainLossHierarchy({ period: 'today' });
-    lossSummary = lossData.summary;
-  } catch (_err) {
-    // Gracefully fallback on empty loss data
+  // Plant contractors (direct to plant)
+  const contractorSources = activeSources.filter((s) => s.source_type === 'CONTRACTOR');
+  const plantContractors = contractorSources.map((c) => {
+    const portions = c.visits.flatMap((v) => v.portions);
+    const decided = portions.filter((p) => p.plant_decision === 'ACCEPTED' || p.plant_decision === 'REJECTED');
+    return {
+      id: c.id.toString(),
+      code: c.code,
+      name: c.name,
+      deliveredLiters: round(c.visits.reduce((sum, v) => sum + (toNumber(v.vehicle_dispatch_gross_liters) ?? 0), 0)),
+      avgFatPercent: mean(portions.map((p) => numericResultFor(p.plant_lab_results, isFatTestCandidate))),
+      avgLr: mean(portions.map((p) => numericResultFor(p.plant_lab_results, isLrTestCandidate))),
+      qualityPassRatePercent: percentOf(decided.filter((p) => p.plant_decision === 'ACCEPTED').length, decided.length),
+    };
+  });
+
+  // Tankers in transit to the plant
+  const inTransitTankers = inTransitVisits.map((v) => ({
+    id: v.id.toString(),
+    vehicleNumber: v.vehicle_number,
+    sourceName: v.procurement_source?.name ?? null,
+    sourceCode: v.procurement_source?.code ?? null,
+    departureTime: v.created_at.toISOString(),
+    grossLiters: toNumber(v.vehicle_dispatch_gross_liters) ?? 0,
+    at13tsLiters: toNumber(v.vehicle_dispatch_at_13ts_liters),
+    temperatureCelsius: mean(
+      v.dispatch_lab_results.filter((r) => isTemperatureTest(r.lab_test)).map((r) => toNumber(r.numeric_value))
+    ),
+    fatPercent: toNumber(v.vehicle_dispatch_fat),
+    lr: toNumber(v.vehicle_dispatch_lr),
+    status: v.current_status,
+  }));
+
+  // MOT routes
+  const motRoutes = activeJourneys.map((j) => ({
+    id: j.id.toString(),
+    routeCode: j.route?.route_code ?? null,
+    routeName: j.route?.name ?? null,
+    vehicleNumber: j.mot_vehicle?.vehicle_number ?? null,
+    motName: j.mot_profile?.name ?? null,
+    completedShops: j._count.collections,
+    totalShops: j._count.stops,
+    grossLiters: toNumber(j.summary?.total_gross_liters) ?? 0,
+    fatPercent: toNumber(j.summary?.weighted_avg_fat),
+    lr: toNumber(j.summary?.weighted_avg_lr),
+    status: j.status,
+    etaOrArrival: j.status === 'COMPLETED' ? 'Arrived ZMCC' : j.status === 'CANCELLED' ? 'Cancelled' : 'Collecting',
+  }));
+
+  // Division intake: ZMCC tank receipts + contractor deliveries, with their quality
+  const contractorVisits = contractorSources.flatMap((c) => c.visits);
+  const intakeRows = [
+    ...tankReceipts.map((r) => ({
+      liters: toNumber(r.gross_liters) ?? 0,
+      fat: toNumber(r.fat),
+      lr: toNumber(r.lr),
+      snf: toNumber(r.snf),
+      at13ts: toNumber(r.at_13ts_liters),
+    })),
+    ...contractorVisits.map((v) => ({
+      liters: toNumber(v.vehicle_dispatch_gross_liters) ?? 0,
+      fat: toNumber(v.vehicle_dispatch_fat),
+      lr: toNumber(v.vehicle_dispatch_lr),
+      snf: toNumber(v.vehicle_dispatch_snf),
+      at13ts: toNumber(v.vehicle_dispatch_at_13ts_liters),
+    })),
+  ];
+  const totalIntakeLiters = round(intakeRows.reduce((sum, r) => sum + r.liters, 0));
+  const at13tsKnown = intakeRows.length > 0 && intakeRows.every((r) => r.at13ts !== null);
+
+  // Quality funnel
+  const zmccTestedLiters = zmccLabSessionsToday.reduce((sum, s) => sum + (toNumber(s.gross_liters) ?? 0), 0);
+  const zmccRejectedLiters = zmccLabSessionsToday
+    .filter((s) => (s.final_decision ?? s.decision) === 'REJECTED')
+    .reduce((sum, s) => sum + (toNumber(s.gross_liters) ?? 0), 0);
+  const plantDecided = plantPortionsToday.map((p) => ({
+    rejected: p.plant_decision === 'REJECTED',
+    liters: portionLiters(p, toNumber(p.visit.vehicle_dispatch_density)) ?? 0,
+  }));
+  const plantDecidedLiters = plantDecided.reduce((sum, p) => sum + p.liters, 0);
+  const plantRejectedLiters = plantDecided.filter((p) => p.rejected).reduce((sum, p) => sum + p.liters, 0);
+
+  const incidents = { formalinCount: 0, ureaCount: 0, waterLowLrCount: 0, cobPositiveCount: 0 };
+  for (const result of failedResultsToday.flat()) {
+    const kind = incidentKind(result.lab_test);
+    if (kind === 'formalin') incidents.formalinCount++;
+    else if (kind === 'urea') incidents.ureaCount++;
+    else if (kind === 'waterLowLr') incidents.waterLowLrCount++;
+    else if (kind === 'cobPositive') incidents.cobPositiveCount++;
   }
 
-  // 5. Aggregate ZMCC Centers
-  const zmccCenters = activeSources
-    .filter((s) => s.source_type === 'ZMCC')
-    .map((zmcc) => {
-      let totalDispatched = 0;
-      let fatSum = 0;
-      let lrSum = 0;
-      let visitCount = 0;
-
-      for (const v of zmcc.visits) {
-        const liters = Number(v.vehicle_dispatch_gross_liters || 0);
-        totalDispatched += liters;
-        if (v.vehicle_dispatch_fat) fatSum += Number(v.vehicle_dispatch_fat) * liters;
-        if (v.vehicle_dispatch_lr) lrSum += Number(v.vehicle_dispatch_lr) * liters;
-        visitCount++;
-      }
-
-      // Calculate Tank Stock
-      let totalStock = 0;
-      let totalCapacity = 0;
-      for (const t of zmcc.zmcc_tanks) {
-        const cap = Number(t.capacity_liters || 50000);
-        totalCapacity += cap;
-        totalStock += Math.round(cap * 0.62); // Baseline live inventory level
-      }
-
-      const siloCapPct = totalCapacity > 0 ? Math.round((totalStock / totalCapacity) * 100) : 0;
-      const avgFat = totalDispatched > 0 ? Number((fatSum / totalDispatched).toFixed(2)) : 4.35;
-      const avgLr = totalDispatched > 0 ? Number((lrSum / totalDispatched).toFixed(2)) : 28.5;
-
-      return {
-        id: zmcc.id.toString(),
-        code: zmcc.code,
-        name: zmcc.name,
-        intakeLiters: totalStock + totalDispatched,
-        siloStockLiters: totalStock,
-        siloCapacityPercent: siloCapPct,
-        avgFatPercent: avgFat,
-        avgLr: avgLr,
-        dispatchedLiters: totalDispatched,
-        dispatchedTankerCount: visitCount,
-        isActive: zmcc.is_active,
-      };
-    });
-
-  // 6. Aggregate Plant Contractors (Direct to Plant)
-  const plantContractors = activeSources
-    .filter((s) => s.source_type === 'CONTRACTOR')
-    .map((c) => {
-      let delivered = 0;
-      let passedPortions = 0;
-      let totalPortions = 0;
-
-      for (const v of c.visits) {
-        delivered += Number(v.vehicle_dispatch_gross_liters || 0);
-        for (const p of v.portions) {
-          totalPortions++;
-          if (p.plant_decision === 'ACCEPTED') passedPortions++;
-        }
-      }
-
-      const passRate = totalPortions > 0 ? Math.round((passedPortions / totalPortions) * 100) : 100;
-
-      return {
-        id: c.id.toString(),
-        code: c.code,
-        name: c.name,
-        deliveredLiters: delivered,
-        avgFatPercent: 4.30,
-        avgLr: 28.2,
-        qualityPassRatePercent: passRate,
-        pricingAgreement: 'Contract Agreement (TS Formula)',
-        erpStatus: (c.code ? 'VERIFIED' : 'PENDING_ERP_MAPPING') as 'VERIFIED' | 'PENDING_ERP_MAPPING',
-      };
-    });
-
-  // 7. Format In-Transit Tankers
-  const inTransitTankers = inTransitVisits.map((v) => {
+  // Emergency substitute vehicles
+  const substituteVehicleIds = substituteAudits.map((a) => a.record_id);
+  const substituteZmccIds = substituteAudits
+    .map((a) => jsonString(a.new_values, 'zmcc_id'))
+    .filter((id): id is string => Boolean(id))
+    .map((id) => BigInt(id));
+  const [substituteVehicles, substituteZmccs] = await Promise.all([
+    prisma.motVehicle.findMany({ where: { id: { in: substituteVehicleIds } }, select: { id: true, is_active: true } }),
+    prisma.procurementSource.findMany({ where: { id: { in: substituteZmccIds } }, select: { id: true, name: true } }),
+  ]);
+  const emergencySubstitutes = substituteAudits.map((a) => {
+    const values = jsonRecord(a.new_values);
+    const zmccId = jsonString(values, 'zmcc_id');
+    const vehicle = substituteVehicles.find((v) => v.id === a.record_id);
     return {
-      id: v.id.toString(),
-      vehicleNumber: v.vehicle_number,
-      driverName: 'Assigned Driver',
-      sourceName: v.procurement_source?.name || 'Chilling Center',
-      sourceCode: v.procurement_source?.code || '',
-      departureTime: v.created_at.toISOString(),
-      grossLiters: Number(v.vehicle_dispatch_gross_liters || 0),
-      at13tsLiters: Number(v.vehicle_dispatch_at_13ts_liters || 0),
-      temperatureCelsius: 3.8,
-      fatPercent: Number(v.vehicle_dispatch_fat || 4.3),
-      lr: Number(v.vehicle_dispatch_lr || 28.4),
-      status: v.current_status,
-      etaPlant: 'In Transit',
+      id: a.id.toString(),
+      vehicleNumber: jsonString(values, 'vehicle_number') || `Vehicle #${a.record_id}`,
+      vehicleType: jsonString(values, 'vehicle_type') || null,
+      zmccName: substituteZmccs.find((z) => z.id.toString() === zmccId)?.name ?? null,
+      registeredBy: personName(a.user),
+      timestamp: a.created_at.toISOString(),
+      status: (vehicle?.is_active ? 'ACTIVE' : 'INACTIVE') as 'ACTIVE' | 'INACTIVE',
     };
   });
 
-  // 8. Format MOT Routes
-  const motRoutes = activeJourneys.map((j) => {
-    const summary = j.summary;
-    return {
-      id: j.id.toString(),
-      routeCode: j.route?.route_code || 'RT-001',
-      routeName: j.route?.name || 'Village Route',
-      vehicleNumber: j.mot_vehicle?.vehicle_number || 'LEA-8921',
-      motName: j.mot_profile?.name || 'MOT Operator',
-      completedShops: j.collections.length,
-      totalShops: Math.max(j.collections.length, 12),
-      grossLiters: Number(summary?.total_gross_liters || 0),
-      fatPercent: Number(summary?.weighted_avg_fat || 4.2),
-      lr: Number(summary?.weighted_avg_lr || 28.0),
-      status: j.status,
-      etaOrArrival: j.status === 'COMPLETED' ? 'Arrived ZMCC' : 'Collecting',
-    };
+  const loss = lossData?.summary ?? null;
+  const tier = (t: { lossLiters: number; lossPercent: number }) => ({
+    lossLiters: round(t.lossLiters),
+    lossPercent: round(t.lossPercent),
   });
-
-  // 9. Total Division Intake Calculations
-  let totalIntakeLiters = 0;
-  zmccCenters.forEach((z) => (totalIntakeLiters += z.intakeLiters));
-  plantContractors.forEach((c) => (totalIntakeLiters += c.deliveredLiters));
-
-  if (totalIntakeLiters === 0) totalIntakeLiters = 284500; // Baseline fallback for display
-
-  let totalInTransitLiters = 0;
-  inTransitTankers.forEach((t) => (totalInTransitLiters += t.grossLiters));
-  if (totalInTransitLiters === 0) totalInTransitLiters = 48000;
-
-  const standardized13Ts = Number((totalIntakeLiters * 0.983).toFixed(2));
 
   return {
     businessDate: calendarDate,
     calendarDate,
     summary: {
       totalIntakeLiters,
-      weightedFatPercent: 4.32,
-      weightedLr: 28.4,
-      weightedSnfPercent: 8.61,
-      standardized13TsLiters: standardized13Ts,
-      inTransitLiters: totalInTransitLiters,
-      inTransitTankerCount: Math.max(inTransitTankers.length, 4),
-      supplyChainLossPercent: Number((lossSummary.tier4TotalLoss?.lossPercent || 0.71).toFixed(2)),
-      supplyChainLossLiters: Number((lossSummary.tier4TotalLoss?.lossLiters || 2010).toFixed(2)),
+      weightedFatPercent: weightedMean(intakeRows.map((r) => [r.fat, r.liters])),
+      weightedLr: weightedMean(intakeRows.map((r) => [r.lr, r.liters])),
+      weightedSnfPercent: weightedMean(intakeRows.map((r) => [r.snf, r.liters])),
+      standardized13TsLiters: at13tsKnown ? round(intakeRows.reduce((sum, r) => sum + (r.at13ts ?? 0), 0)) : null,
+      inTransitLiters: round(inTransitTankers.reduce((sum, t) => sum + t.grossLiters, 0)),
+      inTransitTankerCount: inTransitTankers.length,
+      supplyChainLossPercent: loss ? round(loss.tier4TotalLoss.lossPercent) : null,
+      supplyChainLossLiters: loss ? round(loss.tier4TotalLoss.lossLiters) : null,
       activeZmccCount: zmccCenters.length,
       activeContractorCount: plantContractors.length,
     },
+    lossTiers: loss
+      ? {
+          tier1RouteLoss: tier(loss.tier1RouteLoss),
+          tier2ZmccLoss: tier(loss.tier2ZmccLoss),
+          tier3TransitLoss: tier(loss.tier3TransitLoss),
+          tier4TotalLoss: tier(loss.tier4TotalLoss),
+        }
+      : null,
     motRoutes,
     inTransitTankers,
     zmccCenters,
     plantContractors,
     qualityFunnel: {
-      villageShopRejectedLiters: 420,
-      villageShopRejectionPercent: 0.14,
-      zmccGateRejectedLiters: 1250,
-      zmccGateRejectionPercent: 0.43,
-      plantGateRejectedLiters: 0,
-      plantGateRejectionPercent: 0.0,
-      incidents: {
-        formalinCount: 0,
-        ureaCount: 0,
-        waterLowLrCount: 8,
-        cobPositiveCount: 3,
-      },
+      villageShopRejectedLiters: null,
+      villageShopRejectionPercent: null,
+      zmccGateRejectedLiters: round(zmccRejectedLiters),
+      zmccGateRejectionPercent: percentOf(zmccRejectedLiters, zmccTestedLiters),
+      plantGateRejectedLiters: round(plantRejectedLiters),
+      plantGateRejectionPercent: percentOf(plantRejectedLiters, plantDecidedLiters),
+      incidents,
     },
-    governanceOverrides: [
-      {
-        id: 'OVR-001',
-        reference: 'TKR-0941',
-        sourceName: 'Hasilpur ZMCC',
-        stage: 'ZMCC_GATE',
-        failedParameter: 'Temperature',
-        failedValue: '10.4°C',
-        toleranceLimit: '10.0°C',
-        attendantNote: 'Attendant flagged temperature out of spec.',
-        managerJustification: 'Chiller power dip resolved at 07:00, milk fresh and negative COB.',
-        overruledBy: 'Muhammad Akram (ZMCC Manager)',
-        timestamp: `${calendarDate}T07:45:00.000Z`,
-        status: 'PENDING_AUDIT',
-      },
-    ],
-    emergencySubstitutes: [
-      {
-        id: 'SUB-001',
-        vehicleNumber: 'FSD-9921',
-        vehicleType: 'Suzuki Pickup',
-        replacedVehicleNumber: 'FSD-4019',
-        zmccName: 'Jhang ZMCC',
-        registeredBy: 'PHE Operator Tariq',
-        timestamp: `${calendarDate}T08:15:00.000Z`,
-        status: 'ACTIVE_FIELD',
-      },
-    ],
+    governanceOverrides,
+    emergencySubstitutes,
   };
 }

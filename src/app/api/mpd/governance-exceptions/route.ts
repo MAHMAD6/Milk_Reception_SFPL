@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/backend/core/auth';
 import { prisma } from '@/backend/core/db';
 import { getErrorMessage } from '@/lib/errors';
+import { listGovernanceOverrides, recordGovernanceAudit } from '@/backend/services/mpdExecutiveService';
 
 export const dynamic = 'force-dynamic';
 
@@ -20,26 +21,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'User account inactive.' }, { status: 403 });
     }
 
-    // Return audit logs / override records
-    return NextResponse.json({
-      success: true,
-      items: [
-        {
-          id: 'OVR-001',
-          reference: 'TKR-0941',
-          sourceName: 'Hasilpur ZMCC',
-          stage: 'ZMCC_GATE',
-          failedParameter: 'Temperature',
-          failedValue: '10.4°C',
-          toleranceLimit: '10.0°C',
-          attendantNote: 'Attendant flagged temperature out of spec (+0.4°C drift).',
-          managerJustification: 'Chiller power dip resolved at 07:00, milk organoleptic fresh and negative COB.',
-          overruledBy: 'Muhammad Akram (ZMCC Manager)',
-          timestamp: new Date().toISOString(),
-          status: 'PENDING_AUDIT',
-        },
-      ],
-    });
+    return NextResponse.json({ success: true, items: await listGovernanceOverrides() });
   } catch (error) {
     return NextResponse.json(
       { error: getErrorMessage(error) || 'Failed to fetch governance exceptions.' },
@@ -73,13 +55,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid action or exceptionId.' }, { status: 400 });
     }
 
-    // In a production setup with persistent audit log table, we would record the audit log here.
+    const trimmedRemarks = typeof remarks === 'string' && remarks.trim() ? remarks.trim() : null;
+    const result = await recordGovernanceAudit({
+      overrideId: String(exceptionId),
+      action,
+      remarks: trimmedRemarks,
+      userId: user.id,
+    });
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: result.status });
+    }
+
     return NextResponse.json({
       success: true,
       message: `Override ${exceptionId} has been marked as ${action}.`,
       auditedBy: user.username,
-      auditedAt: new Date().toISOString(),
-      remarks: remarks || '',
+      auditedAt: result.auditedAt,
+      remarks: trimmedRemarks ?? '',
     });
   } catch (error) {
     return NextResponse.json(

@@ -3,9 +3,15 @@
 import React from 'react';
 import { FlaskConical, Filter } from 'lucide-react';
 import type { QualityFunnelTelemetry } from '../types';
+import { formatMetric } from '../format';
 
 interface MpdQualityScreenProps {
   qualityFunnel: QualityFunnelTelemetry;
+}
+
+/** Green when nothing was flagged today, red otherwise. */
+function IncidentDot({ count }: { count: number }) {
+  return <span className={`w-2.5 h-2.5 rounded-full ${count > 0 ? 'bg-rose-500' : 'bg-emerald-500'}`} />;
 }
 
 export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunnel }) => {
@@ -31,17 +37,17 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
             </div>
             <div className="mt-4">
               <div className="text-2xl font-semibold tabular-nums text-foreground">
-                {qualityFunnel.villageShopRejectedLiters.toLocaleString()} L
+                {formatMetric(qualityFunnel.villageShopRejectedLiters, ' L')}
               </div>
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Rejection Rate:</span>
-                <span className="tabular-nums font-semibold text-amber-700">
-                  {qualityFunnel.villageShopRejectionPercent}%
+                <span className="tabular-nums font-semibold text-slate-700">
+                  {formatMetric(qualityFunnel.villageShopRejectionPercent, '%')}
                 </span>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-border text-xs text-slate-600">
-              Rejected at local supplier source before pouring into MOT van cans or drums.
+              Not tracked yet: MOT shop collections do not record rejected milk.
             </div>
           </div>
 
@@ -60,12 +66,12 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Rejection Rate:</span>
                 <span className="tabular-nums font-semibold text-amber-700">
-                  {qualityFunnel.zmccGateRejectionPercent}%
+                  {formatMetric(qualityFunnel.zmccGateRejectionPercent, '%')}
                 </span>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-border text-xs text-slate-600">
-              Rejected at chilling center gate before mixing into bulk chilling silos.
+              Liters rejected by ZMCC lab decisions today, of all liters tested.
             </div>
           </div>
 
@@ -78,18 +84,18 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
               </span>
             </div>
             <div className="mt-4">
-              <div className="text-2xl font-semibold tabular-nums text-emerald-700">
+              <div className="text-2xl font-semibold tabular-nums text-foreground">
                 {qualityFunnel.plantGateRejectedLiters.toLocaleString()} L
               </div>
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Plant Rejection:</span>
-                <span className="tabular-nums font-semibold text-emerald-700">
-                  {qualityFunnel.plantGateRejectionPercent}% (Zero Spill)
+                <span className="tabular-nums font-semibold text-amber-700">
+                  {formatMetric(qualityFunnel.plantGateRejectionPercent, '%')}
                 </span>
               </div>
             </div>
             <div className="mt-4 pt-3 border-t border-border text-xs text-slate-600">
-              Protected by upstream screening. Zero contaminated milk reached Plant silos.
+              Portion liters rejected by plant QA today, of all portions decided.
             </div>
           </div>
         </div>
@@ -105,7 +111,7 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
             </h2>
           </div>
           <span className="text-xs font-medium text-slate-500">
-            Real-time automated chemical strip & lactometer flags
+            Failed tests recorded today at dispatch, ZMCC and plant labs
           </span>
         </div>
 
@@ -113,7 +119,7 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
           <div className="p-3.5 rounded-lg border border-border bg-subtle">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-600">Formalin (Preservative)</span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <IncidentDot count={qualityFunnel.incidents.formalinCount} />
             </div>
             <div className="mt-2 text-xl tabular-nums font-semibold text-slate-800">
               {qualityFunnel.incidents.formalinCount} flags
@@ -123,32 +129,32 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
 
           <div className="p-3.5 rounded-lg border border-border bg-subtle">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">Urea / Synthetic Fat</span>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+              <span className="text-xs font-semibold text-slate-600">Urea</span>
+              <IncidentDot count={qualityFunnel.incidents.ureaCount} />
             </div>
             <div className="mt-2 text-xl tabular-nums font-semibold text-slate-800">
               {qualityFunnel.incidents.ureaCount} flags
             </div>
-            <div className="mt-1 text-xs text-slate-500">Zero contamination</div>
+            <div className="mt-1 text-xs text-slate-500">Strict zero tolerance</div>
           </div>
 
           <div className="p-3.5 rounded-lg border border-border bg-subtle">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">Added Water (Low LR &lt; 26)</span>
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-xs font-semibold text-slate-600">Added Water (LR out of range)</span>
+              <IncidentDot count={qualityFunnel.incidents.waterLowLrCount} />
             </div>
-            <div className="mt-2 text-xl tabular-nums font-semibold text-amber-700">
+            <div className="mt-2 text-xl tabular-nums font-semibold text-slate-800">
               {qualityFunnel.incidents.waterLowLrCount} flags
             </div>
-            <div className="mt-1 text-xs text-slate-500">Diverted/Penalized at shop</div>
+            <div className="mt-1 text-xs text-slate-500">Failed lactometer reading</div>
           </div>
 
           <div className="p-3.5 rounded-lg border border-border bg-subtle">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600">COB Positive / High Acidity</span>
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+              <span className="text-xs font-semibold text-slate-600">Clot on Boiling Positive</span>
+              <IncidentDot count={qualityFunnel.incidents.cobPositiveCount} />
             </div>
-            <div className="mt-2 text-xl tabular-nums font-semibold text-amber-700">
+            <div className="mt-2 text-xl tabular-nums font-semibold text-slate-800">
               {qualityFunnel.incidents.cobPositiveCount} flags
             </div>
             <div className="mt-1 text-xs text-slate-500">Heat stability test failed</div>

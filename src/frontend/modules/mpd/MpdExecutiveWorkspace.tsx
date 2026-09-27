@@ -207,7 +207,7 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
             {activeTab === 'QUALITY_FUNNEL' && (
               <MpdQualityScreen qualityFunnel={telemetry.qualityFunnel} />
             )}
-            {activeTab === 'LOSS_DIAGNOSTICS' && <MpdLossScreen summary={telemetry.summary} />}
+            {activeTab === 'LOSS_DIAGNOSTICS' && <MpdLossScreen lossTiers={telemetry.lossTiers} />}
             {activeTab === 'GOVERNANCE' && (
               <MpdGovernanceScreen
                 overrides={telemetry.governanceOverrides}

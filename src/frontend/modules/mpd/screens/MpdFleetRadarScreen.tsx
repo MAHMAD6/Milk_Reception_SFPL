@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Truck, Navigation, Thermometer, ShieldAlert, Clock, Search } from 'lucide-react';
 import type { InTransitTankerTelemetry, MotRouteTelemetry, EmergencySubstituteTelemetry } from '../types';
+import { formatMetric, NO_DATA } from '../format';
 
 interface MpdFleetRadarScreenProps {
   tankers: InTransitTankerTelemetry[];
@@ -14,20 +15,12 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'TANKERS' | 'MOT_ROUTES' | 'SUBSTITUTES'>('ALL');
 
-  const filteredTankers = tankers.filter(
-    (t) =>
-      t.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.sourceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      t.driverName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const matches = (...fields: Array<string | null>) =>
+    fields.some((field) => (field ?? '').toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const filteredRoutes = routes.filter(
-    (r) =>
-      r.routeCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.routeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.motName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      r.vehicleNumber.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredTankers = tankers.filter((t) => matches(t.vehicleNumber, t.sourceName, t.sourceCode));
+
+  const filteredRoutes = routes.filter((r) => matches(r.routeCode, r.routeName, r.motName, r.vehicleNumber));
 
   return (
     <div className="space-y-6">
@@ -37,7 +30,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Search vehicle number, driver, MOT, or ZMCC source..."
+            placeholder="Search vehicle number, MOT, route, or ZMCC source..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-border focus:outline-hidden focus:border-primary bg-subtle"
@@ -82,12 +75,12 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
             <table className="w-full text-left text-xs border-collapse">
               <thead>
                 <tr className="bg-subtle border-b border-border text-slate-600 font-semibold">
-                  <th className="py-3 px-4">Vehicle / Driver</th>
+                  <th className="py-3 px-4">Vehicle</th>
                   <th className="py-3 px-4">Origin ZMCC</th>
                   <th className="py-3 px-4 text-right">Volume</th>
                   <th className="py-3 px-4 text-center">Quality (Fat / LR)</th>
                   <th className="py-3 px-4 text-center">Temp</th>
-                  <th className="py-3 px-4">Departure / ETA Plant</th>
+                  <th className="py-3 px-4">Departed</th>
                   <th className="py-3 px-4 text-center">Status</th>
                 </tr>
               </thead>
@@ -103,41 +96,45 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
                     <tr key={t.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-3 px-4">
                         <div className="tabular-nums font-semibold text-foreground">{t.vehicleNumber}</div>
-                        <div className="text-slate-500 text-xs">{t.driverName}</div>
                       </td>
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-slate-800">{t.sourceName}</div>
+                        <div className="font-semibold text-slate-800">{t.sourceName ?? NO_DATA}</div>
                         <div className="text-slate-500 tabular-nums text-xs">{t.sourceCode}</div>
                       </td>
                       <td className="py-3 px-4 text-right">
                         <div className="tabular-nums font-semibold text-foreground">{t.grossLiters.toLocaleString()} L</div>
-                        <div className="text-slate-500 tabular-nums text-xs">{t.at13tsLiters.toLocaleString()} L @13%TS</div>
+                        <div className="text-slate-500 tabular-nums text-xs">{formatMetric(t.at13tsLiters, ' L')} @13%TS</div>
                       </td>
                       <td className="py-3 px-4 text-center tabular-nums">
-                        <span className="font-semibold text-slate-800">{t.fatPercent}%</span>
+                        <span className="font-semibold text-slate-800">{formatMetric(t.fatPercent, '%')}</span>
                         <span className="text-slate-400 mx-1">|</span>
-                        <span className="font-semibold text-slate-800">{t.lr}</span>
+                        <span className="font-semibold text-slate-800">{formatMetric(t.lr)}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1 tabular-nums font-semibold px-2 py-0.5 rounded ${
-                            t.temperatureCelsius <= 4.0
-                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                              : t.temperatureCelsius <= 6.0
-                              ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                              : 'bg-rose-50 text-rose-700 border border-rose-200'
-                          }`}
-                        >
-                          <Thermometer className="w-3 h-3" />
-                          {t.temperatureCelsius}°C
-                        </span>
+                        {t.temperatureCelsius === null ? (
+                          <span className="text-slate-400">{NO_DATA}</span>
+                        ) : (
+                          <span
+                            className={`inline-flex items-center gap-1 tabular-nums font-semibold px-2 py-0.5 rounded ${
+                              t.temperatureCelsius <= 4.0
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : t.temperatureCelsius <= 6.0
+                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                                : 'bg-rose-50 text-rose-700 border border-rose-200'
+                            }`}
+                          >
+                            <Thermometer className="w-3 h-3" />
+                            {t.temperatureCelsius}°C
+                          </span>
+                        )}
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1 text-slate-600">
                           <Clock className="w-3 h-3 text-slate-400" />
-                          <span>Dep: {t.departureTime}</span>
+                          <span className="tabular-nums">
+                            {new Date(t.departureTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
                         </div>
-                        <div className="text-xs font-semibold text-primary">ETA: {t.etaPlant}</div>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span className="inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-primary border border-blue-200">
@@ -192,13 +189,13 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
                   filteredRoutes.map((r) => (
                     <tr key={r.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-3 px-4">
-                        <div className="font-semibold text-foreground">{r.routeName}</div>
+                        <div className="font-semibold text-foreground">{r.routeName ?? NO_DATA}</div>
                         <div className="text-slate-500 text-xs">
-                          <span className="tabular-nums">{r.routeCode}</span> • MOT: <strong className="text-slate-700">{r.motName}</strong>
+                          <span className="tabular-nums">{r.routeCode ?? NO_DATA}</span> • MOT: <strong className="text-slate-700">{r.motName ?? NO_DATA}</strong>
                         </div>
                       </td>
                       <td className="py-3 px-4 tabular-nums font-semibold text-slate-800">
-                        {r.vehicleNumber}
+                        {r.vehicleNumber ?? NO_DATA}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <div className="inline-flex items-center gap-1.5">
@@ -217,9 +214,9 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
                         {r.grossLiters.toLocaleString()} L
                       </td>
                       <td className="py-3 px-4 text-center tabular-nums">
-                        <span className="font-semibold text-slate-800">{r.fatPercent}%</span>
+                        <span className="font-semibold text-slate-800">{formatMetric(r.fatPercent, '%')}</span>
                         <span className="text-slate-400 mx-1">|</span>
-                        <span className="font-semibold text-slate-800">{r.lr}</span>
+                        <span className="font-semibold text-slate-800">{formatMetric(r.lr)}</span>
                       </td>
                       <td className="py-3 px-4 text-slate-700 font-medium">
                         {r.etaOrArrival}
@@ -255,7 +252,7 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
               </h2>
             </div>
             <span className="text-xs tabular-nums font-medium text-slate-500">
-              {substitutes.length} record(s) today
+              {substitutes.length} record(s) · last 30 days
             </span>
           </div>
 
@@ -264,7 +261,6 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
               <thead>
                 <tr className="bg-subtle border-b border-border text-slate-600 font-semibold">
                   <th className="py-3 px-4">Substitute Vehicle</th>
-                  <th className="py-3 px-4">Replaced Broken Vehicle</th>
                   <th className="py-3 px-4">ZMCC Assignment</th>
                   <th className="py-3 px-4">Registered By / Timestamp</th>
                   <th className="py-3 px-4 text-center">Status</th>
@@ -273,8 +269,8 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
               <tbody className="divide-y divide-border">
                 {substitutes.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-6 text-center text-slate-500">
-                      No emergency vehicle replacements active.
+                    <td colSpan={4} className="py-6 text-center text-slate-500">
+                      No emergency substitute vehicles registered in the last 30 days.
                     </td>
                   </tr>
                 ) : (
@@ -282,18 +278,15 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
                     <tr key={s.id} className="hover:bg-slate-50/80 transition-colors">
                       <td className="py-3 px-4">
                         <div className="tabular-nums font-semibold text-foreground">{s.vehicleNumber}</div>
-                        <div className="text-slate-500 text-xs">{s.vehicleType}</div>
-                      </td>
-                      <td className="py-3 px-4 tabular-nums font-semibold text-rose-700">
-                        {s.replacedVehicleNumber} (Broken)
+                        <div className="text-slate-500 text-xs">{s.vehicleType ?? NO_DATA}</div>
                       </td>
                       <td className="py-3 px-4 font-medium text-slate-800">
-                        {s.zmccName}
+                        {s.zmccName ?? NO_DATA}
                       </td>
                       <td className="py-3 px-4">
-                        <div className="text-slate-800 font-semibold">{s.registeredBy}</div>
+                        <div className="text-slate-800 font-semibold">{s.registeredBy ?? NO_DATA}</div>
                         <div className="text-slate-500 text-xs tabular-nums">
-                          {new Date(s.timestamp).toLocaleTimeString()}
+                          {new Date(s.timestamp).toLocaleString()}
                         </div>
                       </td>
                       <td className="py-3 px-4 text-center">

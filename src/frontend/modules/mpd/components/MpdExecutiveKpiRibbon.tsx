@@ -5,6 +5,7 @@ import { Droplet, Truck, ShieldAlert, Layers, Building2 } from 'lucide-react';
 import { StatCard } from '@/components/ui/stat-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { MpdSummary } from '../types';
+import { formatMetric } from '../format';
 
 interface MpdExecutiveKpiRibbonProps {
   summary: MpdSummary;
@@ -23,7 +24,7 @@ export const MpdExecutiveKpiRibbon: React.FC<MpdExecutiveKpiRibbonProps> = ({ su
         value={isLoading ? loadingValue : `${summary.totalIntakeLiters.toLocaleString()} L`}
         hint={
           <span className="tabular-nums">
-            Fat {summary.weightedFatPercent}% · LR {summary.weightedLr}
+            Fat {formatMetric(summary.weightedFatPercent, '%')} · LR {formatMetric(summary.weightedLr)}
           </span>
         }
       />
@@ -31,7 +32,7 @@ export const MpdExecutiveKpiRibbon: React.FC<MpdExecutiveKpiRibbonProps> = ({ su
         label="13% TS equivalent"
         icon={Layers}
         tone="success"
-        value={isLoading ? loadingValue : `${summary.standardized13TsLiters.toLocaleString()} L`}
+        value={isLoading ? loadingValue : formatMetric(summary.standardized13TsLiters, ' L')}
         hint="Total-solids standardized volume"
       />
       <StatCard
@@ -49,10 +50,10 @@ export const MpdExecutiveKpiRibbon: React.FC<MpdExecutiveKpiRibbonProps> = ({ su
         label="Supply chain loss"
         icon={ShieldAlert}
         tone="warning"
-        value={isLoading ? loadingValue : `${summary.supplyChainLossPercent}%`}
+        value={isLoading ? loadingValue : formatMetric(summary.supplyChainLossPercent, '%')}
         hint={
           <span>
-            Net <span className="tabular-nums">{summary.supplyChainLossLiters.toLocaleString()} L</span> across 4 tiers
+            Net <span className="tabular-nums">{formatMetric(summary.supplyChainLossLiters, ' L')}</span> across 4 tiers
           </span>
         }
       />
