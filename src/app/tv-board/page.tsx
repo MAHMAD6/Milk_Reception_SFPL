@@ -34,17 +34,20 @@ export default function PublicYardTVBoardPage() {
     loadUser();
   }, []);
 
-  const fetchLogs = useCallback(async () => {
-    try {
-      const res = await fetch('/api/tv-board');
-      if (res.ok) {
-        const data = await res.json();
-        setActiveVehicles(data.vehicles || []);
-      }
-    } catch (_err) {
-      // Handled
-    }
-  }, []);
+  const fetchLogs = useCallback(
+    () =>
+      fetch('/api/tv-board')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setActiveVehicles(data.vehicles || []);
+          }
+        })
+        .catch(() => {
+          // Handled
+        }),
+    []
+  );
 
   useEffect(() => {
     fetchLogs();
