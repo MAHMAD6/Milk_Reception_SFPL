@@ -22,26 +22,29 @@ export const SecurityManager: React.FC = () => {
     }, 0);
   }, []);
 
-  const fetchUser = async () => {
-    try {
-      const res = await fetch('/api/auth/me');
-      const data = await res.json();
-      if (data.user) setCurrentUser(data.user);
-    } catch (_err) {
-      // Fallback
-    }
-  };
+  const fetchUser = () =>
+    fetch('/api/auth/me')
+      .then(async (res) => {
+        const data = await res.json();
+        if (data.user) setCurrentUser(data.user);
+      })
+      .catch(() => {
+        // Fallback
+      });
 
-  const fetchLogs = useCallback(async () => {
-    try {
-      const res = await fetch('/api/logs?mode=live');
-      const data = await res.json();
-      const items = data.items || data.logs;
-      if (items) setLogs(items);
-    } catch (_err) {
-      // Error
-    }
-  }, []);
+  const fetchLogs = useCallback(
+    () =>
+      fetch('/api/logs?mode=live')
+        .then(async (res) => {
+          const data = await res.json();
+          const items = data.items || data.logs;
+          if (items) setLogs(items);
+        })
+        .catch(() => {
+          // Error
+        }),
+    []
+  );
 
   useEffect(() => {
     fetchUser();

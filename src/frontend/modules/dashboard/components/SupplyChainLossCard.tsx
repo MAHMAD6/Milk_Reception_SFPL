@@ -13,6 +13,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { fetchJson } from '@/lib/fetch-json';
 import type { SupplyChainLossSummary } from '@/backend/services/lossCalculationService';
 
 export interface SupplyChainLossCardProps {
@@ -32,34 +33,38 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
   const [isExporting, setIsExporting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchLossData = useCallback(async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const url = new URL('/api/management/reports/loss-reconciliation', window.location.origin);
-      url.searchParams.set('period', period);
-      if (zmccId) {
-        url.searchParams.set('zmccId', zmccId);
-      }
-
-      const res = await fetch(url.toString(), {
-        headers: { Accept: 'application/json' },
-      });
-
-      if (!res.ok) {
-        const errJson = await res.json().catch(() => ({}));
-        throw new Error(errJson.error || 'Failed to load supply chain loss data.');
-      }
-
-      const data = await res.json();
-      setSummary(data.summary);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error fetching loss metrics.';
-      setError(msg);
-    } finally {
-      setIsLoading(false);
+  const fetchLossData = useCallback(() => {
+    const url = new URL('/api/management/reports/loss-reconciliation', window.location.origin);
+    url.searchParams.set('period', period);
+    if (zmccId) {
+      url.searchParams.set('zmccId', zmccId);
     }
+
+    return fetchJson<{ summary: SupplyChainLossSummary }>(
+      url.toString(),
+      { headers: { Accept: 'application/json' } },
+      'Failed to load supply chain loss data.'
+    )
+      .then(
+        (data) => {
+          setSummary(data.summary);
+          setError(null);
+        },
+        (err: unknown) => setError(err instanceof Error ? err.message : 'Error fetching loss metrics.')
+      )
+      .finally(() => setIsLoading(false));
   }, [period, zmccId]);
+
+  const selectPeriod = (next: 'today' | 'wtd' | 'mtd') => {
+    if (next === period) return;
+    setIsLoading(true);
+    setPeriod(next);
+  };
+
+  const refresh = () => {
+    setIsLoading(true);
+    fetchLossData();
+  };
 
   useEffect(() => {
     fetchLossData();
@@ -116,7 +121,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
           <div className="flex items-center p-1 bg-slate-100 rounded-lg border border-slate-200 text-xs font-semibold">
             <button
               type="button"
-              onClick={() => setPeriod('today')}
+              onClick={() => selectPeriod('today')}
               className={`px-2.5 py-1 rounded-md transition-colors ${
                 period === 'today' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
@@ -125,7 +130,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setPeriod('wtd')}
+              onClick={() => selectPeriod('wtd')}
               className={`px-2.5 py-1 rounded-md transition-colors ${
                 period === 'wtd' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
@@ -134,7 +139,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
             </button>
             <button
               type="button"
-              onClick={() => setPeriod('mtd')}
+              onClick={() => selectPeriod('mtd')}
               className={`px-2.5 py-1 rounded-md transition-colors ${
                 period === 'mtd' ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
               }`}
@@ -146,7 +151,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
           {/* Refresh Button */}
           <button
             type="button"
-            onClick={fetchLossData}
+            onClick={refresh}
             disabled={isLoading}
             className="p-1.5 rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors disabled:opacity-50"
             title="Refresh metrics"

@@ -45,6 +45,7 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
   const activeTab = controlledTab !== undefined ? controlledTab : internalTab;
 
   const setActiveTab = (tab: PlantContractorTab) => {
+    if (tab !== activeTab) setLoading(true);
     setInternalTab(tab);
     if (onTabChange) onTabChange(tab);
   };
@@ -67,50 +68,58 @@ export const PlantContractorManagerWorkspace: React.FC<PlantContractorManagerWor
     return currentUser?.zone || currentUser?.department || 'Assigned Plant Contractor';
   }, [currentUser]);
 
-  const fetchLogs = useCallback(
-    async (targetPage: number = 1) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const mode = activeTab === 'LIVE' ? 'live' : 'recent';
-        const params = new URLSearchParams();
-        params.append('mode', mode);
-        params.append('page', String(targetPage));
-        params.append('pageSize', String(pageSize));
+  const loadLogs = useCallback(
+    (targetPage: number = 1) => {
+      const mode = activeTab === 'LIVE' ? 'live' : 'recent';
+      const params = new URLSearchParams();
+      params.append('mode', mode);
+      params.append('page', String(targetPage));
+      params.append('pageSize', String(pageSize));
 
-        const res = await fetch(`/api/logs?${params.toString()}`);
-        const data = await res.json();
-        if (!res.ok) {
-          throw new Error(data.error || 'Failed to fetch operational logs');
-        }
-        const items = data.items || data.logs;
-        if (items) {
-          setLogs(items);
-        }
-        if (data.pagination) {
-          setPage(data.pagination.page || targetPage);
-          setTotalPages(data.pagination.totalPages || data.pagination.total_pages || 1);
-          setTotalRecords(data.pagination.totalRecords || data.pagination.total_count || 0);
-          setHasMore(Boolean(data.pagination.hasMore ?? data.pagination.has_more));
-        }
-        if (data.summary) {
-          setSummary(data.summary);
-        }
-        if (data.serverBusinessDate) {
-          setServerBusinessDate(data.serverBusinessDate);
-        }
-      } catch (err) {
-        setError(getErrorMessage(err) || 'Failed to load contractor operational logs');
-      } finally {
-        setLoading(false);
-      }
+      return fetch(`/api/logs?${params.toString()}`)
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) {
+            throw new Error(data.error || 'Failed to fetch operational logs');
+          }
+          const items = data.items || data.logs;
+          if (items) {
+            setLogs(items);
+          }
+          if (data.pagination) {
+            setPage(data.pagination.page || targetPage);
+            setTotalPages(data.pagination.totalPages || data.pagination.total_pages || 1);
+            setTotalRecords(data.pagination.totalRecords || data.pagination.total_count || 0);
+            setHasMore(Boolean(data.pagination.hasMore ?? data.pagination.has_more));
+          }
+          if (data.summary) {
+            setSummary(data.summary);
+          }
+          if (data.serverBusinessDate) {
+            setServerBusinessDate(data.serverBusinessDate);
+          }
+          setError(null);
+        })
+        .catch((err) => {
+          setError(getErrorMessage(err) || 'Failed to load contractor operational logs');
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     },
     [activeTab, pageSize]
   );
 
+  // User-initiated reloads show the loading state; the mount/tab effect does not need to.
+  const fetchLogs = (targetPage: number = 1) => {
+    setLoading(true);
+    setError(null);
+    return loadLogs(targetPage);
+  };
+
   useEffect(() => {
-    fetchLogs(1);
-  }, [fetchLogs]);
+    loadLogs(1);
+  }, [loadLogs]);
 
   return (
     <div className="flex-1 flex flex-col min-w-0 overflow-hidden w-full max-w-full">
