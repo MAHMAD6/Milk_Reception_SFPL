@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useEffectEvent } from 'react';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
 import { useToast } from '@/frontend/context/ToastContext';
 import { User } from '@core/types';
@@ -46,10 +46,129 @@ interface DynamicDispatchFormProps {
   onSuccess?: () => void;
 }
 
+/** Vehicle LR & Fat from the portions: quantity-weighted average, else a simple average, else ''. */
+function computeAutoVehicleQuality(portions: PortionFormState[], labTests: LabTestDef[]): { lr: string; fat: string } {
+  const lrTest = labTests.find(
+    (t) => t.testName.toLowerCase().includes('lactometer') || t.testName.toLowerCase().includes('lr')
+  );
+  const fatTest = labTests.find(
+    (t) =>
+      t.testName.toLowerCase().includes('fat') &&
+      !t.testName.toLowerCase().includes('ratio') &&
+      !t.testName.toLowerCase().includes('snf')
+  );
+
+  let totalQty = 0;
+  let weightedLrSum = 0;
+  let weightedFatSum = 0;
+  let simpleLrSum = 0;
+  let simpleFatSum = 0;
+  let validLrCount = 0;
+  let validFatCount = 0;
+
+  portions.forEach((p) => {
+    const qty = parseFloat(p.quantity.value) || 0;
+    const lrRes = lrTest ? p.results[lrTest.testId] : null;
+    const fatRes = fatTest ? p.results[fatTest.testId] : null;
+
+    const lrVal = lrRes && lrRes.performanceStatus === 'PERFORMED' && lrRes.numericValue !== ''
+      ? parseFloat(lrRes.numericValue)
+      : null;
+    const fatVal = fatRes && fatRes.performanceStatus === 'PERFORMED' && fatRes.numericValue !== ''
+      ? parseFloat(fatRes.numericValue)
+      : null;
+
+    if (lrVal !== null && !isNaN(lrVal)) {
+      simpleLrSum += lrVal;
+      validLrCount++;
+      if (qty > 0) {
+        weightedLrSum += qty * lrVal;
+      }
+    }
+
+    if (fatVal !== null && !isNaN(fatVal)) {
+      simpleFatSum += fatVal;
+      validFatCount++;
+      if (qty > 0) {
+        weightedFatSum += qty * fatVal;
+      }
+    }
+
+    if (qty > 0) {
+      totalQty += qty;
+    }
+  });
+
+  const lr =
+    totalQty > 0 && weightedLrSum > 0
+      ? (weightedLrSum / totalQty).toFixed(2)
+      : validLrCount > 0
+        ? (simpleLrSum / validLrCount).toFixed(2)
+        : '';
+  const fat =
+    totalQty > 0 && weightedFatSum > 0
+      ? (weightedFatSum / totalQty).toFixed(2)
+      : validFatCount > 0
+        ? (simpleFatSum / validFatCount).toFixed(2)
+        : '';
+  return { lr, fat };
+}
+
+interface StartedDispatchWorkItem {
+  visitId: string;
+  assignedTests?: LabTestDef[];
+  quantityPolicy?: DispatchQuantityPolicySnapshotDTO | null;
+}
+
+/**
+ * Resumes the draft saved for this user/source (unless forceNew) or starts a new dispatch
+ * work item. A stale saved draft (404/400/403) is dropped and a fresh one is created.
+ */
+async function startDispatchWorkItem(
+  targetSourceId: string,
+  scopedKey: string | null,
+  forceNew: boolean
+): Promise<StartedDispatchWorkItem> {
+  const savedDraftId = !forceNew && scopedKey && typeof window !== 'undefined'
+    ? sessionStorage.getItem(scopedKey)
+    : null;
+
+  let res = await fetch('/api/dispatches/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      visitId: savedDraftId || undefined,
+      procurementSourceId: targetSourceId,
+    }),
+  });
+
+  let data = await res.json();
+
+  // Stale draft recovery: if saved draft is invalid (404/400/403), remove stale key and create fresh draft
+  if (!res.ok && savedDraftId && (res.status === 404 || res.status === 400 || res.status === 403)) {
+    if (scopedKey && typeof window !== 'undefined') {
+      sessionStorage.removeItem(scopedKey);
+    }
+    res = await fetch('/api/dispatches/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        procurementSourceId: targetSourceId,
+      }),
+    });
+    data = await res.json();
+  }
+
+  if (!res.ok) {
+    throw new Error(data.error || 'Failed to start dispatch work item');
+  }
+  return data;
+}
+
 export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ currentUser, onSuccess }) => {
   const toast = useToast();
   const [labTests, setLabTests] = useState<LabTestDef[]>([]);
-  const [isLoadingTests, setIsLoadingTests] = useState(false);
+  const [restartingWorkItem, setRestartingWorkItem] = useState(false);
 
   const [availableSources, setAvailableSources] = useState<Array<{ id: string; name: string; source_type: string }>>([]);
   const [selectedSourceId, setSelectedSourceId] = useState<string>('');
@@ -68,8 +187,8 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
     basis: 'MEASURED',
   });
   const [vehicleQuantityError, setVehicleQuantityError] = useState<string | null>(null);
-  const [vehicleLr, setVehicleLr] = useState<string>('');
-  const [vehicleFat, setVehicleFat] = useState<string>('');
+  const [manualVehicleLr, setVehicleLr] = useState<string>('');
+  const [manualVehicleFat, setVehicleFat] = useState<string>('');
   const [isVehicleQualityAuto, setIsVehicleQualityAuto] = useState<boolean>(true);
 
   // Portions Draft State
@@ -144,7 +263,11 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
   const inFlightInitRef = useRef<{ userId: string; sourceId: string } | null>(null);
   const initSeqRef = useRef(0);
 
-  const initializeDispatchWorkItem = async (targetSourceId: string, forceNew = false) => {
+  // Source whose work-item initialization last settled; any other source is still loading.
+  const [testsLoadedForSourceId, setTestsLoadedForSourceId] = useState<string | null>(null);
+  const isLoadingTests = restartingWorkItem || (Boolean(effectiveSourceId) && testsLoadedForSourceId !== effectiveSourceId);
+
+  const initializeDispatchWorkItem = (targetSourceId: string, forceNew = false) => {
     if (!currentUser || !targetSourceId) return;
 
     if (
@@ -155,52 +278,16 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
       return;
     }
 
-    inFlightInitRef.current = { userId: currentUser.id, sourceId: targetSourceId };
+    const userId = currentUser.id;
+    inFlightInitRef.current = { userId, sourceId: targetSourceId };
     const currentSeq = ++initSeqRef.current;
-    setIsLoadingTests(true);
+    const scopedKey = getScopedDraftKey(userId, targetSourceId);
 
-    const scopedKey = getScopedDraftKey(currentUser.id, targetSourceId);
-    try {
-      const savedDraftId = !forceNew && scopedKey && typeof window !== 'undefined'
-        ? sessionStorage.getItem(scopedKey)
-        : null;
+    return startDispatchWorkItem(targetSourceId, scopedKey, forceNew)
+      .then((data) => {
+        // If a newer initialization request began, ignore this outdated response
+        if (initSeqRef.current !== currentSeq || !data.assignedTests) return;
 
-      let res = await fetch('/api/dispatches/start', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          visitId: savedDraftId || undefined,
-          procurementSourceId: targetSourceId,
-        }),
-      });
-
-      let data = await res.json();
-
-      // Stale draft recovery: if saved draft is invalid (404/400/403), remove stale key and create fresh draft
-      if (!res.ok && savedDraftId && (res.status === 404 || res.status === 400 || res.status === 403)) {
-        if (scopedKey && typeof window !== 'undefined') {
-          sessionStorage.removeItem(scopedKey);
-        }
-        res = await fetch('/api/dispatches/start', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            procurementSourceId: targetSourceId,
-          }),
-        });
-        data = await res.json();
-      }
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to start dispatch work item');
-      }
-
-      // If a newer initialization request began, ignore this outdated response
-      if (initSeqRef.current !== currentSeq) {
-        return;
-      }
-
-      if (data.assignedTests) {
         setDraftVisitId(data.visitId);
         if (data.quantityPolicy?.policy) {
           setFrozenQuantityPolicy(data.quantityPolicy);
@@ -239,24 +326,38 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
             ]);
           }
         }
-      }
-    } catch (err) {
-      if (initSeqRef.current === currentSeq) {
-        toast.showError(getErrorMessage(err) || 'Failed to initialize dispatch test catalog', 'Load Error');
-      }
-    } finally {
-      if (inFlightInitRef.current?.userId === currentUser.id && inFlightInitRef.current?.sourceId === targetSourceId) {
-        inFlightInitRef.current = null;
-      }
-      if (initSeqRef.current === currentSeq) {
-        setIsLoadingTests(false);
-      }
-    }
+      })
+      .catch((err) => {
+        if (initSeqRef.current === currentSeq) {
+          toast.showError(getErrorMessage(err) || 'Failed to initialize dispatch test catalog', 'Load Error');
+        }
+      })
+      .finally(() => {
+        if (inFlightInitRef.current?.userId === userId && inFlightInitRef.current?.sourceId === targetSourceId) {
+          inFlightInitRef.current = null;
+        }
+        if (initSeqRef.current === currentSeq) {
+          setRestartingWorkItem(false);
+          setTestsLoadedForSourceId(targetSourceId);
+        }
+      });
   };
+
+  /** Discards the current draft and starts a fresh work item (user actions only). */
+  const restartDispatchWorkItem = (targetSourceId: string) => {
+    setRestartingWorkItem(true);
+    initializeDispatchWorkItem(targetSourceId, true);
+  };
+
+  // Initialize when the source changes. The effect event reads the latest user/source
+  // without re-running initialization when their object identities change.
+  const initializeForSource = useEffectEvent((sourceId: string) => {
+    initializeDispatchWorkItem(sourceId);
+  });
 
   useEffect(() => {
     if (effectiveSourceId) {
-      initializeDispatchWorkItem(effectiveSourceId);
+      initializeForSource(effectiveSourceId);
     }
   }, [effectiveSourceId]);
 
@@ -353,77 +454,10 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
     setIsVehicleQualityAuto(true);
   };
 
-  // Automated Vehicle LR & Fat Calculation from Portions (Weighted Average)
-  useEffect(() => {
-    if (!isVehicleQualityAuto) return;
-
-    const lrTest = labTests.find(
-      (t) => t.testName.toLowerCase().includes('lactometer') || t.testName.toLowerCase().includes('lr')
-    );
-    const fatTest = labTests.find(
-      (t) =>
-        t.testName.toLowerCase().includes('fat') &&
-        !t.testName.toLowerCase().includes('ratio') &&
-        !t.testName.toLowerCase().includes('snf')
-    );
-
-    let totalQty = 0;
-    let weightedLrSum = 0;
-    let weightedFatSum = 0;
-    let simpleLrSum = 0;
-    let simpleFatSum = 0;
-    let validLrCount = 0;
-    let validFatCount = 0;
-
-    portions.forEach((p) => {
-      const qty = parseFloat(p.quantity.value) || 0;
-      const lrRes = lrTest ? p.results[lrTest.testId] : null;
-      const fatRes = fatTest ? p.results[fatTest.testId] : null;
-
-      const lrVal = lrRes && lrRes.performanceStatus === 'PERFORMED' && lrRes.numericValue !== ''
-        ? parseFloat(lrRes.numericValue)
-        : null;
-      const fatVal = fatRes && fatRes.performanceStatus === 'PERFORMED' && fatRes.numericValue !== ''
-        ? parseFloat(fatRes.numericValue)
-        : null;
-
-      if (lrVal !== null && !isNaN(lrVal)) {
-        simpleLrSum += lrVal;
-        validLrCount++;
-        if (qty > 0) {
-          weightedLrSum += qty * lrVal;
-        }
-      }
-
-      if (fatVal !== null && !isNaN(fatVal)) {
-        simpleFatSum += fatVal;
-        validFatCount++;
-        if (qty > 0) {
-          weightedFatSum += qty * fatVal;
-        }
-      }
-
-      if (qty > 0) {
-        totalQty += qty;
-      }
-    });
-
-    if (totalQty > 0 && weightedLrSum > 0) {
-      setVehicleLr((weightedLrSum / totalQty).toFixed(2));
-    } else if (validLrCount > 0) {
-      setVehicleLr((simpleLrSum / validLrCount).toFixed(2));
-    } else {
-      setVehicleLr('');
-    }
-
-    if (totalQty > 0 && weightedFatSum > 0) {
-      setVehicleFat((weightedFatSum / totalQty).toFixed(2));
-    } else if (validFatCount > 0) {
-      setVehicleFat((simpleFatSum / validFatCount).toFixed(2));
-    } else {
-      setVehicleFat('');
-    }
-  }, [portions, labTests, isVehicleQualityAuto]);
+  // Automated Vehicle LR & Fat Calculation from Portions (Weighted Average) unless overridden manually.
+  const autoVehicleQuality = isVehicleQualityAuto ? computeAutoVehicleQuality(portions, labTests) : null;
+  const vehicleLr = autoVehicleQuality ? autoVehicleQuality.lr : manualVehicleLr;
+  const vehicleFat = autoVehicleQuality ? autoVehicleQuality.fat : manualVehicleFat;
 
   // --- Handlers for Portions ---
   const handlePortionQuantityValueChange = (index: number, val: string) => {
@@ -958,7 +992,7 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
 
       // Re-initialize for next work item
       if (effectiveSourceId) {
-        initializeDispatchWorkItem(effectiveSourceId, true);
+        restartDispatchWorkItem(effectiveSourceId);
       }
     } catch (err) {
       toast.showError(getErrorMessage(err) || 'An error occurred while submitting dispatch', 'Submission Error');
@@ -980,7 +1014,7 @@ export const DynamicDispatchForm: React.FC<DynamicDispatchFormProps> = ({ curren
 
     toast.showInfo('Draft cleared. Initializing fresh dispatch work item...');
     if (effectiveSourceId) {
-      initializeDispatchWorkItem(effectiveSourceId, true);
+      restartDispatchWorkItem(effectiveSourceId);
     }
   };
 
