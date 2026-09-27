@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { fmtNum } from '../format';
 import { Droplet, Truck, ShieldAlert, Layers, Building2 } from 'lucide-react';
 import { StatCard } from '@/components/ui/stat-card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -23,7 +24,7 @@ export const MpdExecutiveKpiRibbon: React.FC<MpdExecutiveKpiRibbonProps> = ({ su
         value={isLoading ? loadingValue : `${summary.totalIntakeLiters.toLocaleString()} L`}
         hint={
           <span className="tabular-nums">
-            Fat {summary.weightedFatPercent}% · LR {summary.weightedLr}
+            Fat {fmtNum(summary.weightedFatPercent, '%')} · LR {fmtNum(summary.weightedLr)}
           </span>
         }
       />

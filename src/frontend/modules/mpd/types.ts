@@ -8,9 +8,9 @@ export type MpdTabId =
 
 export interface MpdSummary {
   totalIntakeLiters: number;
-  weightedFatPercent: number;
-  weightedLr: number;
-  weightedSnfPercent: number;
+  weightedFatPercent: number | null;
+  weightedLr: number | null;
+  weightedSnfPercent: number | null;
   standardized13TsLiters: number;
   inTransitLiters: number;
   inTransitTankerCount: number;
@@ -29,8 +29,8 @@ export interface MotRouteTelemetry {
   completedShops: number;
   totalShops: number;
   grossLiters: number;
-  fatPercent: number;
-  lr: number;
+  fatPercent: number | null;
+  lr: number | null;
   status: string;
   etaOrArrival: string;
 }
@@ -44,9 +44,9 @@ export interface InTransitTankerTelemetry {
   departureTime: string;
   grossLiters: number;
   at13tsLiters: number;
-  temperatureCelsius: number;
-  fatPercent: number;
-  lr: number;
+  temperatureCelsius: number | null;
+  fatPercent: number | null;
+  lr: number | null;
   status: string;
   etaPlant: string;
 }
@@ -57,9 +57,9 @@ export interface ZmccCenterTelemetry {
   name: string;
   intakeLiters: number;
   siloStockLiters: number;
-  siloCapacityPercent: number;
-  avgFatPercent: number;
-  avgLr: number;
+  siloCapacityPercent: number | null;
+  avgFatPercent: number | null;
+  avgLr: number | null;
   dispatchedLiters: number;
   dispatchedTankerCount: number;
   isActive: boolean;
@@ -70,16 +70,16 @@ export interface PlantContractorTelemetry {
   code: string;
   name: string;
   deliveredLiters: number;
-  avgFatPercent: number;
-  avgLr: number;
-  qualityPassRatePercent: number;
-  pricingAgreement: string;
+  avgFatPercent: number | null;
+  avgLr: number | null;
+  qualityPassRatePercent: number | null;
+  pricingAgreement: string | null;
   erpStatus: 'VERIFIED' | 'PENDING_ERP_MAPPING';
 }
 
 export interface QualityFunnelTelemetry {
-  villageShopRejectedLiters: number;
-  villageShopRejectionPercent: number;
+  villageShopRejectedLiters: number | null;
+  villageShopRejectionPercent: number | null;
   zmccGateRejectedLiters: number;
   zmccGateRejectionPercent: number;
   plantGateRejectedLiters: number;

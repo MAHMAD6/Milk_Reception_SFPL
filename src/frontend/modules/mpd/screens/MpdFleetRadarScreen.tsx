@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { fmtNum } from '../format';
 import { Truck, Navigation, Thermometer, ShieldAlert, CheckCircle2, Clock, Search } from 'lucide-react';
 import type { InTransitTankerTelemetry, MotRouteTelemetry, EmergencySubstituteTelemetry } from '../types';
 
@@ -114,14 +115,16 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
                         <div className="text-slate-500 tabular-nums text-xs">{t.at13tsLiters.toLocaleString()} L @13%TS</div>
                       </td>
                       <td className="py-3 px-4 text-center tabular-nums">
-                        <span className="font-semibold text-slate-800">{t.fatPercent}%</span>
+                        <span className="font-semibold text-slate-800">{fmtNum(t.fatPercent, '%')}</span>
                         <span className="text-slate-400 mx-1">|</span>
-                        <span className="font-semibold text-slate-800">{t.lr}</span>
+                        <span className="font-semibold text-slate-800">{fmtNum(t.lr)}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span
                           className={`inline-flex items-center gap-1 tabular-nums font-semibold px-2 py-0.5 rounded ${
-                            t.temperatureCelsius <= 4.0
+                            t.temperatureCelsius === null
+                              ? 'bg-slate-50 text-slate-500 border border-slate-200'
+                              : t.temperatureCelsius <= 4.0
                               ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                               : t.temperatureCelsius <= 6.0
                               ? 'bg-amber-50 text-amber-700 border border-amber-200'
@@ -129,13 +132,13 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
                           }`}
                         >
                           <Thermometer className="w-3 h-3" />
-                          {t.temperatureCelsius}°C
+                          {fmtNum(t.temperatureCelsius, '°C')}
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-1 text-slate-600">
                           <Clock className="w-3 h-3 text-slate-400" />
-                          <span>Dep: {t.departureTime}</span>
+                          <span>Dep: {new Date(t.departureTime).toLocaleString('en-GB', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}</span>
                         </div>
                         <div className="text-xs font-semibold text-primary">ETA: {t.etaPlant}</div>
                       </td>
@@ -217,9 +220,9 @@ export const MpdFleetRadarScreen: React.FC<MpdFleetRadarScreenProps> = ({ tanker
                         {r.grossLiters.toLocaleString()} L
                       </td>
                       <td className="py-3 px-4 text-center tabular-nums">
-                        <span className="font-semibold text-slate-800">{r.fatPercent}%</span>
+                        <span className="font-semibold text-slate-800">{fmtNum(r.fatPercent, '%')}</span>
                         <span className="text-slate-400 mx-1">|</span>
-                        <span className="font-semibold text-slate-800">{r.lr}</span>
+                        <span className="font-semibold text-slate-800">{fmtNum(r.lr)}</span>
                       </td>
                       <td className="py-3 px-4 text-slate-700 font-medium">
                         {r.etaOrArrival}

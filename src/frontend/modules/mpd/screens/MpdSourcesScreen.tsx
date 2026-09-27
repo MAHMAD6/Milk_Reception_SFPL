@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { fmtNum } from '../format';
 import { Building2, Building, CheckCircle2, AlertCircle, Droplet, Search, ShieldCheck } from 'lucide-react';
 import type { ZmccCenterTelemetry, PlantContractorTelemetry } from '../types';
 
@@ -105,7 +106,7 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
                     <div>
                       <div className="text-xs text-slate-500 font-medium">Fat / LR</div>
                       <div className="tabular-nums font-semibold text-slate-800 text-xs">
-                        {z.avgFatPercent}% | {z.avgLr}
+                        {fmtNum(z.avgFatPercent, '%')} | {fmtNum(z.avgLr)}
                       </div>
                     </div>
                   </div>
@@ -115,19 +116,19 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
                     <div className="flex items-center justify-between text-xs mb-1">
                       <span className="text-slate-600 font-medium">Silo Inventory</span>
                       <span className="tabular-nums font-semibold text-slate-800">
-                        {z.siloStockLiters.toLocaleString()} L ({z.siloCapacityPercent}%)
+                        {z.siloStockLiters.toLocaleString()} L ({fmtNum(z.siloCapacityPercent, '%')})
                       </span>
                     </div>
                     <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full ${
-                          z.siloCapacityPercent > 85
+                          (z.siloCapacityPercent ?? 0) > 85
                             ? 'bg-amber-500'
-                            : z.siloCapacityPercent > 40
+                            : (z.siloCapacityPercent ?? 0) > 40
                             ? 'bg-primary'
                             : 'bg-slate-300'
                         }`}
-                        style={{ width: `${Math.min(z.siloCapacityPercent, 100)}%` }}
+                        style={{ width: `${Math.min(z.siloCapacityPercent ?? 0, 100)}%` }}
                       />
                     </div>
                   </div>
@@ -190,17 +191,17 @@ export const MpdSourcesScreen: React.FC<MpdSourcesScreenProps> = ({ zmccs, contr
                         {c.deliveredLiters.toLocaleString()} L
                       </td>
                       <td className="py-3 px-4 text-center tabular-nums">
-                        <span className="font-semibold text-slate-800">{c.avgFatPercent}%</span>
+                        <span className="font-semibold text-slate-800">{fmtNum(c.avgFatPercent, '%')}</span>
                         <span className="text-slate-400 mx-1">|</span>
-                        <span className="font-semibold text-slate-800">{c.avgLr}</span>
+                        <span className="font-semibold text-slate-800">{fmtNum(c.avgLr)}</span>
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span className="inline-flex items-center gap-1 tabular-nums font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                          {c.qualityPassRatePercent}%
+                          {fmtNum(c.qualityPassRatePercent, '%')}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-slate-700 font-medium">
-                        {c.pricingAgreement}
+                        {c.pricingAgreement ?? '—'}
                       </td>
                       <td className="py-3 px-4 text-center">
                         <span

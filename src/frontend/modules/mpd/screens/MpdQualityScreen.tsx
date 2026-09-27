@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { fmtNum } from '../format';
 import { ShieldAlert, AlertTriangle, CheckCircle2, FlaskConical, Filter } from 'lucide-react';
 import type { QualityFunnelTelemetry } from '../types';
 
@@ -31,12 +32,12 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
             </div>
             <div className="mt-4">
               <div className="text-2xl font-semibold tabular-nums text-foreground">
-                {qualityFunnel.villageShopRejectedLiters.toLocaleString()} L
+                {fmtNum(qualityFunnel.villageShopRejectedLiters, ' L')}
               </div>
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Rejection Rate:</span>
                 <span className="tabular-nums font-semibold text-amber-700">
-                  {qualityFunnel.villageShopRejectionPercent}%
+                  {fmtNum(qualityFunnel.villageShopRejectionPercent, '%')}
                 </span>
               </div>
             </div>
@@ -84,7 +85,7 @@ export const MpdQualityScreen: React.FC<MpdQualityScreenProps> = ({ qualityFunne
               <div className="mt-1 flex items-center justify-between text-xs">
                 <span className="text-slate-500">Plant Rejection:</span>
                 <span className="tabular-nums font-semibold text-emerald-700">
-                  {qualityFunnel.plantGateRejectionPercent}% (Zero Spill)
+                  {qualityFunnel.plantGateRejectionPercent}%
                 </span>
               </div>
             </div>

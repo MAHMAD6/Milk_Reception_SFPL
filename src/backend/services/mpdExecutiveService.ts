@@ -1,15 +1,23 @@
 import { prisma } from '@core/db';
 import { getSupplyChainLossHierarchy } from './lossCalculationService';
 import { getPakistanCalendarDate } from '@core/business-day';
+import { calculateSNF } from '@backend/utils/milkFormulas';
+import { listGovernanceOverrides, type GovernanceOverride } from './governanceOverrideService';
 
+/**
+ * MPD executive telemetry for the current Pakistan calendar day.
+ *
+ * Every figure is derived from recorded operational data. Where the system holds no
+ * data for a metric the value is `null` (rendered as "—"), never a placeholder number.
+ */
 export interface MpdExecutiveTelemetry {
   businessDate: string;
   calendarDate: string;
   summary: {
     totalIntakeLiters: number;
-    weightedFatPercent: number;
-    weightedLr: number;
-    weightedSnfPercent: number;
+    weightedFatPercent: number | null;
+    weightedLr: number | null;
+    weightedSnfPercent: number | null;
     standardized13TsLiters: number;
     inTransitLiters: number;
     inTransitTankerCount: number;
@@ -27,8 +35,8 @@ export interface MpdExecutiveTelemetry {
     completedShops: number;
     totalShops: number;
     grossLiters: number;
-    fatPercent: number;
-    lr: number;
+    fatPercent: number | null;
+    lr: number | null;
     status: string;
     etaOrArrival: string;
   }>;
@@ -41,9 +49,9 @@ export interface MpdExecutiveTelemetry {
     departureTime: string;
     grossLiters: number;
     at13tsLiters: number;
-    temperatureCelsius: number;
-    fatPercent: number;
-    lr: number;
+    temperatureCelsius: number | null;
+    fatPercent: number | null;
+    lr: number | null;
     status: string;
     etaPlant: string;
   }>;
@@ -53,9 +61,9 @@ export interface MpdExecutiveTelemetry {
     name: string;
     intakeLiters: number;
     siloStockLiters: number;
-    siloCapacityPercent: number;
-    avgFatPercent: number;
-    avgLr: number;
+    siloCapacityPercent: number | null;
+    avgFatPercent: number | null;
+    avgLr: number | null;
     dispatchedLiters: number;
     dispatchedTankerCount: number;
     isActive: boolean;
@@ -65,15 +73,16 @@ export interface MpdExecutiveTelemetry {
     code: string;
     name: string;
     deliveredLiters: number;
-    avgFatPercent: number;
-    avgLr: number;
-    qualityPassRatePercent: number;
-    pricingAgreement: string;
+    avgFatPercent: number | null;
+    avgLr: number | null;
+    qualityPassRatePercent: number | null;
+    pricingAgreement: string | null;
     erpStatus: 'VERIFIED' | 'PENDING_ERP_MAPPING';
   }>;
   qualityFunnel: {
-    villageShopRejectedLiters: number;
-    villageShopRejectionPercent: number;
+    /** Village-shop rejections are not captured by MOT collection; null until they are. */
+    villageShopRejectedLiters: number | null;
+    villageShopRejectionPercent: number | null;
     zmccGateRejectedLiters: number;
     zmccGateRejectionPercent: number;
     plantGateRejectedLiters: number;
@@ -85,20 +94,8 @@ export interface MpdExecutiveTelemetry {
       cobPositiveCount: number;
     };
   };
-  governanceOverrides: Array<{
-    id: string;
-    reference: string;
-    sourceName: string;
-    stage: 'ZMCC_GATE' | 'PLANT_RECEPTION';
-    failedParameter: string;
-    failedValue: string;
-    toleranceLimit: string;
-    attendantNote: string;
-    managerJustification: string;
-    overruledBy: string;
-    timestamp: string;
-    status: 'PENDING_AUDIT' | 'APPROVED' | 'FLAGGED';
-  }>;
+  governanceOverrides: GovernanceOverride[];
+  /** Emergency vehicle substitution is not modelled yet; always empty until it is. */
   emergencySubstitutes: Array<{
     id: string;
     vehicleNumber: string;
@@ -111,222 +108,332 @@ export interface MpdExecutiveTelemetry {
   }>;
 }
 
+const TEST_CODES = {
+  temperature: ['LT-000001'],
+  cob: ['LT-000004'],
+  urea: ['LT-000012'],
+  formalin: ['LT-000018'],
+  lr: ['LT-000008', 'LT-000027'],
+} as const;
+
+const round = (value: number, digits = 2) => Number(value.toFixed(digits));
+const num = (value: unknown): number | null =>
+  value === null || value === undefined || Number.isNaN(Number(value)) ? null : Number(value);
+
+/** Liters-weighted average accumulator; returns null when nothing was weighed. */
+class WeightedAverage {
+  private sum = 0;
+  private weight = 0;
+  add(value: number | null, weight: number) {
+    if (value === null || !(weight > 0)) return;
+    this.sum += value * weight;
+    this.weight += weight;
+  }
+  value(digits = 2): number | null {
+    return this.weight > 0 ? round(this.sum / this.weight, digits) : null;
+  }
+}
+
+function pktDayBounds(calendarDate: string) {
+  return {
+    start: new Date(`${calendarDate}T00:00:00.000+05:00`),
+    end: new Date(`${calendarDate}T23:59:59.999+05:00`),
+  };
+}
+
+function portionLiters(
+  portion: { dispatch_quantity_value: unknown; dispatch_quantity_unit: string | null },
+  density: number | null
+): number | null {
+  const value = num(portion.dispatch_quantity_value);
+  if (value === null) return null;
+  if (portion.dispatch_quantity_unit === 'LITER') return value;
+  if (portion.dispatch_quantity_unit === 'KG' && density && density > 0) return value / density;
+  return null;
+}
+
 export async function getMpdExecutiveTelemetry(): Promise<MpdExecutiveTelemetry> {
   const calendarDate = getPakistanCalendarDate();
-  const todayStart = new Date(`${calendarDate}T00:00:00.000Z`);
-  const todayEnd = new Date(`${calendarDate}T23:59:59.999Z`);
+  const { start: todayStart, end: todayEnd } = pktDayBounds(calendarDate);
+  const today = { gte: todayStart, lte: todayEnd };
 
-  // 1. Fetch active Procurement Sources (ZMCCs and Plant Contractors) dynamically
-  const activeSources = await prisma.procurementSource.findMany({
-    where: { is_active: true },
-    include: {
-      zmcc_tanks: true,
-      visits: {
-        where: {
-          created_at: { gte: todayStart, lte: todayEnd },
-        },
-        include: {
-          portions: {
-            include: {
-              plant_lab_results: {
-                include: { lab_test: true },
-              },
+  const [
+    activeSources,
+    tankLedgerAllTime,
+    tankReceiptsToday,
+    activeJourneys,
+    inTransitVisits,
+    zmccSessionsToday,
+    zmccFailedResults,
+    plantFailedResults,
+    governanceOverrides,
+  ] = await Promise.all([
+    prisma.procurementSource.findMany({
+      where: { is_active: true },
+      include: {
+        zmcc_tanks: { select: { capacity_liters: true, is_active: true } },
+        visits: {
+          where: { created_at: today, current_status: { notIn: ['CANCELLED', 'DRAFT_DISPATCH'] } },
+          select: {
+            vehicle_dispatch_gross_liters: true,
+            vehicle_dispatch_at_13ts_liters: true,
+            vehicle_dispatch_fat: true,
+            vehicle_dispatch_lr: true,
+            vehicle_dispatch_density: true,
+            portions: {
+              select: { plant_decision: true, dispatch_quantity_value: true, dispatch_quantity_unit: true },
             },
           },
         },
       },
-    },
-    orderBy: { name: 'asc' },
-  });
-
-  // 2. Fetch Active MOT Journeys for Today
-  const activeJourneys = await prisma.motJourney.findMany({
-    where: {
-      operational_date: { gte: todayStart, lte: todayEnd },
-    },
-    include: {
-      zmcc: true,
-      route: true,
-      mot_vehicle: true,
-      mot_profile: true,
-      summary: true,
-      collections: true,
-    },
-    orderBy: { created_at: 'desc' },
-  });
-
-  // 3. Fetch In-Transit Tankers (Status: DISPATCHED or IN_TRANSIT)
-  const inTransitVisits = await prisma.vehicleVisit.findMany({
-    where: {
-      current_status: { in: ['DISPATCHED', 'IN_TRANSIT', 'GATE_ENTRY_PENDING', 'WEIGHMENT_GROSS_PENDING'] },
-    },
-    include: {
-      procurement_source: true,
-      portions: {
-        include: {
-          dispatch_lab_results: {
-            include: { lab_test: true },
+      orderBy: { name: 'asc' },
+    }),
+    prisma.zmccTankInventoryTransaction.groupBy({
+      by: ['zmcc_id', 'transaction_type'],
+      _sum: { quantity_liters: true },
+    }),
+    prisma.zmccTankInventoryTransaction.groupBy({
+      by: ['zmcc_id'],
+      where: { transaction_type: 'RECEIPT', operational_timestamp: today },
+      _sum: { quantity_liters: true, at_13ts_liters: true },
+    }),
+    prisma.motJourney.findMany({
+      where: { operational_date: today },
+      include: {
+        route: { select: { route_code: true, name: true } },
+        mot_vehicle: { select: { vehicle_number: true } },
+        mot_profile: { select: { name: true } },
+        summary: true,
+        _count: { select: { stops: true, collections: true } },
+      },
+      orderBy: { created_at: 'desc' },
+    }),
+    prisma.vehicleVisit.findMany({
+      where: { current_status: 'DISPATCHED' },
+      include: {
+        procurement_source: { select: { name: true, code: true } },
+        portions: {
+          select: {
+            dispatch_lab_results: {
+              where: { lab_test: { testCode: { in: [...TEST_CODES.temperature] } } },
+              select: { numeric_value: true },
+            },
           },
         },
       },
-    },
-    orderBy: { created_at: 'desc' },
-  });
+      orderBy: { created_at: 'desc' },
+    }),
+    prisma.zmccLabSession.findMany({
+      where: { status: 'COMPLETED', completed_at: today },
+      select: { decision: true, final_decision: true, gross_liters: true },
+    }),
+    prisma.zmccLabResult.findMany({
+      where: {
+        is_passed: false,
+        session: { completed_at: today },
+        test_code_snapshot: { in: [...TEST_CODES.cob, ...TEST_CODES.urea, ...TEST_CODES.formalin, ...TEST_CODES.lr] },
+      },
+      select: { test_code_snapshot: true },
+    }),
+    prisma.plantLabResult.findMany({
+      where: {
+        is_passed: false,
+        created_at: today,
+        lab_test: { testCode: { in: [...TEST_CODES.cob, ...TEST_CODES.urea, ...TEST_CODES.formalin, ...TEST_CODES.lr] } },
+      },
+      select: { lab_test: { select: { testCode: true } } },
+    }),
+    listGovernanceOverrides().catch((err) => {
+      console.error('[MPD_TELEMETRY_GOVERNANCE_ERROR]', err);
+      return [] as GovernanceOverride[];
+    }),
+  ]);
 
-  // 4. Fetch Supply Chain Loss Summary
-  let lossSummary = {
-    tier4TotalLoss: { lossLiters: 0, lossPercent: 0 },
-  };
+  let lossSummary: { lossLiters: number; lossPercent: number } = { lossLiters: 0, lossPercent: 0 };
   try {
     const lossData = await getSupplyChainLossHierarchy({ period: 'today' });
-    lossSummary = lossData.summary;
-  } catch (_err) {
-    // Gracefully fallback on empty loss data
+    lossSummary = lossData.summary.tier4TotalLoss;
+  } catch (err) {
+    console.error('[MPD_TELEMETRY_LOSS_ERROR]', err);
   }
 
-  // 5. Aggregate ZMCC Centers
+  // Tank ledger: stock is the signed all-time balance; intake is today's receipts.
+  const stockByZmcc = new Map<string, number>();
+  for (const row of tankLedgerAllTime) {
+    const qty = num(row._sum.quantity_liters) ?? 0;
+    const signed = row.transaction_type === 'RECEIPT' || row.transaction_type === 'ADJUSTMENT_IN' ? qty : -qty;
+    const key = row.zmcc_id.toString();
+    stockByZmcc.set(key, (stockByZmcc.get(key) ?? 0) + signed);
+  }
+  const receiptsByZmcc = new Map(
+    tankReceiptsToday.map((row) => [
+      row.zmcc_id.toString(),
+      { liters: num(row._sum.quantity_liters) ?? 0, at13ts: num(row._sum.at_13ts_liters) ?? 0 },
+    ])
+  );
+
+  const divisionFat = new WeightedAverage();
+  const divisionLr = new WeightedAverage();
+  let plantRejectedLiters = 0;
+  let plantAssessedLiters = 0;
+
   const zmccCenters = activeSources
     .filter((s) => s.source_type === 'ZMCC')
     .map((zmcc) => {
-      const totalIntake = 0;
-      let totalDispatched = 0;
-      let fatSum = 0;
-      let lrSum = 0;
-      let visitCount = 0;
+      const fat = new WeightedAverage();
+      const lr = new WeightedAverage();
+      let dispatched = 0;
 
       for (const v of zmcc.visits) {
-        const liters = Number(v.vehicle_dispatch_gross_liters || 0);
-        totalDispatched += liters;
-        if (v.vehicle_dispatch_fat) fatSum += Number(v.vehicle_dispatch_fat) * liters;
-        if (v.vehicle_dispatch_lr) lrSum += Number(v.vehicle_dispatch_lr) * liters;
-        visitCount++;
+        const liters = num(v.vehicle_dispatch_gross_liters) ?? 0;
+        dispatched += liters;
+        fat.add(num(v.vehicle_dispatch_fat), liters);
+        lr.add(num(v.vehicle_dispatch_lr), liters);
+        divisionFat.add(num(v.vehicle_dispatch_fat), liters);
+        divisionLr.add(num(v.vehicle_dispatch_lr), liters);
       }
 
-      // Calculate Tank Stock
-      let totalStock = 0;
-      let totalCapacity = 0;
-      for (const t of zmcc.zmcc_tanks) {
-        const cap = Number(t.capacity_liters || 50000);
-        totalCapacity += cap;
-        totalStock += Math.round(cap * 0.62); // Baseline live inventory level
-      }
-
-      const siloCapPct = totalCapacity > 0 ? Math.round((totalStock / totalCapacity) * 100) : 0;
-      const avgFat = totalDispatched > 0 ? Number((fatSum / totalDispatched).toFixed(2)) : 4.35;
-      const avgLr = totalDispatched > 0 ? Number((lrSum / totalDispatched).toFixed(2)) : 28.5;
+      const capacity = zmcc.zmcc_tanks
+        .filter((t) => t.is_active)
+        .reduce((sum, t) => sum + (num(t.capacity_liters) ?? 0), 0);
+      const stock = round(stockByZmcc.get(zmcc.id.toString()) ?? 0);
 
       return {
         id: zmcc.id.toString(),
         code: zmcc.code,
         name: zmcc.name,
-        intakeLiters: totalStock + totalDispatched,
-        siloStockLiters: totalStock,
-        siloCapacityPercent: siloCapPct,
-        avgFatPercent: avgFat,
-        avgLr: avgLr,
-        dispatchedLiters: totalDispatched,
-        dispatchedTankerCount: visitCount,
+        intakeLiters: round(receiptsByZmcc.get(zmcc.id.toString())?.liters ?? 0),
+        siloStockLiters: stock,
+        siloCapacityPercent: capacity > 0 ? Math.round((stock / capacity) * 100) : null,
+        avgFatPercent: fat.value(),
+        avgLr: lr.value(),
+        dispatchedLiters: round(dispatched),
+        dispatchedTankerCount: zmcc.visits.length,
         isActive: zmcc.is_active,
       };
     });
 
-  // 6. Aggregate Plant Contractors (Direct to Plant)
+  let contractorAt13ts = 0;
   const plantContractors = activeSources
     .filter((s) => s.source_type === 'CONTRACTOR')
     .map((c) => {
+      const fat = new WeightedAverage();
+      const lr = new WeightedAverage();
       let delivered = 0;
-      const fatSum = 0;
-      const lrSum = 0;
-      let passedPortions = 0;
-      let totalPortions = 0;
+      let decidedPortions = 0;
+      let acceptedPortions = 0;
 
       for (const v of c.visits) {
-        delivered += Number(v.vehicle_dispatch_gross_liters || 0);
+        const liters = num(v.vehicle_dispatch_gross_liters) ?? 0;
+        delivered += liters;
+        contractorAt13ts += num(v.vehicle_dispatch_at_13ts_liters) ?? 0;
+        fat.add(num(v.vehicle_dispatch_fat), liters);
+        lr.add(num(v.vehicle_dispatch_lr), liters);
+        divisionFat.add(num(v.vehicle_dispatch_fat), liters);
+        divisionLr.add(num(v.vehicle_dispatch_lr), liters);
         for (const p of v.portions) {
-          totalPortions++;
-          if (p.plant_decision === 'ACCEPTED') passedPortions++;
+          if (p.plant_decision === 'ACCEPTED' || p.plant_decision === 'REJECTED') decidedPortions++;
+          if (p.plant_decision === 'ACCEPTED') acceptedPortions++;
         }
       }
-
-      const passRate = totalPortions > 0 ? Math.round((passedPortions / totalPortions) * 100) : 100;
 
       return {
         id: c.id.toString(),
         code: c.code,
         name: c.name,
-        deliveredLiters: delivered,
-        avgFatPercent: 4.30,
-        avgLr: 28.2,
-        qualityPassRatePercent: passRate,
-        pricingAgreement: 'Contract Agreement (TS Formula)',
+        deliveredLiters: round(delivered),
+        avgFatPercent: fat.value(),
+        avgLr: lr.value(),
+        qualityPassRatePercent: decidedPortions > 0 ? Math.round((acceptedPortions / decidedPortions) * 100) : null,
+        pricingAgreement: null,
         erpStatus: (c.code ? 'VERIFIED' : 'PENDING_ERP_MAPPING') as 'VERIFIED' | 'PENDING_ERP_MAPPING',
       };
     });
 
-  // 7. Format In-Transit Tankers
+  // Plant gate rejection share across every source's visits dispatched today.
+  for (const source of activeSources) {
+    for (const v of source.visits) {
+      const density = num(v.vehicle_dispatch_density);
+      for (const p of v.portions) {
+        if (p.plant_decision !== 'ACCEPTED' && p.plant_decision !== 'REJECTED') continue;
+        const liters = portionLiters(p, density);
+        if (liters === null) continue;
+        plantAssessedLiters += liters;
+        if (p.plant_decision === 'REJECTED') plantRejectedLiters += liters;
+      }
+    }
+  }
+
+  const motRoutes = activeJourneys.map((j) => ({
+    id: j.id.toString(),
+    routeCode: j.route?.route_code || '—',
+    routeName: j.route?.name || '—',
+    vehicleNumber: j.mot_vehicle?.vehicle_number || '—',
+    motName: j.mot_profile?.name || '—',
+    completedShops: j._count.collections,
+    totalShops: Math.max(j._count.stops, j._count.collections),
+    grossLiters: num(j.summary?.total_gross_liters) ?? 0,
+    fatPercent: num(j.summary?.weighted_avg_fat),
+    lr: num(j.summary?.weighted_avg_lr),
+    status: j.status,
+    etaOrArrival: j.status === 'COMPLETED' ? 'Arrived ZMCC' : 'Collecting',
+  }));
+
   const inTransitTankers = inTransitVisits.map((v) => {
+    const temperatures = v.portions
+      .flatMap((p) => p.dispatch_lab_results.map((r) => num(r.numeric_value)))
+      .filter((t): t is number => t !== null);
     return {
       id: v.id.toString(),
       vehicleNumber: v.vehicle_number,
-      driverName: 'Assigned Driver',
-      sourceName: v.procurement_source?.name || 'Chilling Center',
+      driverName: '—',
+      sourceName: v.procurement_source?.name || '—',
       sourceCode: v.procurement_source?.code || '',
       departureTime: v.created_at.toISOString(),
-      grossLiters: Number(v.vehicle_dispatch_gross_liters || 0),
-      at13tsLiters: Number(v.vehicle_dispatch_at_13ts_liters || 0),
-      temperatureCelsius: 3.8,
-      fatPercent: Number(v.vehicle_dispatch_fat || 4.3),
-      lr: Number(v.vehicle_dispatch_lr || 28.4),
+      grossLiters: num(v.vehicle_dispatch_gross_liters) ?? 0,
+      at13tsLiters: num(v.vehicle_dispatch_at_13ts_liters) ?? 0,
+      temperatureCelsius: temperatures.length ? round(temperatures.reduce((a, b) => a + b, 0) / temperatures.length, 1) : null,
+      fatPercent: num(v.vehicle_dispatch_fat),
+      lr: num(v.vehicle_dispatch_lr),
       status: v.current_status,
       etaPlant: 'In Transit',
     };
   });
 
-  // 8. Format MOT Routes
-  const motRoutes = activeJourneys.map((j) => {
-    const summary = j.summary;
-    return {
-      id: j.id.toString(),
-      routeCode: j.route?.route_code || 'RT-001',
-      routeName: j.route?.name || 'Village Route',
-      vehicleNumber: j.mot_vehicle?.vehicle_number || 'LEA-8921',
-      motName: j.mot_profile?.name || 'MOT Operator',
-      completedShops: j.collections.length,
-      totalShops: Math.max(j.collections.length, 12),
-      grossLiters: Number(summary?.total_gross_liters || 0),
-      fatPercent: Number(summary?.weighted_avg_fat || 4.2),
-      lr: Number(summary?.weighted_avg_lr || 28.0),
-      status: j.status,
-      etaOrArrival: j.status === 'COMPLETED' ? 'Arrived ZMCC' : 'Collecting',
-    };
-  });
+  let zmccRejectedLiters = 0;
+  let zmccTestedLiters = 0;
+  for (const s of zmccSessionsToday) {
+    const liters = num(s.gross_liters) ?? 0;
+    zmccTestedLiters += liters;
+    if ((s.final_decision || s.decision) === 'REJECTED') zmccRejectedLiters += liters;
+  }
 
-  // 9. Total Division Intake Calculations
-  let totalIntakeLiters = 0;
-  zmccCenters.forEach((z) => (totalIntakeLiters += z.intakeLiters));
-  plantContractors.forEach((c) => (totalIntakeLiters += c.deliveredLiters));
+  const failedCodes = [
+    ...zmccFailedResults.map((r) => r.test_code_snapshot.toUpperCase()),
+    ...plantFailedResults.map((r) => r.lab_test.testCode.toUpperCase()),
+  ];
+  const countCodes = (codes: readonly string[]) => failedCodes.filter((c) => codes.includes(c)).length;
 
-  if (totalIntakeLiters === 0) totalIntakeLiters = 284500; // Baseline fallback for display
-
-  let totalInTransitLiters = 0;
-  inTransitTankers.forEach((t) => (totalInTransitLiters += t.grossLiters));
-  if (totalInTransitLiters === 0) totalInTransitLiters = 48000;
-
-  const standardized13Ts = Number((totalIntakeLiters * 0.983).toFixed(2));
+  const zmccIntakeLiters = zmccCenters.reduce((sum, z) => sum + z.intakeLiters, 0);
+  const contractorLiters = plantContractors.reduce((sum, c) => sum + c.deliveredLiters, 0);
+  const zmccIntakeAt13ts = Array.from(receiptsByZmcc.values()).reduce((sum, r) => sum + r.at13ts, 0);
+  const weightedFat = divisionFat.value();
+  const weightedLr = divisionLr.value();
+  const pct = (part: number, whole: number) => (whole > 0 ? round((part / whole) * 100) : 0);
 
   return {
     businessDate: calendarDate,
     calendarDate,
     summary: {
-      totalIntakeLiters,
-      weightedFatPercent: 4.32,
-      weightedLr: 28.4,
-      weightedSnfPercent: 8.61,
-      standardized13TsLiters: standardized13Ts,
-      inTransitLiters: totalInTransitLiters,
-      inTransitTankerCount: Math.max(inTransitTankers.length, 4),
-      supplyChainLossPercent: Number((lossSummary.tier4TotalLoss?.lossPercent || 0.71).toFixed(2)),
-      supplyChainLossLiters: Number((lossSummary.tier4TotalLoss?.lossLiters || 2010).toFixed(2)),
+      totalIntakeLiters: round(zmccIntakeLiters + contractorLiters),
+      weightedFatPercent: weightedFat,
+      weightedLr,
+      weightedSnfPercent: weightedFat !== null && weightedLr !== null ? round(calculateSNF(weightedLr, weightedFat)) : null,
+      standardized13TsLiters: round(zmccIntakeAt13ts + contractorAt13ts),
+      inTransitLiters: round(inTransitTankers.reduce((sum, t) => sum + t.grossLiters, 0)),
+      inTransitTankerCount: inTransitTankers.length,
+      supplyChainLossPercent: round(lossSummary.lossPercent || 0),
+      supplyChainLossLiters: round(lossSummary.lossLiters || 0),
       activeZmccCount: zmccCenters.length,
       activeContractorCount: plantContractors.length,
     },
@@ -335,46 +442,20 @@ export async function getMpdExecutiveTelemetry(): Promise<MpdExecutiveTelemetry>
     zmccCenters,
     plantContractors,
     qualityFunnel: {
-      villageShopRejectedLiters: 420,
-      villageShopRejectionPercent: 0.14,
-      zmccGateRejectedLiters: 1250,
-      zmccGateRejectionPercent: 0.43,
-      plantGateRejectedLiters: 0,
-      plantGateRejectionPercent: 0.0,
+      villageShopRejectedLiters: null,
+      villageShopRejectionPercent: null,
+      zmccGateRejectedLiters: round(zmccRejectedLiters),
+      zmccGateRejectionPercent: pct(zmccRejectedLiters, zmccTestedLiters),
+      plantGateRejectedLiters: round(plantRejectedLiters),
+      plantGateRejectionPercent: pct(plantRejectedLiters, plantAssessedLiters),
       incidents: {
-        formalinCount: 0,
-        ureaCount: 0,
-        waterLowLrCount: 8,
-        cobPositiveCount: 3,
+        formalinCount: countCodes(TEST_CODES.formalin),
+        ureaCount: countCodes(TEST_CODES.urea),
+        waterLowLrCount: countCodes(TEST_CODES.lr),
+        cobPositiveCount: countCodes(TEST_CODES.cob),
       },
     },
-    governanceOverrides: [
-      {
-        id: 'OVR-001',
-        reference: 'TKR-0941',
-        sourceName: 'Hasilpur ZMCC',
-        stage: 'ZMCC_GATE',
-        failedParameter: 'Temperature',
-        failedValue: '10.4°C',
-        toleranceLimit: '10.0°C',
-        attendantNote: 'Attendant flagged temperature out of spec.',
-        managerJustification: 'Chiller power dip resolved at 07:00, milk fresh and negative COB.',
-        overruledBy: 'Muhammad Akram (ZMCC Manager)',
-        timestamp: `${calendarDate}T07:45:00.000Z`,
-        status: 'PENDING_AUDIT',
-      },
-    ],
-    emergencySubstitutes: [
-      {
-        id: 'SUB-001',
-        vehicleNumber: 'FSD-9921',
-        vehicleType: 'Suzuki Pickup',
-        replacedVehicleNumber: 'FSD-4019',
-        zmccName: 'Jhang ZMCC',
-        registeredBy: 'PHE Operator Tariq',
-        timestamp: `${calendarDate}T08:15:00.000Z`,
-        status: 'ACTIVE_FIELD',
-      },
-    ],
+    governanceOverrides,
+    emergencySubstitutes: [],
   };
 }
