@@ -314,18 +314,18 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
   // Fetch ZMCC Sources for Super Admin
   useEffect(() => {
     if (isSuperAdmin) {
-      fetch('/api/super-admin/sources?source_type=ZMCC')
+      fetch('/api/zmcc/sources')
         .then((res) => res.json())
         .then((data) => {
-          const list = (data.sources || []).filter((s: ZmccSource) => s.is_active);
+          const list = ((data.zmccs || []) as ZmccSource[]).filter((s) => s.is_active);
           setSources(list);
-          if (list.length > 0 && !selectedZmccId) {
-            setSelectedZmccId(list[0].id);
+          if (list.length > 0) {
+            setSelectedZmccId((current) => current || list[0].id);
           }
         })
         .catch(() => {});
     }
-  }, [isSuperAdmin, selectedZmccId]);
+  }, [isSuperAdmin]);
 
   // Acquire GPS on Dispatch tab. Results arrive in the geolocation callbacks.
   const geolocationSupported = useSyncExternalStore(

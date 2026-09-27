@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useSyncExternalStore } from 'react';
 import { Tv, Radio, Truck, LogIn } from 'lucide-react';
 import { Header } from '@/frontend/modules/shared/Header';
 import { HierarchicalNavDrawer } from '@/frontend/modules/shared/navigation/HierarchicalNavDrawer';
@@ -9,11 +9,25 @@ import { User } from '@core/types';
 import Link from 'next/link';
 import { PageTransition } from '@/components/motion/page-transition';
 
+function subscribeToClock(onTick: () => void) {
+  const id = window.setInterval(onTick, 1000);
+  return () => window.clearInterval(id);
+}
+
+/** Minutes since the epoch, updated on the minute; null while server rendering/hydrating. */
+function useCurrentMinute(): number | null {
+  return useSyncExternalStore(
+    subscribeToClock,
+    () => Math.floor(Date.now() / 60000),
+    () => null
+  );
+}
+
 export default function PublicYardTVBoardPage() {
   const [activeVehicles, setActiveVehicles] = useState<
     Array<{ visitId: string; vehicleNumber: string; stage: string }>
   >([]);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const currentMinute = useCurrentMinute();
   const [user, setUser] = useState<User | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const hamburgerButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -53,7 +67,6 @@ export default function PublicYardTVBoardPage() {
     fetchLogs();
     const interval = setInterval(() => {
       fetchLogs();
-      setCurrentTime(new Date());
     }, 60000); // 60s polling to prevent Database load
     return () => clearInterval(interval);
   }, [fetchLogs]);
@@ -149,7 +162,9 @@ export default function PublicYardTVBoardPage() {
                 <span>LIVE YARD FEED</span>
               </div>
               <div className="px-3.5 py-1.5 rounded-xl bg-muted border border-border tabular-nums text-xs sm:text-sm font-semibold text-foreground">
-                {currentTime.toLocaleTimeString()}
+                {currentMinute === null
+                  ? '--:--'
+                  : new Date(currentMinute * 60000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </div>
             </div>
           </div>
