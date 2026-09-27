@@ -6,6 +6,8 @@ import { ChevronLeft, ChevronRight, RefreshCw, Truck } from 'lucide-react';
 import { DynamicDispatchForm } from '@modules/forms/DynamicDispatchForm';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
+import { useUrlSearchParam } from '@/frontend/hooks/useUrlSearchParam';
 
 interface DispatchRecord {
   id: string;
@@ -53,28 +55,21 @@ interface MPDFieldWorkspaceProps {
 export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
   currentUser,
 }) => {
-  const [activeTab, setActiveTab] = useState<'new' | 'recent'>('new');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab')?.toLowerCase();
-      if (tab === 'recent') {
-        setActiveTab('recent');
-      } else if (tab === 'new') {
-        setActiveTab('new');
-      }
-    }
-  }, []);
+  // The URL's ?tab= picks the initial view until the user chooses one.
+  const urlTab = useUrlSearchParam('tab')?.toLowerCase();
+  const [selectedTab, setActiveTab] = useState<'new' | 'recent' | null>(null);
+  const activeTab: 'new' | 'recent' = selectedTab ?? (urlTab === 'recent' ? 'recent' : 'new');
 
   const [dbDispatches, setDbDispatches] = useState<DispatchRecord[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Date Filter State
   const [dateRange, setDateRange] = useState<'today' | '7d' | '30d' | 'custom'>('7d');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [dateError, setDateError] = useState<string | null>(null);
+  // Custom dates take effect only when applied.
+  const [appliedCustomDates, setAppliedCustomDates] = useState({ from: '', to: '' });
+  const [reloadToken, setReloadToken] = useState(0);
 
   // Server-side Pagination State
   const [page, setPage] = useState(1);
@@ -85,50 +80,41 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
     totalPages: 1,
   });
 
-  const fetchDbDispatches = async (targetPage = page, range = dateRange, fDate = fromDate, tDate = toDate) => {
-    if (!currentUser) {
-      setIsLoading(false);
-      return;
-    }
-    setIsLoading(true);
-    setDateError(null);
-
-    let queryUrl = `/api/dispatches?range=${range}&page=${targetPage}&pageSize=20`;
-
-    if (range === 'custom') {
-      if (fDate && tDate && fDate > tDate) {
-        setDateError('From Date cannot be after To Date');
-        setIsLoading(false);
-        return;
-      }
-      if (fDate) queryUrl += `&fromDate=${fDate}`;
-      if (tDate) queryUrl += `&toDate=${tDate}`;
-    }
-
-    try {
-      const res = await fetch(queryUrl);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to fetch dispatches');
-
-      if (data.dispatches) {
-        setDbDispatches(data.dispatches);
-      }
-      if (data.pagination) {
-        setPagination(data.pagination);
-      }
-    } catch (err) {
-      console.error('Failed to fetch dispatches', err);
-      setDateError(getErrorMessage(err) || 'Failed to fetch dispatches');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  let queryUrl = `/api/dispatches?range=${dateRange}&page=${page}&pageSize=20`;
+  if (dateRange === 'custom') {
+    if (appliedCustomDates.from) queryUrl += `&fromDate=${appliedCustomDates.from}`;
+    if (appliedCustomDates.to) queryUrl += `&toDate=${appliedCustomDates.to}`;
+  }
+  const shouldLoad = activeTab === 'recent' && Boolean(currentUser);
+  const requestKey = `${queryUrl}#${reloadToken}`;
+  // Request whose response last settled; any other key means a fetch is in flight.
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
+  const isLoading = shouldLoad && loadedKey !== requestKey;
 
   useEffect(() => {
-    if (activeTab === 'recent') {
-      fetchDbDispatches(1, dateRange);
-    }
-  }, [activeTab, dateRange]);
+    if (!shouldLoad) return;
+    let ignore = false;
+    fetchJson<{ dispatches?: DispatchRecord[]; pagination?: PaginationMeta }>(queryUrl, undefined, 'Failed to fetch dispatches')
+      .then(
+        (data) => {
+          if (ignore) return;
+          if (data.dispatches) setDbDispatches(data.dispatches);
+          if (data.pagination) setPagination(data.pagination);
+          setDateError(null);
+        },
+        (err) => {
+          if (ignore) return;
+          console.error('Failed to fetch dispatches', err);
+          setDateError(getErrorMessage(err) || 'Failed to fetch dispatches');
+        }
+      )
+      .finally(() => {
+        if (!ignore) setLoadedKey(requestKey);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [shouldLoad, queryUrl, requestKey]);
 
   const handleRangeChange = (newRange: 'today' | '7d' | '30d' | 'custom') => {
     setDateRange(newRange);
@@ -140,14 +126,17 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
       setDateError('From Date cannot be after To Date');
       return;
     }
+    setDateError(null);
     setPage(1);
-    fetchDbDispatches(1, 'custom', fromDate, toDate);
+    setAppliedCustomDates({ from: fromDate, to: toDate });
+    setReloadToken((token) => token + 1);
   };
 
   const handleClearCustomDate = () => {
     setFromDate('');
     setToDate('');
     setDateError(null);
+    setAppliedCustomDates({ from: '', to: '' });
     setDateRange('7d');
     setPage(1);
   };
@@ -155,7 +144,11 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > pagination.totalPages) return;
     setPage(newPage);
-    fetchDbDispatches(newPage, dateRange);
+  };
+
+  const reloadFirstPage = () => {
+    setPage(1);
+    setReloadToken((token) => token + 1);
   };
 
   return (
@@ -184,7 +177,7 @@ export const MPDFieldWorkspace: React.FC<MPDFieldWorkspaceProps> = ({
         aria-labelledby="tab-new-dispatch"
         className={activeTab === 'new' ? 'block' : 'hidden'}
       >
-        <DynamicDispatchForm currentUser={currentUser} onSuccess={() => fetchDbDispatches(1, dateRange)} />
+        <DynamicDispatchForm currentUser={currentUser} onSuccess={reloadFirstPage} />
       </div>
 
       {/* Tab Panels: Recent Dispatches Panel */}
