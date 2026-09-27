@@ -8,6 +8,9 @@ import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNa
 import { User } from '@core/types';
 import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
+import { roleGateRedirect } from '@/lib/role-routing';
+
+const PAGE_ROLES = ['QA_LAB_ATTENDANT', 'QA_MANAGER', 'QA_HEAD', 'SUPER_ADMIN'];
 
 function QADepartmentContent() {
   const router = useRouter();
@@ -19,16 +22,21 @@ function QADepartmentContent() {
 
   useEffect(() => {
     async function loadUser() {
+      let redirecting = false;
       try {
         const res = await fetch('/api/auth/me');
-        if (res.ok) {
-          const data = await res.json();
-          setUser(data.user);
+        const data = res.ok ? await res.json() : null;
+        const redirect = roleGateRedirect(data?.user, PAGE_ROLES);
+        if (redirect) {
+          redirecting = true;
+          window.location.replace(redirect);
+          return;
         }
+        setUser(data.user);
       } catch (err) {
         console.error('Failed to load user', err);
       } finally {
-        setLoading(false);
+        if (!redirecting) setLoading(false);
       }
     }
     loadUser();

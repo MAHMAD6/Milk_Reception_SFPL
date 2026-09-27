@@ -8,6 +8,7 @@ import { HierarchicalNavDrawer } from '@modules/shared/navigation/HierarchicalNa
 import { User } from '@core/types';
 import { PageLoader } from '@/components/ui/spinner';
 import { PageTransition } from '@/components/motion/page-transition';
+import { resolveRoleHome } from '@/lib/role-routing';
 
 function ProductionDepartmentContent() {
   const router = useRouter();
@@ -30,7 +31,7 @@ function ProductionDepartmentContent() {
             setUser(data.user);
             setIsAuthorized(true);
           } else {
-            router.push('/login');
+            router.replace(data.user ? resolveRoleHome(roleStr) : '/login');
           }
         } else {
           router.push('/login');
