@@ -3265,7 +3265,7 @@ export async function correctGateExit(
   }
 }
 
-type InsideVehicle = {
+export type InsideVehicle = {
   id: string;
   arrival_type: 'MOT' | 'LOCAL_SUPPLIER';
   vehicle_number: string;

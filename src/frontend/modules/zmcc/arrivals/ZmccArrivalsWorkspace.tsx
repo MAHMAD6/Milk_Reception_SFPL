@@ -23,8 +23,40 @@ import { onActivateKey } from '@/lib/a11y';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
+import type {
+  InsideVehicle,
+  serializeContractorArrival,
+  serializeLocalSupplierArrival,
+  serializeMotArrival,
+} from '@/backend/services/zmccArrival/zmccArrivalCore';
+import type { serializeLocalSupplier } from '@/backend/services/zmccLocalSupplierService';
 
 export type MainTab = 'MOT_ARRIVAL' | 'LOCAL_SUPPLIER_ARRIVAL' | 'INSIDE_ZMCC' | 'HISTORY';
+
+type MotArrivalRow = ReturnType<typeof serializeMotArrival>;
+type ContractorArrivalRow = ReturnType<typeof serializeContractorArrival>;
+type LocalSupplierArrivalRow = ReturnType<typeof serializeLocalSupplierArrival>;
+type LocalSupplierRow = ReturnType<typeof serializeLocalSupplier>;
+type CorrectionTarget =
+  | { type: 'MOT'; record: MotArrivalRow }
+  | { type: 'CONTRACTOR'; record: ContractorArrivalRow }
+  | { type: 'LOCAL_SUPPLIER'; record: LocalSupplierArrivalRow };
+
+/** Row shape of GET /api/zmcc/arrivals/arriving-journeys (see getArrivingMotJourneys). */
+type ArrivingJourney = {
+  id: string;
+  journey_number: string;
+  operational_date: string;
+  started_at: string;
+  route: { id: string; route_code: string; name: string } | null;
+  mot_vehicle: { id: string; vehicle_number: string } | null;
+  mot_profile: { id: string; mot_code: string; name: string; phone_number: string | null } | null;
+  zmcc: { id: string; code: string; name: string } | null;
+  total_stops: number;
+  visited_stops: number;
+  total_gross_liters: number;
+  total_at_13ts_liters: number;
+};
 
 interface ZmccArrivalsWorkspaceProps {
   currentUser: User | null;
@@ -55,9 +87,9 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   };
 
   // MOT Arrival Form State
-  const [arrivingJourneys, setArrivingJourneys] = useState<any[]>([]);
+  const [arrivingJourneys, setArrivingJourneys] = useState<ArrivingJourney[]>([]);
   const [loadingJourneys, setLoadingJourneys] = useState(false);
-  const [selectedJourney, setSelectedJourney] = useState<any | null>(null);
+  const [selectedJourney, setSelectedJourney] = useState<ArrivingJourney | null>(null);
   const [rawMilkTokenNumber, setRawMilkTokenNumber] = useState('');
   const [rawMilkTokenPolicyMode, setRawMilkTokenPolicyMode] = useState<'REQUIRED' | 'OPTIONAL' | 'DISABLED'>('REQUIRED');
   const [motArrivalTimestamp, setMotArrivalTimestamp] = useState(() =>
@@ -70,11 +102,11 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   });
   const [motEventId, setMotEventId] = useState('');
   const [motSubmitting, setMotSubmitting] = useState(false);
-  const [motSuccessResult, setMotSuccessResult] = useState<any | null>(null);
+  const [motSuccessResult, setMotSuccessResult] = useState<MotArrivalRow | null>(null);
   const [motError, setMotError] = useState<string | null>(null);
 
   // Local Supplier Arrival Form State
-  const [localSuppliers, setLocalSuppliers] = useState<any[]>([]);
+  const [localSuppliers, setLocalSuppliers] = useState<LocalSupplierRow[]>([]);
   const [loadingLocalSuppliers, setLoadingLocalSuppliers] = useState(false);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
   const [selectedLocalSupplierId, setSelectedLocalSupplierId] = useState('');
@@ -90,15 +122,15 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   });
   const [localSupplierEventId, setLocalSupplierEventId] = useState('');
   const [localSupplierSubmitting, setLocalSupplierSubmitting] = useState(false);
-  const [localSupplierSuccessResult, setLocalSupplierSuccessResult] = useState<any | null>(null);
+  const [localSupplierSuccessResult, setLocalSupplierSuccessResult] = useState<LocalSupplierArrivalRow | null>(null);
   const [localSupplierError, setLocalSupplierError] = useState<string | null>(null);
 
   // Inside Vehicles State & Gate Exit Modal
-  const [insideVehicles, setInsideVehicles] = useState<any[]>([]);
+  const [insideVehicles, setInsideVehicles] = useState<InsideVehicle[]>([]);
   const [insideHasMore, setInsideHasMore] = useState(false);
   const [insideTotalCount, setInsideTotalCount] = useState(0);
   const [loadingInside, setLoadingInside] = useState(false);
-  const [exitModalTarget, setExitModalTarget] = useState<any | null>(null);
+  const [exitModalTarget, setExitModalTarget] = useState<InsideVehicle | null>(null);
   const [exitEventId, setExitEventId] = useState<string>('');
   const [exitTimestamp, setExitTimestamp] = useState(() => toDatetimeLocalInput(new Date()));
   const [exitSubmitting, setExitSubmitting] = useState(false);
@@ -121,13 +153,13 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   const [historyPageSize] = useState(20);
   const [historyTotalPages, setHistoryTotalPages] = useState(1);
   const [historyTotalRecords, setHistoryTotalRecords] = useState(0);
-  const [motArrivals, setMotArrivals] = useState<any[]>([]);
-  const [contractorArrivals, setContractorArrivals] = useState<any[]>([]);
-  const [localSupplierArrivals, setLocalSupplierArrivals] = useState<any[]>([]);
+  const [motArrivals, setMotArrivals] = useState<MotArrivalRow[]>([]);
+  const [contractorArrivals, setContractorArrivals] = useState<ContractorArrivalRow[]>([]);
+  const [localSupplierArrivals, setLocalSupplierArrivals] = useState<LocalSupplierArrivalRow[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
   // Correction Modal State
-  const [correctionTarget, setCorrectionTarget] = useState<{ type: 'MOT' | 'CONTRACTOR' | 'LOCAL_SUPPLIER'; record: any } | null>(null);
+  const [correctionTarget, setCorrectionTarget] = useState<CorrectionTarget | null>(null);
   const [corrReason, setCorrReason] = useState('');
   const [corrToken, setCorrToken] = useState('');
   const [corrRmr, setCorrRmr] = useState('');
@@ -269,7 +301,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
       const res = await fetch('/api/paper-reference-policies');
       if (res.ok) {
         const data = await res.json();
-        const rmtPolicy = (data.policies || []).find((p: any) => p.referenceType === 'RAW_MILK_TOKEN');
+        const rmtPolicy = (data.policies || []).find((p: { referenceType: string; policyMode?: 'REQUIRED' | 'OPTIONAL' | 'DISABLED' }) => p.referenceType === 'RAW_MILK_TOKEN');
         if (rmtPolicy?.policyMode) {
           setRawMilkTokenPolicyMode(rmtPolicy.policyMode);
         }
@@ -300,7 +332,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   }, [activeTab, fetchInsideVehicles, fetchHistory]);
 
   // Gate Exit Modal Controls
-  const openExitModal = (arrival: any) => {
+  const openExitModal = (arrival: InsideVehicle) => {
     setExitModalTarget(arrival);
     setExitTimestamp(toDatetimeLocalInput(new Date()));
     setExitEventId(generateClientEventId('exit'));
@@ -523,8 +555,9 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   };
 
   // Open Correction Modal
-  const openCorrectionModal = (type: 'MOT' | 'CONTRACTOR' | 'LOCAL_SUPPLIER', record: any) => {
-    setCorrectionTarget({ type, record });
+  const openCorrectionModal = (target: CorrectionTarget) => {
+    const { record } = target;
+    setCorrectionTarget(target);
     setCorrReason('');
     setCorrError(null);
     setCorrTimestamp(record.arrival_timestamp ? toDatetimeLocalInput(record.arrival_timestamp) : '');
@@ -532,16 +565,16 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
     setCorrLng(record.phe_longitude != null ? String(record.phe_longitude) : '');
     setCorrAcc(record.phe_gps_accuracy != null ? String(record.phe_gps_accuracy) : '');
 
-    if (type === 'MOT') {
-      setCorrToken(record.raw_milk_token_number || '');
-    } else if (type === 'CONTRACTOR') {
-      setCorrRmr(record.rmr_number || '');
-      setCorrVehicle(record.vehicle_number || '');
-    } else if (type === 'LOCAL_SUPPLIER') {
-      setCorrLocalSupplierId(record.local_supplier_id ? String(record.local_supplier_id) : '');
-      setCorrToken(record.raw_milk_token_number || '');
+    if (target.type === 'MOT') {
+      setCorrToken(target.record.raw_milk_token_number || '');
+    } else if (target.type === 'CONTRACTOR') {
+      setCorrRmr(target.record.rmr_number || '');
+      setCorrVehicle(target.record.vehicle_number || '');
+    } else if (target.type === 'LOCAL_SUPPLIER') {
+      setCorrLocalSupplierId(target.record.local_supplier_id ? String(target.record.local_supplier_id) : '');
+      setCorrToken(target.record.raw_milk_token_number || '');
       setCorrRmr('');
-      setCorrVehicle(record.vehicle_number || '');
+      setCorrVehicle(target.record.vehicle_number || '');
     }
   };
 
@@ -565,7 +598,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
         url = `/api/zmcc/arrivals/local-supplier/${correctionTarget.record.id}`;
       }
 
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         reason: corrReason.trim(),
         arrival_timestamp: datetimeLocalToIso(corrTimestamp) || new Date(corrTimestamp).toISOString(),
       };
@@ -1448,7 +1481,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => openCorrectionModal('MOT', arr)}
+                                onClick={() => openCorrectionModal({ type: 'MOT', record: arr })}
                                 className="px-2.5 py-1 text-xs font-semibold text-primary hover:bg-blue-50 rounded-lg"
                               >
                                 Correct
@@ -1482,7 +1515,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                         <td className="p-3 text-slate-600">{arr.recorded_by?.full_name || arr.recorded_by?.username}</td>
                         <td className="p-3">
                           {(() => {
-                            const mgrCount = arr.manager_correction_count ?? arr.correction_count ?? 0;
+                            const mgrCount = arr.correction_count ?? 0;
                             const isLocked = !isSuperAdmin && mgrCount >= 5;
                             return (
                               <span
@@ -1501,12 +1534,12 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                         </td>
                         {canCorrect && (
                           <td className="p-3 text-right">
-                            {(!isSuperAdmin && (arr.manager_correction_count ?? arr.correction_count ?? 0) >= 5) ? (
+                            {(!isSuperAdmin && (arr.correction_count ?? 0) >= 5) ? (
                               <span className="text-slate-400 text-xs">Locked</span>
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => openCorrectionModal('CONTRACTOR', arr)}
+                                onClick={() => openCorrectionModal({ type: 'CONTRACTOR', record: arr })}
                                 className="px-2.5 py-1 text-xs font-semibold text-primary hover:bg-blue-50 rounded-lg"
                               >
                                 Correct
@@ -1577,7 +1610,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                             ) : (
                               <button
                                 type="button"
-                                onClick={() => openCorrectionModal('LOCAL_SUPPLIER', arr)}
+                                onClick={() => openCorrectionModal({ type: 'LOCAL_SUPPLIER', record: arr })}
                                 className="px-2.5 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-50 rounded-lg cursor-pointer"
                               >
                                 Correct
@@ -1645,7 +1678,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
                   ) : (
                     <span>
                       (Remaining Manager Corrections:{' '}
-                      <strong>{Math.max(0, 5 - (correctionTarget.record.manager_correction_count ?? 0))}</strong>)
+                      <strong>{Math.max(0, 5 - (('manager_correction_count' in correctionTarget.record ? correctionTarget.record.manager_correction_count : correctionTarget.record.correction_count) ?? 0))}</strong>)
                     </span>
                   )}
                 </p>
