@@ -62,7 +62,14 @@ describe('authentication and authorization (database)', { skip: !hasDatabase && 
   test('sign-in failures are indistinguishable (no account enumeration)', async () => {
     const wrongPassword = await signIn('qa.chemist', 'definitely-wrong');
     const unknownUser = await signIn('no.such.user', 'whatever');
-    const deactivated = await signIn('super.admin', 'admin123'); // seeded inactive account
+    // A deactivated account with the correct password must look like any other failure.
+    const gate = await prisma.user.update({ where: { username: 'security.gate' }, data: { is_active: false } });
+    let deactivated: Awaited<ReturnType<typeof signIn>>;
+    try {
+      deactivated = await signIn('security.gate', 'security123');
+    } finally {
+      await prisma.user.update({ where: { id: gate.id }, data: { is_active: true } });
+    }
     for (const { res } of [wrongPassword, unknownUser, deactivated]) {
       assert.equal(res.status, 401);
       assert.deepEqual(await res.json(), { error: 'Invalid username or password' });

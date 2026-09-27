@@ -4,7 +4,7 @@ import { isDemoLoginEnabled } from '@core/demoLogin';
 // Evaluated per request so ENABLE_DEMO_LOGIN is read at runtime, not baked in at build time.
 export const dynamic = 'force-dynamic';
 
-// Served only when demo login is enabled; see isDemoLoginEnabled().
+// One account per role, matching prisma/seed.ts. Served only when demo login is enabled.
 const DEMO_PROFILES = [
   {
     group: 'DIRECTORATE & GOVERNANCE',
@@ -32,12 +32,9 @@ const DEMO_PROFILES = [
     items: [
       { label: 'PHE Operator — Hasilpur', department: 'Milk Procurement (Hasilpur)', username: 'phe.operator', password: 'phe123' },
       { label: 'ZMCC Lab Attendant — Hasilpur', department: 'Milk Procurement (Hasilpur)', username: 'zmcc.operator', password: 'mpd123' },
-      { label: 'ZMCC Lab Attendant — Jhang', department: 'Milk Procurement (Jhang)', username: 'zmcc.operator.jhang', password: 'mpd123' },
-      { label: 'ZMCC Lab Attendant — Kabirwala', department: 'Milk Procurement (Kabirwala)', username: 'zmcc.operator.kabirwala', password: 'mpd123' },
       { label: 'MOT Field Operator', department: 'Milk Procurement (Hasilpur)', username: 'mot.driver', password: 'mot123' },
       { label: 'QA Lab Chemist', department: 'Quality Assurance Lab', username: 'qa.chemist', password: 'qa123' },
-      { label: 'Weighbridge Operator — Shift 1', department: 'Production & Weighbridge', username: 'weighbridge.operator', password: 'weighbridge123' },
-      { label: 'Weighbridge Operator — Shift 2', department: 'Production & Weighbridge', username: 'weighbridge.02', password: 'weighbridge123' },
+      { label: 'Weighbridge Operator', department: 'Production & Weighbridge', username: 'weighbridge.operator', password: 'weighbridge123' },
       { label: 'Production Reception Operator', department: 'Plant Production & Silos', username: 'production.operator', password: 'production123' },
       { label: 'Security Gate Operator', department: 'Security', username: 'security.gate', password: 'security123' },
     ],
@@ -45,8 +42,7 @@ const DEMO_PROFILES = [
   {
     group: 'CONTRACTORS',
     items: [
-      { label: 'Wasim Sahib (Contractor Operator)', department: 'Milk Procurement - Contractor Operations', username: 'contractor.operator.alkhair', password: 'mpd123' },
-      { label: 'Contractor Operator (Al Mehmood)', department: 'Milk Procurement - Contractor Operations', username: 'contractor.operator.almehmood', password: 'mpd123' },
+      { label: 'Contractor Operator — Al Khair', department: 'Milk Procurement - Contractor Operations', username: 'contractor.operator.alkhair', password: 'mpd123' },
     ],
   },
 ];

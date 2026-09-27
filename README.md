@@ -174,6 +174,34 @@ Open:
 http://localhost:3000
 ```
 
+### Demo accounts
+
+`NODE_ENV=development npx prisma db seed` creates exactly one dummy account per role (the login page
+lists them as one-click shortcuts under `npm run dev`). Demo data only — the production seed never
+creates these, and re-running the development seed deactivates the extra accounts older seeds created.
+
+| Role | Username | Password | Scope | Lands on |
+| --- | --- | --- | --- | --- |
+| Super Admin | `admin.superuser` | `admin123` | System | `/super-admin` |
+| Executive Management | `executive.management` | `exec123` | System | `/mpd/head` |
+| Data Executive | `data.executive` | `data123` | System | `/super-admin/lab-tests` |
+| Head of MPD | `mpd.head` | `mpdhead123` | System | `/mpd/head` |
+| Admin Head | `admin.head` | `adminhead123` | Administration | `/department/security` |
+| QA Head | `qa.head` | `qahead123` | Quality Assurance | `/department/qa-head` |
+| Production Head | `production.head` | `prodhead123` | Production | `/department/production` |
+| Finance & Accounts | `finance.accounts` | `finance123` | Finance & Accounts | `/finance/reconciliation` |
+| ZMCC Manager | `zmcc.manager.north` | `zone123` | ZMCC Hasilpur | `/mpd/zmcc-manager` |
+| Contractor Manager | `contractor.manager.alkhair` | `contractor123` | Al Khair Dairy | `/contractor/manager` |
+| PHE Operator | `phe.operator` | `phe123` | ZMCC Hasilpur | `/phe` |
+| ZMCC Lab Attendant | `zmcc.operator` | `mpd123` | ZMCC Hasilpur | `/zmcc/lab` |
+| MOT Operator | `mot.driver` | `mot123` | ZMCC Hasilpur | `/mot` |
+| Contractor Operator | `contractor.operator.alkhair` | `mpd123` | Al Khair Dairy | `/contractor/manager` |
+| Security Operator | `security.gate` | `security123` | Security | `/department/security` |
+| QA Manager | `qa.manager` | `qamgr123` | Quality Assurance | `/department/qa-manager` |
+| QA Lab Attendant | `qa.chemist` | `qa123` | Quality Assurance | `/department/qa` |
+| Weighbridge Operator | `weighbridge.operator` | `weighbridge123` | Production & Weighbridge | `/department/weighbridge` |
+| Production Reception Operator | `production.operator` | `production123` | Production | `/department/production` |
+
 ## Environment Variables
 
 Copy `.env.example` to `.env` and fill it in. Every variable is documented there.

@@ -129,7 +129,7 @@ async function main() {
   console.log(
     IS_PRODUCTION_SEED
       ? '✅ Production seed complete: reference data present and a Super Admin account available.'
-      : '✅ Successfully seeded 30 Lab Tests, Procurement Sources, demo System Users, and 11 Chiller Ownership records!'
+      : '✅ Successfully seeded 30 Lab Tests, Procurement Sources, one demo user per role (19), and 11 Chiller Ownership records!'
   );
 }
 
@@ -173,9 +173,10 @@ async function seedDemoUsers() {
   console.log('Seeding System Users in PostgreSQL...');
 
   const bcrypt = await import('bcryptjs');
+  // Exactly one dummy account per role (19 roles). Development/demo databases only;
+  // the production seed never creates these.
   const USERS_SEED = [
     { username: 'admin.superuser', email: 'admin.superuser@example.com', name: 'Super Admin', role: 'SUPER_ADMIN', department: 'System Administration', pass: 'admin123', scopeType: 'SYSTEM', isActive: true, sourceCode: null },
-    { username: 'super.admin', email: 'super.admin@example.com', name: 'Retired Bootstrap Admin', role: 'SUPER_ADMIN', department: 'Retired Migration Account', pass: 'admin123', scopeType: 'SYSTEM', isActive: false, sourceCode: null },
     { username: 'executive.management', email: 'executive.management@example.com', name: 'Senior Executive Management', role: 'EXECUTIVE_MANAGEMENT', department: 'Executive Management', pass: 'exec123', scopeType: 'SYSTEM', isActive: true, sourceCode: null },
     { username: 'data.executive', email: 'data.executive@example.com', name: 'Data Executive', role: 'DATA_EXECUTIVE', department: 'Data & Analytics', pass: 'data123', scopeType: 'SYSTEM', isActive: true, sourceCode: null },
     { username: 'mpd.head', email: 'mpd.head@example.com', name: 'MPD Head', role: 'HEAD_OF_MPD', department: 'Milk Procurement', pass: 'mpdhead123', scopeType: 'SYSTEM', isActive: true, sourceCode: null },
@@ -187,22 +188,33 @@ async function seedDemoUsers() {
     { username: 'contractor.manager.alkhair', email: 'contractor.manager.alkhair@example.com', name: 'Contractor Manager - Al Khair', role: 'CONTRACTOR_MANAGER', department: 'Milk Procurement', pass: 'contractor123', scopeType: 'SOURCE', isActive: true, sourceCode: 'CONT-ALKHAIR' },
     { username: 'phe.operator', email: 'phe.operator@example.com', name: 'PHE Operator', role: 'PHE_OPERATOR', department: 'Milk Procurement', pass: 'phe123', scopeType: 'SOURCE', isActive: true, sourceCode: 'ZMCC-HASILPUR' },
     { username: 'zmcc.operator', email: 'zmcc.operator@example.com', name: 'ZMCC Lab Attendant (Hasilpur)', role: 'ZMCC_LAB_ATTENDANT', department: 'Milk Procurement', pass: 'mpd123', scopeType: 'SOURCE', isActive: true, sourceCode: 'ZMCC-HASILPUR' },
-    { username: 'zmcc.operator.jhang', email: 'zmcc.operator.jhang@example.com', name: 'ZMCC Lab Attendant (Jhang)', role: 'ZMCC_LAB_ATTENDANT', department: 'Milk Procurement', pass: 'mpd123', scopeType: 'SOURCE', isActive: true, sourceCode: 'ZMCC-JHANG' },
-    { username: 'zmcc.operator.kabirwala', email: 'zmcc.operator.kabirwala@example.com', name: 'ZMCC Lab Attendant (Kabirwala)', role: 'ZMCC_LAB_ATTENDANT', department: 'Milk Procurement', pass: 'mpd123', scopeType: 'SOURCE', isActive: true, sourceCode: 'ZMCC-KABIRWALA' },
     { username: 'mot.driver', email: 'mot.driver@example.com', name: 'MOT Operator', role: 'MOT', department: 'Milk Procurement', pass: 'mot123', scopeType: 'SOURCE', isActive: true, sourceCode: 'ZMCC-HASILPUR' },
-    { username: 'contractor.operator.alkhair', email: 'contractor.operator.alkhair@example.com', name: 'Wasim Sahib', role: 'CONTRACTOR_OPERATOR', department: 'Milk Procurement - Contractor Operations', pass: 'mpd123', scopeType: 'SOURCE', isActive: true, sourceCode: 'CONT-ALKHAIR' },
-    { username: 'contractor.operator.almehmood', email: 'contractor.operator.almehmood@example.com', name: 'Contractor Operator (Al Mehmood)', role: 'CONTRACTOR_OPERATOR', department: 'Milk Procurement - Contractor Operations', pass: 'mpd123', scopeType: 'SOURCE', isActive: true, sourceCode: 'CONT-ALMEHMOOD' },
+    { username: 'contractor.operator.alkhair', email: 'contractor.operator.alkhair@example.com', name: 'Contractor Operator (Al Khair)', role: 'CONTRACTOR_OPERATOR', department: 'Milk Procurement - Contractor Operations', pass: 'mpd123', scopeType: 'SOURCE', isActive: true, sourceCode: 'CONT-ALKHAIR' },
     { username: 'security.gate', email: 'security.gate@example.com', name: 'Security Operator', role: 'SECURITY_OPERATOR', department: 'Security', pass: 'security123', scopeType: 'DEPARTMENT', isActive: true, sourceCode: null },
     { username: 'qa.manager', email: 'qa.manager@example.com', name: 'QA Manager', role: 'QA_MANAGER', department: 'Quality Assurance', pass: 'qamgr123', scopeType: 'DEPARTMENT', isActive: true, sourceCode: null },
     { username: 'qa.chemist', email: 'qa.chemist@example.com', name: 'QA Lab Attendant', role: 'QA_LAB_ATTENDANT', department: 'Quality Assurance', pass: 'qa123', scopeType: 'DEPARTMENT', isActive: true, sourceCode: null },
     { username: 'weighbridge.operator', email: 'weighbridge.operator@example.com', name: 'Weighbridge Operator', role: 'WEIGHBRIDGE_OPERATOR', department: 'Production & Weighbridge', pass: 'weighbridge123', scopeType: 'DEPARTMENT', isActive: true, sourceCode: null },
-    { username: 'weighbridge.02', email: 'weighbridge.02@example.com', name: 'Weighbridge Shift Operator 2', role: 'WEIGHBRIDGE_OPERATOR', department: 'Production & Weighbridge', pass: 'weighbridge123', scopeType: 'DEPARTMENT', isActive: true, sourceCode: null },
     { username: 'production.operator', email: 'production.operator@example.com', name: 'Production Reception Operator', role: 'PRODUCTION_RECEPTION_OPERATOR', department: 'Production', pass: 'production123', scopeType: 'DEPARTMENT', isActive: true, sourceCode: null },
-    // Inactive legacy accounts preserved for FK history without active authority
-    { username: 'security.head', email: 'security.head@example.com', name: 'Retired Security Head', role: 'ADMIN_HEAD', department: 'Security Management', pass: 'sechead123', scopeType: 'DEPARTMENT', isActive: false, sourceCode: null },
-    { username: 'general.plant.manager', email: 'general.plant.manager@example.com', name: 'Retired Plant Manager', role: 'EXECUTIVE_MANAGEMENT', department: 'Plant Executive Directorate', pass: 'plantmanager123', scopeType: 'SYSTEM', isActive: false, sourceCode: null },
-    { username: 'correction.officer', email: 'correction.officer@example.com', name: 'Retired Correction Officer', role: 'SUPER_ADMIN', department: 'Plant Audit & Data Corrections', pass: 'correct123', scopeType: 'SYSTEM', isActive: false, sourceCode: null },
   ];
+
+  // Earlier demo seeds created a second/third account for some roles plus retired accounts.
+  // Deactivate them (never delete: operational records may reference them) so each role
+  // keeps exactly one active dummy account.
+  const RETIRED_DEMO_USERNAMES = [
+    'zmcc.operator.jhang',
+    'zmcc.operator.kabirwala',
+    'weighbridge.02',
+    'contractor.operator.almehmood',
+    'super.admin',
+    'security.head',
+    'general.plant.manager',
+    'correction.officer',
+  ];
+  const retired = await prisma.user.updateMany({
+    where: { username: { in: RETIRED_DEMO_USERNAMES }, is_active: true },
+    data: { is_active: false },
+  });
+  if (retired.count > 0) console.log(`Deactivated ${retired.count} surplus demo account(s).`);
 
   const shouldResetPasswords = process.env.RESET_DEV_PASSWORDS === 'true';
 

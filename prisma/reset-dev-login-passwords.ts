@@ -26,13 +26,10 @@ async function resetDevLoginPasswords() {
     // Operators
     { username: 'phe.operator', pass: 'phe123' },
     { username: 'zmcc.operator', pass: 'mpd123' },
-    { username: 'zmcc.operator.jhang', pass: 'mpd123' },
-    { username: 'zmcc.operator.kabirwala', pass: 'mpd123' },
     { username: 'mot.driver', pass: 'mot123' },
     { username: 'security.gate', pass: 'security123' },
     { username: 'qa.chemist', pass: 'qa123' },
     { username: 'weighbridge.operator', pass: 'weighbridge123' },
-    { username: 'weighbridge.02', pass: 'weighbridge123' },
     { username: 'production.operator', pass: 'production123' },
 
     // Workspace Pending
@@ -44,7 +41,6 @@ async function resetDevLoginPasswords() {
     { username: 'finance.accounts', pass: 'finance123' },
     { username: 'qa.manager', pass: 'qamgr123' },
     { username: 'contractor.operator.alkhair', pass: 'mpd123' },
-    { username: 'contractor.operator.almehmood', pass: 'mpd123' },
   ];
 
   let count = 0;
