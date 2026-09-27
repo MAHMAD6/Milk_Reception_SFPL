@@ -90,6 +90,50 @@ export const STATION_METADATA: Record<
   },
 };
 
+/** Loads a station's policy assignments (deduplicated across its testing points) and active SOP rules. */
+async function requestPoliciesAndRules(station: StationKey) {
+  const targetPoints = STATION_METADATA[station].testingPoints;
+
+  // 1. Fetch policies
+  const policyPromises = targetPoints.map((pt) =>
+    fetch(`/api/milk-test-policies?testingPoint=${pt}`)
+      .then((res) => (res.ok ? res.json() : { policies: [] }))
+      .catch(() => ({ policies: [] }))
+  );
+  const policyResults = await Promise.all(policyPromises);
+
+  // Deduplicate assignments across synchronized testing points
+  const combinedPolicies: SerializedPolicyAssignment[] = [];
+  const seenTestIds = new Set<string>();
+  for (const res of policyResults) {
+    for (const pol of (res.policies || []) as SerializedPolicyAssignment[]) {
+      if (!seenTestIds.has(pol.labTestId)) {
+        seenTestIds.add(pol.labTestId);
+        combinedPolicies.push(pol);
+      }
+    }
+  }
+  const policies = combinedPolicies.sort((a, b) => a.displayOrder - b.displayOrder || Number(a.id) - Number(b.id));
+
+  // 2. Fetch active SOP rules for criteria display
+  const rulePromises = targetPoints.map((pt) =>
+    fetch(`/api/qa-head/sop-rules?testingPoint=${pt}&isActive=true`)
+      .then((res) => (res.ok ? res.json() : { rules: [] }))
+      .catch(() => ({ rules: [] }))
+  );
+  const ruleResults = await Promise.all(rulePromises);
+
+  const rulesMap: Record<string, SopRuleItem> = {};
+  for (const res of ruleResults) {
+    for (const rule of (res.rules || []) as SopRuleItem[]) {
+      if (!rulesMap[rule.labTestId]) {
+        rulesMap[rule.labTestId] = rule;
+      }
+    }
+  }
+  return { policies, rulesMap };
+}
+
 export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = ({ currentUser }) => {
   const toast = useToast();
   const isSuperAdminOrDataExec =
@@ -128,74 +172,48 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
   const [criteriaSubmitting, setCriteriaSubmitting] = useState(false);
 
   // Fetch policies and active SOP rules for current station
-  const fetchPoliciesAndRules = useCallback(async () => {
+  const loadPoliciesAndRules = useCallback(
+    () =>
+      requestPoliciesAndRules(activeStation)
+        .then(
+          ({ policies: nextPolicies, rulesMap }) => {
+            setPolicies(nextPolicies);
+            setActiveRules(rulesMap);
+          },
+          (err: unknown) => {
+            const msg = err instanceof Error ? err.message : 'Error loading policies and acceptance rules';
+            toast.showError(msg);
+          }
+        )
+        .finally(() => setLoading(false)),
+    [activeStation, toast]
+  );
+
+  const fetchPoliciesAndRules = () => {
     setLoading(true);
-    try {
-      const targetPoints = STATION_METADATA[activeStation].testingPoints;
-
-      // 1. Fetch policies
-      const policyPromises = targetPoints.map((pt) =>
-        fetch(`/api/milk-test-policies?testingPoint=${pt}`)
-          .then((res) => (res.ok ? res.json() : { policies: [] }))
-          .catch(() => ({ policies: [] }))
-      );
-      const policyResults = await Promise.all(policyPromises);
-
-      // Deduplicate assignments across synchronized testing points
-      const combinedPolicies: SerializedPolicyAssignment[] = [];
-      const seenTestIds = new Set<string>();
-      for (const res of policyResults) {
-        for (const pol of (res.policies || []) as SerializedPolicyAssignment[]) {
-          if (!seenTestIds.has(pol.labTestId)) {
-            seenTestIds.add(pol.labTestId);
-            combinedPolicies.push(pol);
-          }
-        }
-      }
-      setPolicies(combinedPolicies.sort((a, b) => a.displayOrder - b.displayOrder || Number(a.id) - Number(b.id)));
-
-      // 2. Fetch active SOP rules for criteria display
-      const rulePromises = targetPoints.map((pt) =>
-        fetch(`/api/qa-head/sop-rules?testingPoint=${pt}&isActive=true`)
-          .then((res) => (res.ok ? res.json() : { rules: [] }))
-          .catch(() => ({ rules: [] }))
-      );
-      const ruleResults = await Promise.all(rulePromises);
-
-      const rulesMap: Record<string, SopRuleItem> = {};
-      for (const res of ruleResults) {
-        for (const rule of (res.rules || []) as SopRuleItem[]) {
-          if (!rulesMap[rule.labTestId]) {
-            rulesMap[rule.labTestId] = rule;
-          }
-        }
-      }
-      setActiveRules(rulesMap);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Error loading policies and acceptance rules';
-      toast.showError(msg);
-    } finally {
-      setLoading(false);
-    }
-  }, [activeStation, toast]);
+    return loadPoliciesAndRules();
+  };
 
   // Fetch all active lab tests for selection
-  const fetchLabTests = useCallback(async () => {
-    try {
-      const res = await fetch('/api/lab-tests?activeOnly=true');
-      if (res.ok) {
-        const data = await res.json();
-        const tests: LabTestOption[] = Array.isArray(data) ? data : data.tests || [];
-        setLabTests(tests.filter((t) => t.isActive));
-      }
-    } catch (err) {
-      console.error('Error fetching lab tests catalogue', err);
-    }
-  }, []);
+  const fetchLabTests = useCallback(
+    () =>
+      fetch('/api/lab-tests?activeOnly=true')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            const tests: LabTestOption[] = Array.isArray(data) ? data : data.tests || [];
+            setLabTests(tests.filter((t) => t.isActive));
+          }
+        })
+        .catch((err) => {
+          console.error('Error fetching lab tests catalogue', err);
+        }),
+    []
+  );
 
   useEffect(() => {
-    fetchPoliciesAndRules();
-  }, [fetchPoliciesAndRules]);
+    loadPoliciesAndRules();
+  }, [loadPoliciesAndRules]);
 
   useEffect(() => {
     fetchLabTests();
@@ -482,7 +500,10 @@ export const MilkTestPolicyWorkspace: React.FC<MilkTestPolicyWorkspaceProps> = (
           return (
             <button
               key={station}
-              onClick={() => setActiveStation(station)}
+              onClick={() => {
+                if (station !== activeStation) setLoading(true);
+                setActiveStation(station);
+              }}
               className={`flex flex-col p-3.5 rounded-xl border text-left transition ${
                 isSelected
                   ? 'bg-primary text-white border-primary shadow-xs'

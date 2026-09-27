@@ -39,37 +39,46 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
   const [error, setError] = useState<string | null>(null);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<Date>(new Date());
 
-  const fetchTelemetry = useCallback(async (isManual = false) => {
+  const loadTelemetry = useCallback(
+    (isManual = false) =>
+      fetch('/api/mpd/executive-overview', { cache: 'no-store' })
+        .then(async (res) => {
+          const json = await res.json();
+          if (res.ok && json.success) {
+            setTelemetry(json.data);
+            setLastRefreshedAt(new Date());
+            setError(null);
+          } else {
+            setError(json.error || 'Failed to load MPD Executive Telemetry.');
+          }
+        })
+        .catch((err) => {
+          setError(getErrorMessage(err) || 'Network error fetching telemetry.');
+        })
+        .finally(() => {
+          setLoading(false);
+          if (isManual) setIsRefreshing(false);
+        }),
+    []
+  );
+
+  const fetchTelemetry = (isManual = false) => {
     if (isManual) setIsRefreshing(true);
     setError(null);
-    try {
-      const res = await fetch('/api/mpd/executive-overview', { cache: 'no-store' });
-      const json = await res.json();
-      if (res.ok && json.success) {
-        setTelemetry(json.data);
-        setLastRefreshedAt(new Date());
-      } else {
-        setError(json.error || 'Failed to load MPD Executive Telemetry.');
-      }
-    } catch (err) {
-      setError(getErrorMessage(err) || 'Network error fetching telemetry.');
-    } finally {
-      setLoading(false);
-      if (isManual) setIsRefreshing(false);
-    }
-  }, []);
+    return loadTelemetry(isManual);
+  };
 
   useEffect(() => {
     if (!initialData) {
-      fetchTelemetry();
+      loadTelemetry();
     }
     // Periodic auto-refresh every 30 seconds
     const interval = setInterval(() => {
-      fetchTelemetry();
+      loadTelemetry();
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [fetchTelemetry, initialData]);
+  }, [loadTelemetry, initialData]);
 
   const handleAuditAction = async (id: string, action: 'APPROVED' | 'FLAGGED', remarks?: string) => {
     try {
