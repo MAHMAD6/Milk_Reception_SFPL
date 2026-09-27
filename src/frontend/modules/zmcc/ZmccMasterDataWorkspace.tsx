@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { User } from '@core/types';
 import {
   MapPin,
@@ -160,6 +160,82 @@ interface ShopItem {
   created_at: string;
 }
 
+interface MasterDataFilters {
+  /** Only sent for Super Admins; managers are scoped server-side. */
+  zmccId: string;
+  status: 'all' | 'true' | 'false';
+  search: string;
+  routeId: string;
+  areaId: string;
+  milkSourceId: string;
+}
+
+type MasterDataResult =
+  | { tab: 'LOCAL_SUPPLIERS'; items: LocalSupplierItem[] }
+  | { tab: 'ROUTES'; items: RouteItem[] }
+  | { tab: 'AREAS'; items: AreaItem[] }
+  | { tab: 'MILK_SOURCES'; items: MilkSourceItem[] }
+  | { tab: 'CHILLER_OWNERSHIP'; items: ChillerOwnershipItem[] }
+  | { tab: 'SHOPS'; items: ShopItem[] }
+  | { tab: 'TANKS'; items: TankItem[] };
+
+/** Fetches the rows for one master-data tab with the given filters. */
+async function fetchMasterData(tab: MasterDataTab, filters: MasterDataFilters): Promise<MasterDataResult> {
+  const zmccParam = filters.zmccId ? `&zmcc_id=${filters.zmccId}` : '';
+  const statusParam = filters.status !== 'all' ? `&is_active=${filters.status}` : '';
+  const searchParam = filters.search ? `&search=${encodeURIComponent(filters.search)}` : '';
+
+  const getJson = async (url: string, fallbackError: string) => {
+    const res = await fetch(url);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || fallbackError);
+    return data;
+  };
+
+  if (tab === 'LOCAL_SUPPLIERS') {
+    const data = await getJson(`/api/zmcc/local-suppliers?${zmccParam}${statusParam}${searchParam}`, 'Failed to fetch local suppliers');
+    return { tab, items: data.suppliers || [] };
+  }
+  if (tab === 'ROUTES') {
+    const data = await getJson(`/api/zmcc/routes?${zmccParam}${statusParam}${searchParam}`, 'Failed to fetch routes');
+    return { tab, items: data.routes || [] };
+  }
+  if (tab === 'AREAS') {
+    const rParam = filters.routeId ? `&route_id=${filters.routeId}` : '';
+    const data = await getJson(`/api/zmcc/areas?${zmccParam}${statusParam}${searchParam}${rParam}`, 'Failed to fetch areas');
+    return { tab, items: data.areas || [] };
+  }
+  if (tab === 'MILK_SOURCES') {
+    const data = await getJson(`/api/zmcc/milk-sources?${zmccParam}${statusParam}${searchParam}`, 'Failed to fetch milk sources');
+    return { tab, items: data.milk_sources || [] };
+  }
+  if (tab === 'CHILLER_OWNERSHIP') {
+    const data = await getJson(`/api/zmcc/chiller-ownerships?${statusParam}${searchParam}`, 'Failed to fetch chiller ownerships');
+    return { tab, items: data.chiller_ownerships || [] };
+  }
+  if (tab === 'SHOPS') {
+    const rParam = filters.routeId ? `&route_id=${filters.routeId}` : '';
+    const aParam = filters.areaId ? `&area_id=${filters.areaId}` : '';
+    const sParam = filters.milkSourceId ? `&milk_source_id=${filters.milkSourceId}` : '';
+    const data = await getJson(
+      `/api/zmcc/shops?${zmccParam}${statusParam}${searchParam}${rParam}${aParam}${sParam}`,
+      'Failed to fetch shops'
+    );
+    return { tab, items: data.shops || [] };
+  }
+  const activeOnlyParam = filters.status === 'true' ? '&active_only=true' : '';
+  const data = await getJson(`/api/zmcc/tanks?${zmccParam}${activeOnlyParam}`, 'Failed to fetch tanks');
+  let tankList: TankItem[] = data.tanks || [];
+  if (filters.status === 'false') {
+    tankList = tankList.filter((t) => !t.is_active);
+  }
+  if (filters.search) {
+    const s = filters.search.toLowerCase();
+    tankList = tankList.filter((t) => t.tank_name.toLowerCase().includes(s) || t.tank_code.toLowerCase().includes(s));
+  }
+  return { tab: 'TANKS', items: tankList };
+}
+
 export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = ({
   currentUser,
   initialTab,
@@ -205,17 +281,6 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
     if (onTabChange) onTabChange(tab);
   };
 
-  useEffect(() => {
-    if (controlledTab) {
-      setInternalTab(controlledTab);
-      setSearch('');
-      setStatusFilter('all');
-      setRouteFilter('');
-      setAreaFilter('');
-      setSourceFilter('');
-    }
-  }, [controlledTab]);
-
   // ZMCC Scope
   const [sources, setSources] = useState<ZmccSource[]>([]);
   const [selectedZmccId, setSelectedZmccId] = useState<string>('');
@@ -241,8 +306,21 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
   const [areaFilter, setAreaFilter] = useState<string>('');
   const [sourceFilter, setSourceFilter] = useState<string>('');
 
+  // A parent-driven tab change starts the new tab with cleared filters.
+  const [previousControlledTab, setPreviousControlledTab] = useState(controlledTab);
+  if (controlledTab !== previousControlledTab) {
+    setPreviousControlledTab(controlledTab);
+    if (controlledTab) {
+      setInternalTab(controlledTab);
+      setSearch('');
+      setStatusFilter('all');
+      setRouteFilter('');
+      setAreaFilter('');
+      setSourceFilter('');
+    }
+  }
+
   // UI state
-  const [loading, setLoading] = useState<boolean>(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
@@ -286,71 +364,40 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
   }, []);
 
   // Fetch scoped reference data
-  const loadData = useCallback(async () => {
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      const zmccParam = isSuperAdmin && selectedZmccId ? `&zmcc_id=${selectedZmccId}` : '';
-      const statusParam = statusFilter !== 'all' ? `&is_active=${statusFilter}` : '';
-      const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+  const dataFilters = useMemo<MasterDataFilters>(
+    () => ({
+      zmccId: isSuperAdmin ? selectedZmccId : '',
+      status: statusFilter,
+      search,
+      routeId: routeFilter,
+      areaId: areaFilter,
+      milkSourceId: sourceFilter,
+    }),
+    [isSuperAdmin, selectedZmccId, statusFilter, search, routeFilter, areaFilter, sourceFilter]
+  );
+  const dataRequestKey = JSON.stringify([activeTab, dataFilters]);
+  // Tab + filters whose request last settled; any other key means a fetch is in flight.
+  const [loadedDataKey, setLoadedDataKey] = useState<string | null>(null);
+  const loading = loadedDataKey !== dataRequestKey;
 
-      if (activeTab === 'LOCAL_SUPPLIERS') {
-        const res = await fetch(`/api/zmcc/local-suppliers?${zmccParam}${statusParam}${searchParam}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch local suppliers');
-        setLocalSuppliersList(data.suppliers || []);
-      } else if (activeTab === 'ROUTES') {
-        const res = await fetch(`/api/zmcc/routes?${zmccParam}${statusParam}${searchParam}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch routes');
-        setRoutes(data.routes || []);
-      } else if (activeTab === 'AREAS') {
-        const rParam = routeFilter ? `&route_id=${routeFilter}` : '';
-        const res = await fetch(`/api/zmcc/areas?${zmccParam}${statusParam}${searchParam}${rParam}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch areas');
-        setAreas(data.areas || []);
-      } else if (activeTab === 'MILK_SOURCES') {
-        const res = await fetch(`/api/zmcc/milk-sources?${zmccParam}${statusParam}${searchParam}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch milk sources');
-        setMilkSources(data.milk_sources || []);
-      } else if (activeTab === 'CHILLER_OWNERSHIP') {
-        const res = await fetch(`/api/zmcc/chiller-ownerships?${statusParam}${searchParam}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch chiller ownerships');
-        setChillerOwnerships(data.chiller_ownerships || []);
-      } else if (activeTab === 'SHOPS') {
-        const rParam = routeFilter ? `&route_id=${routeFilter}` : '';
-        const aParam = areaFilter ? `&area_id=${areaFilter}` : '';
-        const sParam = sourceFilter ? `&milk_source_id=${sourceFilter}` : '';
-        const res = await fetch(
-          `/api/zmcc/shops?${zmccParam}${statusParam}${searchParam}${rParam}${aParam}${sParam}`
-        );
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch shops');
-        setShops(data.shops || []);
-      } else if (activeTab === 'TANKS') {
-        const activeOnlyParam = statusFilter === 'true' ? '&active_only=true' : '';
-        const res = await fetch(`/api/zmcc/tanks?${zmccParam}${activeOnlyParam}`);
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Failed to fetch tanks');
-        let tankList = data.tanks || [];
-        if (statusFilter === 'false') {
-          tankList = tankList.filter((t: TankItem) => !t.is_active);
-        }
-        if (search) {
-          const s = search.toLowerCase();
-          tankList = tankList.filter((t: TankItem) => t.tank_name.toLowerCase().includes(s) || t.tank_code.toLowerCase().includes(s));
-        }
-        setTanks(tankList);
-      }
-    } catch (err) {
-      setErrorMsg(getErrorMessage(err) || 'Error loading data.');
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, isSuperAdmin, selectedZmccId, statusFilter, search, routeFilter, areaFilter, sourceFilter]);
+  const loadData = useCallback(() => {
+    const requestKey = JSON.stringify([activeTab, dataFilters]);
+    return fetchMasterData(activeTab, dataFilters)
+      .then(
+        (result) => {
+          if (result.tab === 'LOCAL_SUPPLIERS') setLocalSuppliersList(result.items);
+          else if (result.tab === 'ROUTES') setRoutes(result.items);
+          else if (result.tab === 'AREAS') setAreas(result.items);
+          else if (result.tab === 'MILK_SOURCES') setMilkSources(result.items);
+          else if (result.tab === 'CHILLER_OWNERSHIP') setChillerOwnerships(result.items);
+          else if (result.tab === 'SHOPS') setShops(result.items);
+          else setTanks(result.items);
+          setErrorMsg(null);
+        },
+        (err) => setErrorMsg(getErrorMessage(err) || 'Error loading data.')
+      )
+      .finally(() => setLoadedDataKey(requestKey));
+  }, [activeTab, dataFilters]);
 
   // Load dropdown helper data for Shop and Area forms
   const [helperRoutes, setHelperRoutes] = useState<RouteItem[]>([]);
@@ -358,35 +405,35 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
   const [helperMilkSources, setHelperMilkSources] = useState<MilkSourceItem[]>([]);
   const [helperChillers, setHelperChillers] = useState<ChillerOwnershipItem[]>([]);
 
-  const loadHelperData = useCallback(async () => {
-    try {
-      const zmccParam = isSuperAdmin && selectedZmccId ? `&zmcc_id=${selectedZmccId}` : '';
-      const [rRes, aRes, mRes, cRes] = await Promise.all([
-        fetch(`/api/zmcc/routes?is_active=true${zmccParam}`),
-        fetch(`/api/zmcc/areas?is_active=true${zmccParam}`),
-        fetch(`/api/zmcc/milk-sources?is_active=true${zmccParam}`),
-        fetch('/api/zmcc/chiller-ownerships?is_active=true'),
-      ]);
-
-      if (rRes.ok) {
-        const d = await rRes.json();
-        setHelperRoutes(d.routes || []);
-      }
-      if (aRes.ok) {
-        const d = await aRes.json();
-        setHelperAreas(d.areas || []);
-      }
-      if (mRes.ok) {
-        const d = await mRes.json();
-        setHelperMilkSources(d.milk_sources || []);
-      }
-      if (cRes.ok) {
-        const d = await cRes.json();
-        setHelperChillers(d.chiller_ownerships || []);
-      }
-    } catch (err) {
-      console.error('Failed loading helper data', err);
-    }
+  const loadHelperData = useCallback(() => {
+    const zmccParam = isSuperAdmin && selectedZmccId ? `&zmcc_id=${selectedZmccId}` : '';
+    return Promise.all([
+      fetch(`/api/zmcc/routes?is_active=true${zmccParam}`),
+      fetch(`/api/zmcc/areas?is_active=true${zmccParam}`),
+      fetch(`/api/zmcc/milk-sources?is_active=true${zmccParam}`),
+      fetch('/api/zmcc/chiller-ownerships?is_active=true'),
+    ])
+      .then(async ([rRes, aRes, mRes, cRes]) => {
+        if (rRes.ok) {
+          const d = await rRes.json();
+          setHelperRoutes(d.routes || []);
+        }
+        if (aRes.ok) {
+          const d = await aRes.json();
+          setHelperAreas(d.areas || []);
+        }
+        if (mRes.ok) {
+          const d = await mRes.json();
+          setHelperMilkSources(d.milk_sources || []);
+        }
+        if (cRes.ok) {
+          const d = await cRes.json();
+          setHelperChillers(d.chiller_ownerships || []);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed loading helper data', err);
+      });
   }, [isSuperAdmin, selectedZmccId]);
 
   useEffect(() => {
@@ -405,17 +452,6 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
     setSourceFilter('');
     setSearch('');
   };
-
-  // Close modals on Escape key
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && modalType) {
-        closeModal();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [modalType]);
 
   const closeModal = () => {
     setModalType(null);
