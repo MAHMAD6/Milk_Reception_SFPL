@@ -21,6 +21,16 @@ export interface ZmccArrivalAuthContext {
   effectiveZmccId: bigint | null;
 }
 
+/** An idempotent replay may only ever return a record from the caller's own ZMCC. */
+function isReplayOutsideScope(auth: ZmccArrivalAuthContext, existing: { zmcc_id: bigint }): boolean {
+  return !auth.isSuperAdmin && existing.zmcc_id !== auth.effectiveZmccId;
+}
+
+const REPLAY_SCOPE_CONFLICT = {
+  status: 409,
+  error: 'Conflict: client_event_id is already in use for another ZMCC.',
+} as const;
+
 export type ZmccArrivalAction =
   | 'SUBMIT_ARRIVAL'
   | 'CORRECT_ARRIVAL'
@@ -778,6 +788,7 @@ export async function submitMotArrival(
   });
 
   if (existingByEventId) {
+    if (isReplayOutsideScope(auth, existingByEventId)) return REPLAY_SCOPE_CONFLICT;
     if (isExactMotArrivalReplay(existingByEventId, expectedMotPayload)) {
       return {
         status: 200,
@@ -894,6 +905,7 @@ export async function submitMotArrival(
         },
       });
       if (existingAfterCollision) {
+        if (isReplayOutsideScope(auth, existingAfterCollision)) return REPLAY_SCOPE_CONFLICT;
         if (isExactMotArrivalReplay(existingAfterCollision, expectedMotPayload)) {
           return {
             status: 200,
@@ -1070,6 +1082,7 @@ export async function submitMotArrival(
         },
       });
       if (existingAfterCollision) {
+        if (isReplayOutsideScope(auth, existingAfterCollision)) return REPLAY_SCOPE_CONFLICT;
         if (isExactMotArrivalReplay(existingAfterCollision, expectedMotPayload)) {
           return {
             status: 200,
@@ -2098,6 +2111,7 @@ export async function submitLocalSupplierArrival(
   });
 
   if (existingByEventId) {
+    if (isReplayOutsideScope(auth, existingByEventId)) return REPLAY_SCOPE_CONFLICT;
     if (isExactLocalSupplierArrivalReplay(existingByEventId, expectedSupplierPayload)) {
       return {
         status: 200,
@@ -2132,6 +2146,7 @@ export async function submitLocalSupplierArrival(
         },
       });
       if (existingAfterCollision) {
+        if (isReplayOutsideScope(auth, existingAfterCollision)) return REPLAY_SCOPE_CONFLICT;
         if (isExactLocalSupplierArrivalReplay(existingAfterCollision, expectedSupplierPayload)) {
           return {
             status: 200,
@@ -2241,6 +2256,7 @@ export async function submitLocalSupplierArrival(
         },
       });
       if (existingAfterCollision) {
+        if (isReplayOutsideScope(auth, existingAfterCollision)) return REPLAY_SCOPE_CONFLICT;
         if (isExactLocalSupplierArrivalReplay(existingAfterCollision, expectedSupplierPayload)) {
           return {
             status: 200,

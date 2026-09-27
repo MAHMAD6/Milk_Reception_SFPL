@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   if (user.role !== 'ZMCC_MANAGER' && user.role !== 'SUPER_ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   const sourceId = user.role === 'SUPER_ADMIN' ? new URL(req.url).searchParams.get('sourceId') : user.procurement_source_id;
-  if (!sourceId) return NextResponse.json({ error: 'ZMCC source is required.' }, { status: 400 });
+  if (!sourceId || !/^\d+$/.test(sourceId)) return NextResponse.json({ error: 'ZMCC source is required.' }, { status: 400 });
   const requests = await prisma.correctionRequest.findMany({
     where: { source_id: BigInt(sourceId), status: 'REQUESTED' },
     include: { requester: { select: { username: true, full_name: true } } },
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const requestId = body?.requestId;
     const decision = body?.decision;
     const reason = typeof body?.reason === 'string' ? body.reason.trim() : '';
-    if (!requestId || !['APPROVE', 'REJECT', 'ESCALATE'].includes(decision) || reason.length < 5) {
+    if (!/^\d+$/.test(String(requestId ?? '')) || !['APPROVE', 'REJECT', 'ESCALATE'].includes(decision) || reason.length < 5) {
       return NextResponse.json({ error: 'Request, decision, and a reason of at least 5 characters are required.' }, { status: 400 });
     }
     const result = await prisma.$transaction(async (tx) => {

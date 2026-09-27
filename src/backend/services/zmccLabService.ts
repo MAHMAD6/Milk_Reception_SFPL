@@ -1594,6 +1594,9 @@ export async function completeSession(
   });
 
   if (existingByEvent) {
+    if (!auth.isSuperAdmin && !auth.isMpdHead && existingByEvent.zmcc_id !== auth.effectiveZmccId) {
+      return { status: 409, error: 'Conflict. completion_client_event_id is already in use for another ZMCC.' };
+    }
     if (matchesPersistedSessionCompletion(existingByEvent, sessionId, payload)) {
       return {
         status: 200,
