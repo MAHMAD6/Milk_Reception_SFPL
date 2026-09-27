@@ -18,6 +18,7 @@ import {
   X,
   Users,
   Truck,
+  type LucideIcon,
 } from 'lucide-react';
 import { Modal } from '@/components/ui/modal';
 import { SegmentedTabs } from '@/components/ui/segmented-tabs';
@@ -41,6 +42,18 @@ interface LocalSupplierItem {
   creator?: { id: string; username: string; full_name: string };
   updater?: { id: string; username: string; full_name: string } | null;
 }
+
+/** Any master-data row; the active tab decides which fields are present. */
+type MasterRecordFields = LocalSupplierItem & RouteItem & AreaItem & MilkSourceItem & ChillerOwnershipItem & ShopItem & TankItem;
+type MasterRecord = { [K in keyof MasterRecordFields]?: MasterRecordFields[K] | null } & { id: string };
+
+type MasterFormField =
+  | 'name' | 'origin' | 'destination' | 'route_id' | 'area_id' | 'erp_code' | 'ownership_code'
+  | 'shop_name' | 'owner_name' | 'phone_number' | 'cnic' | 'phone' | 'erp_reference'
+  | 'milk_source_id' | 'chiller_ownership_id' | 'latitude' | 'longitude'
+  | 'tank_code' | 'tank_name' | 'capacity_liters'
+  | 'vehicle_number' | 'vehicle_type' | 'category' | 'driver_name' | 'driver_phone';
+type MasterFormData = Partial<Record<MasterFormField, string | number>>;
 
 interface ZmccMasterDataWorkspaceProps {
   currentUser: User | null;
@@ -83,6 +96,7 @@ interface RouteItem {
   is_active: boolean;
   creator_name: string;
   updater_name: string | null;
+  area_count?: number;
   created_at: string;
 }
 
@@ -96,6 +110,7 @@ interface AreaItem {
   is_active: boolean;
   creator_name: string;
   updater_name: string | null;
+  shop_count?: number;
   created_at: string;
 }
 
@@ -107,6 +122,7 @@ interface MilkSourceItem {
   is_active: boolean;
   creator_name: string;
   updater_name: string | null;
+  shop_count?: number;
   created_at: string;
 }
 
@@ -117,6 +133,7 @@ interface ChillerOwnershipItem {
   is_active: boolean;
   creator_name: string;
   updater_name: string | null;
+  shop_count?: number;
   created_at: string;
 }
 
@@ -155,14 +172,14 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
   const isPheOperator = currentUser?.role === 'PHE_OPERATOR';
 
   // Tabs permitted
-  const permittedTabs: { id: MasterDataTab; label: string; icon: any }[] = React.useMemo(() => {
+  const permittedTabs: { id: MasterDataTab; label: string; icon: LucideIcon }[] = React.useMemo(() => {
     if (isPheOperator) {
       return [
         { id: 'LOCAL_SUPPLIERS', label: 'Local Suppliers', icon: Users },
         { id: 'SHOPS', label: 'Shop Details (Reference)', icon: Store },
       ];
     }
-    const tabs: { id: MasterDataTab; label: string; icon: any }[] = [
+    const tabs: { id: MasterDataTab; label: string; icon: LucideIcon }[] = [
       { id: 'LOCAL_SUPPLIERS', label: 'Local Suppliers', icon: Users },
       { id: 'ROUTES', label: 'Routes', icon: RouteIcon },
       { id: 'AREAS', label: 'Areas', icon: MapPin },
@@ -242,12 +259,12 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
     'TOGGLE_ACTIVE' | null
   >(null);
 
-  const [activeRecord, setActiveRecord] = useState<any>(null);
+  const [activeRecord, setActiveRecord] = useState<MasterRecord | null>(null);
   const [modalError, setModalError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   // Form Fields
-  const [formData, setFormData] = useState<any>({});
+  const [formData, setFormData] = useState<MasterFormData>({});
 
   // 1. Fetch ZMCC sources
   useEffect(() => {
@@ -320,11 +337,11 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
         if (!res.ok) throw new Error(data.error || 'Failed to fetch tanks');
         let tankList = data.tanks || [];
         if (statusFilter === 'false') {
-          tankList = tankList.filter((t: any) => !t.is_active);
+          tankList = tankList.filter((t: TankItem) => !t.is_active);
         }
         if (search) {
           const s = search.toLowerCase();
-          tankList = tankList.filter((t: any) => t.tank_name.toLowerCase().includes(s) || t.tank_code.toLowerCase().includes(s));
+          tankList = tankList.filter((t: TankItem) => t.tank_name.toLowerCase().includes(s) || t.tank_code.toLowerCase().includes(s));
         }
         setTanks(tankList);
       }
@@ -425,54 +442,54 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
     if (activeTab === 'TANKS') setModalType('CREATE_TANK');
   };
 
-  const handleOpenEditModal = (item: any) => {
+  const handleOpenEditModal = (item: MasterRecord) => {
     setModalError(null);
     setActiveRecord(item);
     if (activeTab === 'LOCAL_SUPPLIERS') {
       setFormData({
-        name: item.name,
+        name: item.name ?? '',
         phone: item.phone || '',
         cnic: item.cnic || '',
         erp_reference: item.erp_reference || '',
       });
       setModalType('EDIT_LOCAL_SUPPLIER');
     } else if (activeTab === 'ROUTES') {
-      setFormData({ name: item.name, origin: item.origin, destination: item.destination });
+      setFormData({ name: item.name ?? '', origin: item.origin ?? '', destination: item.destination ?? '' });
       setModalType('EDIT_ROUTE');
     } else if (activeTab === 'AREAS') {
-      setFormData({ name: item.name });
+      setFormData({ name: item.name ?? '' });
       setModalType('EDIT_AREA');
     } else if (activeTab === 'MILK_SOURCES') {
-      setFormData({ name: item.name });
+      setFormData({ name: item.name ?? '' });
       setModalType('EDIT_MILK_SOURCE');
     } else if (activeTab === 'CHILLER_OWNERSHIP') {
-      setFormData({ name: item.name });
+      setFormData({ name: item.name ?? '' });
       setModalType('EDIT_CHILLER');
     } else if (activeTab === 'SHOPS') {
       setFormData({
-        shop_name: item.shop_name,
-        owner_name: item.owner_name,
-        phone_number: item.phone_number,
-        cnic: item.cnic,
-        area_id: item.area_id,
-        route_id: item.route_id,
-        milk_source_id: item.milk_source_id,
-        chiller_ownership_id: item.chiller_ownership_id,
+        shop_name: item.shop_name ?? '',
+        owner_name: item.owner_name ?? '',
+        phone_number: item.phone_number ?? '',
+        cnic: item.cnic ?? '',
+        area_id: item.area_id ?? '',
+        route_id: item.route_id ?? '',
+        milk_source_id: item.milk_source_id ?? '',
+        chiller_ownership_id: item.chiller_ownership_id ?? '',
         latitude: item.latitude ?? '',
         longitude: item.longitude ?? '',
       });
       setModalType('EDIT_SHOP');
     } else if (activeTab === 'TANKS') {
       setFormData({
-        tank_code: item.tank_code,
-        tank_name: item.tank_name,
-        capacity_liters: item.capacity_liters,
+        tank_code: item.tank_code ?? '',
+        tank_name: item.tank_name ?? '',
+        capacity_liters: item.capacity_liters ?? '',
       });
       setModalType('EDIT_TANK');
     }
   };
 
-  const handleOpenToggleModal = (item: any) => {
+  const handleOpenToggleModal = (item: MasterRecord) => {
     setModalError(null);
     setActiveRecord(item);
     setModalType('TOGGLE_ACTIVE');
@@ -487,7 +504,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
     try {
       let url = '';
       let method = 'POST';
-      let body: any = {};
+      let body: Record<string, unknown> = {};
 
       if (modalType === 'CREATE_ROUTE') {
         url = '/api/zmcc/routes';
@@ -498,7 +515,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           zmcc_id: isSuperAdmin ? selectedZmccId : undefined,
         };
       } else if (modalType === 'EDIT_ROUTE') {
-        url = `/api/zmcc/routes/${activeRecord.id}`;
+        url = `/api/zmcc/routes/${activeRecord?.id}`;
         method = 'PATCH';
         body = {
           name: formData.name,
@@ -512,7 +529,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           route_id: formData.route_id,
         };
       } else if (modalType === 'EDIT_AREA') {
-        url = `/api/zmcc/areas/${activeRecord.id}`;
+        url = `/api/zmcc/areas/${activeRecord?.id}`;
         method = 'PATCH';
         body = { name: formData.name };
       } else if (modalType === 'CREATE_MILK_SOURCE') {
@@ -523,7 +540,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           zmcc_id: isSuperAdmin ? selectedZmccId : undefined,
         };
       } else if (modalType === 'EDIT_MILK_SOURCE') {
-        url = `/api/zmcc/milk-sources/${activeRecord.id}`;
+        url = `/api/zmcc/milk-sources/${activeRecord?.id}`;
         method = 'PATCH';
         body = { name: formData.name };
       } else if (modalType === 'CREATE_CHILLER') {
@@ -533,7 +550,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           name: formData.name,
         };
       } else if (modalType === 'EDIT_CHILLER') {
-        url = `/api/zmcc/chiller-ownerships/${activeRecord.id}`;
+        url = `/api/zmcc/chiller-ownerships/${activeRecord?.id}`;
         method = 'PATCH';
         body = { name: formData.name };
       } else if (modalType === 'CREATE_SHOP') {
@@ -550,7 +567,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           longitude: formData.longitude !== '' && formData.longitude != null ? Number(formData.longitude) : null,
         };
       } else if (modalType === 'EDIT_SHOP') {
-        url = `/api/zmcc/shops/${activeRecord.id}`;
+        url = `/api/zmcc/shops/${activeRecord?.id}`;
         method = 'PATCH';
         body = {
           shop_name: formData.shop_name,
@@ -585,7 +602,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           zmcc_id: isSuperAdmin ? selectedZmccId : undefined,
         };
       } else if (modalType === 'EDIT_LOCAL_SUPPLIER') {
-        url = `/api/zmcc/local-suppliers/${activeRecord.id}`;
+        url = `/api/zmcc/local-suppliers/${activeRecord?.id}`;
         method = 'PATCH';
         body = {
           name: formData.name,
@@ -602,7 +619,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           zmcc_id: isSuperAdmin ? selectedZmccId : undefined,
         };
       } else if (modalType === 'EDIT_TANK') {
-        url = `/api/zmcc/tanks/${activeRecord.id}`;
+        url = `/api/zmcc/tanks/${activeRecord?.id}`;
         method = 'PATCH';
         body = {
           tank_code: formData.tank_code,
@@ -610,14 +627,14 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           capacity_liters: formData.capacity_liters !== undefined ? Number(formData.capacity_liters) : undefined,
         };
       } else if (modalType === 'TOGGLE_ACTIVE') {
-        const targetActive = !activeRecord.is_active;
-        if (activeTab === 'LOCAL_SUPPLIERS') url = `/api/zmcc/local-suppliers/${activeRecord.id}`;
-        else if (activeTab === 'ROUTES') url = `/api/zmcc/routes/${activeRecord.id}`;
-        else if (activeTab === 'AREAS') url = `/api/zmcc/areas/${activeRecord.id}`;
-        else if (activeTab === 'MILK_SOURCES') url = `/api/zmcc/milk-sources/${activeRecord.id}`;
-        else if (activeTab === 'CHILLER_OWNERSHIP') url = `/api/zmcc/chiller-ownerships/${activeRecord.id}`;
-        else if (activeTab === 'SHOPS') url = `/api/zmcc/shops/${activeRecord.id}`;
-        else if (activeTab === 'TANKS') url = `/api/zmcc/tanks/${activeRecord.id}`;
+        const targetActive = !activeRecord?.is_active;
+        if (activeTab === 'LOCAL_SUPPLIERS') url = `/api/zmcc/local-suppliers/${activeRecord?.id}`;
+        else if (activeTab === 'ROUTES') url = `/api/zmcc/routes/${activeRecord?.id}`;
+        else if (activeTab === 'AREAS') url = `/api/zmcc/areas/${activeRecord?.id}`;
+        else if (activeTab === 'MILK_SOURCES') url = `/api/zmcc/milk-sources/${activeRecord?.id}`;
+        else if (activeTab === 'CHILLER_OWNERSHIP') url = `/api/zmcc/chiller-ownerships/${activeRecord?.id}`;
+        else if (activeTab === 'SHOPS') url = `/api/zmcc/shops/${activeRecord?.id}`;
+        else if (activeTab === 'TANKS') url = `/api/zmcc/tanks/${activeRecord?.id}`;
         method = 'PATCH';
         body = { is_active: targetActive };
       }
@@ -745,7 +762,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
           {/* Status Filter */}
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) => setStatusFilter(e.target.value as 'all' | 'true' | 'false')}
             className="px-3 py-2 min-h-[44px] bg-subtle border border-border rounded-xl text-xs font-semibold text-slate-700 focus:outline-hidden focus:ring-2 focus:ring-primary"
             aria-label="Filter by Status"
           >
@@ -976,7 +993,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
                         <td className="py-3 px-4 font-semibold text-foreground">{r.name}</td>
                         <td className="py-3 px-4 text-slate-600">{r.origin}</td>
                         <td className="py-3 px-4 text-slate-600">{r.destination}</td>
-                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{(r as any).area_count || 0}</td>
+                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{r.area_count || 0}</td>
                         <td className="py-3 px-4 text-center">
                           <span
                             className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase ${
@@ -1046,7 +1063,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
                         <td className="py-3 px-4 text-slate-600">
                           {a.route.name} <span className="text-xs tabular-nums text-slate-400">({a.route.route_code})</span>
                         </td>
-                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{(a as any).shop_count || 0}</td>
+                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{a.shop_count || 0}</td>
                         <td className="py-3 px-4 text-center">
                           <span
                             className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase ${
@@ -1112,7 +1129,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
                       <tr key={ms.id} className="hover:bg-subtle/60 transition">
                         <td className="py-3 px-4 tabular-nums font-semibold text-foreground">{ms.erp_code}</td>
                         <td className="py-3 px-4 font-semibold text-foreground">{ms.name}</td>
-                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{(ms as any).shop_count || 0}</td>
+                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{ms.shop_count || 0}</td>
                         <td className="py-3 px-4 text-center">
                           <span
                             className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase ${
@@ -1178,7 +1195,7 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
                       <tr key={co.id} className="hover:bg-subtle/60 transition">
                         <td className="py-3 px-4 tabular-nums font-semibold text-foreground">{co.ownership_code}</td>
                         <td className="py-3 px-4 font-semibold text-foreground">{co.name}</td>
-                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{(co as any).shop_count || 0}</td>
+                        <td className="py-3 px-4 text-center font-semibold tabular-nums">{co.shop_count || 0}</td>
                         <td className="py-3 px-4 text-center">
                           <span
                             className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase ${
