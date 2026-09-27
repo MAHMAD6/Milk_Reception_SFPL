@@ -2742,39 +2742,12 @@ export async function recordGateExit(
       if (arrivalType === 'MOT') {
         arrival = await tx.zmccMotArrival.findUnique({
           where: { id: arrivalId },
-          include: {
-            journey: {
-              include: {
-                route: true,
-                mot_vehicle: true,
-                mot_profile: true,
-                summary: true,
-              },
-            },
-            zmcc: true,
-            recorded_by: true,
-            exit_recorded_by: true,
-            lab_session: {
-              include: {
-                tank_receipt: true,
-              },
-            },
-          },
+          include: motArrivalWithLabInclude,
         });
       } else {
         arrival = await tx.zmccLocalSupplierArrival.findUnique({
           where: { id: arrivalId },
-          include: {
-            local_supplier: true,
-            zmcc: true,
-            recorded_by: true,
-            exit_recorded_by: true,
-            lab_session: {
-              include: {
-                tank_receipt: true,
-              },
-            },
-          },
+          include: localSupplierArrivalWithLabInclude,
         });
       }
 
