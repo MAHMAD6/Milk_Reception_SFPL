@@ -7,6 +7,10 @@ async function resetDevLoginPasswords() {
     console.error('❌ ERROR: Development password reset CANNOT be executed in production environment!');
     process.exit(1);
   }
+  if ((process.env.ALLOW_DEMO_RESET || '').trim() !== 'true') {
+    console.error('❌ ERROR: ALLOW_DEMO_RESET=true is required. This resets known accounts to publicly known demo passwords.');
+    process.exit(1);
+  }
 
   console.log('🔧 EXPLICIT DEVELOPMENT PASSWORD RESET INITIATED...');
 

@@ -305,6 +305,7 @@ model LabTestRule {
 
   @@unique([lab_test_id, testing_point, rule_category, version])
   @@index([lab_test_id, testing_point, rule_category, is_active])
+  @@index([lab_test_id, is_active])
   @@index([effective_from, effective_to])
   @@map("lab_test_rule")
 }
@@ -1455,6 +1456,7 @@ model ZmccLabSession {
   @@index([zmcc_id, status])
   @@index([status, created_at])
   @@index([manager_review_status])
+  @@index([final_decision, final_decided_at])
   @@map("zmcc_lab_session")
 }
 

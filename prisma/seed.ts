@@ -3,6 +3,13 @@ import { createPrismaClient } from '../src/backend/core/db';
 
 const prisma = createPrismaClient();
 
+/**
+ * Production mode seeds reference data only (create-if-missing, never overwriting edits made
+ * in the app) plus a single bootstrap Super Admin from BOOTSTRAP_ADMIN_* env vars.
+ * Development mode additionally creates the demo accounts with their well-known passwords.
+ */
+const IS_PRODUCTION_SEED = process.env.NODE_ENV === 'production' || process.env.SEED_MODE === 'production';
+
 const LAB_TESTS_SEED = [
   { displayOrder: 1, testCode: 'LT-000001', testName: 'Temperature', resultType: 'NUMERIC', unit: '°C', testScope: 'BOTH', isRequired: true, isActive: true },
   { displayOrder: 2, testCode: 'LT-000002', testName: 'Organoleptic Smell', resultType: 'OK_NOT_OK', unit: null, testScope: 'BOTH', isRequired: true, isActive: true },
@@ -63,7 +70,7 @@ async function main() {
 
     await prisma.labTest.upsert({
       where: { testCode: test.testCode },
-      update: {
+      update: IS_PRODUCTION_SEED ? {} : {
         testName: test.testName,
         resultType: test.resultType,
         unit: test.unit,
@@ -89,15 +96,17 @@ async function main() {
 
   console.log('Seeding Procurement Sources in PostgreSQL...');
 
-  // Remove unconfirmed demo contractor CONT-NDL if present
-  await prisma.procurementSource.deleteMany({
-    where: { code: 'CONT-NDL' },
-  });
+  if (!IS_PRODUCTION_SEED) {
+    // Remove unconfirmed demo contractor CONT-NDL if present
+    await prisma.procurementSource.deleteMany({
+      where: { code: 'CONT-NDL' },
+    });
+  }
 
   for (const ps of PROCUREMENT_SOURCES_SEED) {
     await prisma.procurementSource.upsert({
       where: { code: ps.code },
-      update: {
+      update: IS_PRODUCTION_SEED ? {} : {
         name: ps.name,
         source_type: ps.sourceType,
       },
@@ -109,6 +118,58 @@ async function main() {
     });
   }
 
+  if (IS_PRODUCTION_SEED) {
+    await seedBootstrapSuperAdmin();
+  } else {
+    await seedDemoUsers();
+  }
+
+  await seedChillerOwnership();
+
+  console.log(
+    IS_PRODUCTION_SEED
+      ? '✅ Production seed complete: reference data present and a Super Admin account available.'
+      : '✅ Successfully seeded 30 Lab Tests, Procurement Sources, demo System Users, and 11 Chiller Ownership records!'
+  );
+}
+
+async function seedBootstrapSuperAdmin() {
+  const existingAdmin = await prisma.user.findFirst({ where: { role: 'SUPER_ADMIN', is_active: true } });
+  if (existingAdmin) {
+    console.log(`Active Super Admin "${existingAdmin.username}" already exists; bootstrap account not created.`);
+    return;
+  }
+
+  const username = process.env.BOOTSTRAP_ADMIN_USERNAME?.trim() || 'admin.superuser';
+  const password = process.env.BOOTSTRAP_ADMIN_PASSWORD || '';
+  if (password.length < 12) {
+    throw new Error(
+      'No active Super Admin exists. Set BOOTSTRAP_ADMIN_PASSWORD (at least 12 characters) and re-run the seed to create one.'
+    );
+  }
+
+  const bcrypt = await import('bcryptjs');
+  const existingUser = await prisma.user.findFirst({ where: { username } });
+  const data = {
+    full_name: process.env.BOOTSTRAP_ADMIN_NAME?.trim() || 'Super Admin',
+    role: 'SUPER_ADMIN',
+    department: 'System Administration',
+    scope_type: 'SYSTEM',
+    procurement_source_id: null,
+    is_active: true,
+    password_hash: await bcrypt.hash(password, 12),
+  };
+  if (existingUser) {
+    await prisma.user.update({ where: { id: existingUser.id }, data });
+  } else {
+    await prisma.user.create({
+      data: { ...data, username, email: process.env.BOOTSTRAP_ADMIN_EMAIL?.trim() || null },
+    });
+  }
+  console.log(`Bootstrap Super Admin "${username}" is ready. Sign in and rotate the password.`);
+}
+
+async function seedDemoUsers() {
   console.log('Seeding System Users in PostgreSQL...');
 
   const bcrypt = await import('bcryptjs');
@@ -193,6 +254,9 @@ async function main() {
     }
   }
 
+}
+
+async function seedChillerOwnership() {
   console.log('Seeding Chiller Ownership Master Data in PostgreSQL...');
   const CHILLER_OWNERSHIP_SEED = [
     { code: 'NESTLE', name: 'Nestlé' },
@@ -210,23 +274,21 @@ async function main() {
 
   const superAdmin = await prisma.user.findFirst({
     where: {
-      username: 'admin.superuser',
       role: 'SUPER_ADMIN',
       is_active: true,
       scope_type: 'SYSTEM',
     },
+    orderBy: { id: 'asc' },
   });
 
   if (!superAdmin) {
-    throw new Error(
-      'Active canonical SUPER_ADMIN (admin.superuser with role=SUPER_ADMIN, is_active=true, scope_type=SYSTEM) not found for seeding ChillerOwnership'
-    );
+    throw new Error('An active SYSTEM-scoped SUPER_ADMIN is required for seeding ChillerOwnership.');
   }
 
   for (const item of CHILLER_OWNERSHIP_SEED) {
     await prisma.chillerOwnership.upsert({
       where: { ownership_code: item.code },
-      update: {
+      update: IS_PRODUCTION_SEED ? {} : {
         name: item.name,
         is_active: true,
         updated_by: superAdmin.id,
@@ -241,7 +303,6 @@ async function main() {
     });
   }
 
-  console.log('✅ Successfully seeded 30 Lab Tests, 5 Procurement Sources, System Users, and 11 Chiller Ownership records!');
 }
 
 main()

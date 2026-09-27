@@ -1,0 +1,22 @@
+# Dependencies and build output are produced inside the image
+node_modules
+.next
+out
+
+# Secrets never enter the build context
+.env
+.env.*
+!.env.example
+
+# VCS, docs and audit material not needed at runtime
+.git
+.github
+artifacts
+screenshots
+my_files
+docs
+PROMPT.md
+*.log
+tsconfig.tsbuildinfo
+Dockerfile
+docker-compose*.yml

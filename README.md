@@ -176,59 +176,107 @@ http://localhost:3000
 
 ## Environment Variables
 
-Create a local `.env` file.
+Copy `.env.example` to `.env` and fill it in. Every variable is documented there.
 
-Example structure:
+| Variable | Required | Purpose |
+| --- | --- | --- |
+| `DATABASE_URL` | yes | PostgreSQL connection string |
+| `JWT_SECRET` | yes | Session signing key; ≥ 32 random chars in production (`openssl rand -base64 48`) |
+| `APP_URL` / `ALLOWED_ORIGINS` | recommended | Origins allowed to make state-changing API calls |
+| `TRUST_PROXY` | behind a proxy | Trust `X-Forwarded-*` headers (client IP for rate limiting, forwarded host) |
+| `SESSION_COOKIE_SECURE` | no | Defaults to secure cookies in production; `false` only for a plain-HTTP intranet |
+| `BOOTSTRAP_ADMIN_*` | first deploy | Creates the first Super Admin when the production seed runs on an empty database |
+| `CRON_SECRET` | for SMS | Shared secret for `/api/cron/*` |
+| `SMS_PROVIDER_URL` / `SMS_PROVIDER_TOKEN` / `SMS_SENDER_ID` | for SMS | HTTPS gateway for MOT collection receipts; messages stay `PENDING` until set |
+| `TV_BOARD_ACCESS_KEY` | no | Lets an unattended yard screen open `/tv-board?key=…` without signing in |
+| `ENABLE_DEMO_LOGIN` | no | Demo sign-in shortcuts (on automatically under `npm run dev`); **never** enable on real data |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | no | Web Push public key, inlined at build time |
 
-```env
-DATABASE_URL="postgresql://USER:PASSWORD@HOST:PORT/DATABASE"
-JWT_SECRET="your-secret"
-```
+The server validates its environment at startup and refuses to start in production with a
+missing or weak `JWT_SECRET` or a missing `DATABASE_URL`.
 
-The real `.env` file must not be committed to GitHub.
+The real `.env` file must never be committed (it is in `.gitignore` and `.dockerignore`).
 
-Use `.env.example` for documenting required environment variables.
+## Security Model
 
-## Development Safety
-
-The following should not be committed:
-
-```text
-.env
-node_modules/
-.next/
-log files
-local build/cache files
-```
-
-These are excluded through `.gitignore`.
-
-## Project Verification
-
-Common validation commands:
-
-```bash
-npx prisma validate
-npx prisma generate
-npm run lint
-npm run typecheck
-npm run build
-```
+* **Sessions** — HS256 JWT in an `HttpOnly`, `SameSite=Lax` cookie (`Secure` in production), with pinned
+  algorithm, issuer and audience. Role, scope and active status are re-read from PostgreSQL on every
+  request; changing or resetting a password revokes every existing session for that user.
+* **Sign-in** — generic failure messages (no account enumeration), constant-time comparison for
+  unknown users, and a lockout of 10 attempts per username / 50 per client IP per 15 minutes.
+  The limiter is in-process: run a single instance or add a shared limiter at the reverse proxy.
+* **Authorization** — every API route authenticates and checks role and procurement-source scope
+  server-side; source-scoped roles only ever see their own ZMCC/contractor data, and roles without
+  an explicit grant are refused (fail closed).
+* **Request proxy** (`src/proxy.ts`) — redirects signed-out page loads to `/login`, rejects
+  cross-origin state-changing API requests, and sets CSP, `X-Frame-Options`, `nosniff`,
+  `Referrer-Policy`, `Permissions-Policy` and (over HTTPS) HSTS.
+* **Errors** — API responses never include database or runtime error details; those are logged
+  server-side only.
 
 ## Deployment
 
-Production deployment has not been finalized.
+The app is provider-neutral: any host that can run Node.js 24 or a container and reach PostgreSQL.
 
-The application is intentionally kept PostgreSQL/Prisma based and provider-neutral so it can later run against:
+### Container (recommended)
 
-* company-hosted PostgreSQL
-* managed PostgreSQL for staging/testing
-* standard Next.js Node/Docker deployment
+```bash
+cp .env.example .env        # set JWT_SECRET, POSTGRES_PASSWORD, BOOTSTRAP_ADMIN_PASSWORD, ...
+docker compose up -d --build
+```
 
-Cloud-specific infrastructure is not required for current local development.
+`docker-compose.yml` runs PostgreSQL, a one-off `migrate` job (`prisma migrate deploy` then the
+production-safe seed) and the app, which only starts once migrations succeed. The image is a
+non-root, standalone Next.js build with a built-in health check.
+
+To use an existing PostgreSQL instead, build the two images and run them yourself:
+
+```bash
+docker build --target migrator -t milk-reception:migrator .
+docker build --target runner   -t milk-reception:app .
+docker run --rm --env-file .env milk-reception:migrator                        # each release
+docker run --rm --env-file .env milk-reception:migrator npx prisma db seed     # first deploy
+docker run -d  --env-file .env -p 3000:3000 milk-reception:app
+```
+
+### Bare Node.js
+
+```bash
+npm ci
+npm run db:migrate                             # apply migrations
+NODE_ENV=production npm run db:seed            # first deploy: reference data + bootstrap admin
+npm run build
+NODE_ENV=production npm start
+```
+
+### Production seed
+
+With `NODE_ENV=production` (or `SEED_MODE=production`), `prisma db seed` only creates missing
+reference data (lab tests, procurement sources, chiller ownership) and — if no active Super Admin
+exists — one Super Admin from `BOOTSTRAP_ADMIN_USERNAME` / `BOOTSTRAP_ADMIN_PASSWORD` (≥ 12 chars).
+It never creates demo accounts and never overwrites data edited in the app. Sign in and rotate the
+bootstrap password immediately.
+
+Demo data scripts (`scripts/*demo*`, `prisma/reset-dev-login-passwords.ts`) refuse to run with
+`NODE_ENV=production` and require `ALLOW_DEMO_RESET=true`.
+
+### Operations
+
+* **Health check** — `GET /api/health` returns `200 {"status":"ok"}` when the database is reachable, `503` otherwise.
+* **SMS outbox** — schedule `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<host>/api/cron/process-sms`
+  every minute (cron, systemd timer or Kubernetes CronJob). Each message is retried up to 3 times.
+* **Reverse proxy** — terminate TLS in front of the app, forward `Host`/`X-Forwarded-*`, and set `TRUST_PROXY=true`.
+* **Migrations** — `npm run db:drift` (also enforced in CI) fails if `schema.prisma` and the migrations disagree.
+
+### Known limitations
+
+* Web Push subscriptions are stored, but no server-side push sender is wired up yet; notifications are delivered in-app.
+* Emergency vehicle substitution and village-shop rejections are not modelled yet, so the MPD executive
+  dashboard shows those sections as empty ("—") rather than estimated figures.
 
 ## Repository
 
 This repository contains the development source code for the SFPL Milk Reception Management System.
 
-The application is currently under active development.
+CI (`.github/workflows/ci.yml`) applies migrations to a fresh PostgreSQL, seeds it, checks for schema
+drift, audits production dependencies, typechecks, lints, builds, and builds the production container image.

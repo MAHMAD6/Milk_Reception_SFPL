@@ -12,9 +12,25 @@ export function createPrismaClient() {
 }
 
 declare const globalThis: {
-  prismaGlobal: ReturnType<typeof createPrismaClient>;
+  prismaGlobal: ReturnType<typeof createPrismaClient> | undefined;
 } & typeof global;
 
-export const prisma = globalThis.prismaGlobal ?? createPrismaClient();
+function getPrismaClient(): PrismaClient {
+  if (!globalThis.prismaGlobal) {
+    globalThis.prismaGlobal = createPrismaClient();
+  }
+  return globalThis.prismaGlobal;
+}
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
+/**
+ * Lazily-connected client: the connection is created on first use, not at import time,
+ * so `next build` can load route modules without DATABASE_URL (e.g. in a container
+ * build stage). One client per process, reused across hot reloads in development.
+ */
+export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
+  get(_target, property) {
+    const client = getPrismaClient();
+    const value = Reflect.get(client, property, client);
+    return typeof value === 'function' ? value.bind(client) : value;
+  },
+});
