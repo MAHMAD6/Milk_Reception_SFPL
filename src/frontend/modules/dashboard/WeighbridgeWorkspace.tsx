@@ -129,58 +129,64 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
   const [_statusMsg, setStatusMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Fetch First Weight Queue with Auto-Selection & Stale Repair
-  const fetchFirstWeightQueue = useCallback(async (query: string = '') => {
-    try {
-      const res = await fetch(`/api/scale/ready-for-gross?q=${encodeURIComponent(query)}`);
-      if (res.ok) {
-        const data = await res.json();
-        const visits: FirstWeightVisit[] = data.visits || [];
-        setFirstWeightVisits(visits);
-        
-        // Auto-selection & Stale queue repair rule
-        if (visits.length > 0) {
-          setSelectedFirstVisitId((currentId) => {
-            if (!currentId || !visits.some((v) => v.id === currentId)) {
-              return visits[0].id;
+  const fetchFirstWeightQueue = useCallback(
+    (query: string = '') =>
+      fetch(`/api/scale/ready-for-gross?q=${encodeURIComponent(query)}`)
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            const visits: FirstWeightVisit[] = data.visits || [];
+            setFirstWeightVisits(visits);
+            
+            // Auto-selection & Stale queue repair rule
+            if (visits.length > 0) {
+              setSelectedFirstVisitId((currentId) => {
+                if (!currentId || !visits.some((v) => v.id === currentId)) {
+                  return visits[0].id;
+                }
+                return currentId;
+              });
+            } else {
+              setSelectedFirstVisitId(null);
+              setGrossInputKg('');
             }
-            return currentId;
-          });
-        } else {
-          setSelectedFirstVisitId(null);
-          setGrossInputKg('');
-        }
-      }
-    } catch (_err) {
-      // Handled silently
-    }
-  }, []);
+          }
+        })
+        .catch(() => {
+          // Handled silently
+        }),
+    []
+  );
 
   // Fetch Second Weight Queue with Auto-Selection & Stale Repair
-  const fetchSecondWeightQueue = useCallback(async (query: string = '') => {
-    try {
-      const res = await fetch(`/api/scale/ready-for-tare?q=${encodeURIComponent(query)}`);
-      if (res.ok) {
-        const data = await res.json();
-        const visits: SecondWeightVisit[] = data.visits || [];
-        setSecondWeightVisits(visits);
+  const fetchSecondWeightQueue = useCallback(
+    (query: string = '') =>
+      fetch(`/api/scale/ready-for-tare?q=${encodeURIComponent(query)}`)
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            const visits: SecondWeightVisit[] = data.visits || [];
+            setSecondWeightVisits(visits);
 
-        // Auto-selection & Stale queue repair rule
-        if (visits.length > 0) {
-          setSelectedSecondVisitId((currentId) => {
-            if (!currentId || !visits.some((v) => v.id === currentId)) {
-              return visits[0].id;
+            // Auto-selection & Stale queue repair rule
+            if (visits.length > 0) {
+              setSelectedSecondVisitId((currentId) => {
+                if (!currentId || !visits.some((v) => v.id === currentId)) {
+                  return visits[0].id;
+                }
+                return currentId;
+              });
+            } else {
+              setSelectedSecondVisitId(null);
+              setTareInputKg('');
             }
-            return currentId;
-          });
-        } else {
-          setSelectedSecondVisitId(null);
-          setTareInputKg('');
-        }
-      }
-    } catch (_err) {
-      // Handled silently
-    }
-  }, []);
+          }
+        })
+        .catch(() => {
+          // Handled silently
+        }),
+    []
+  );
 
   // Refresh both queues
   const refreshAllQueues = useCallback(async () => {
@@ -194,13 +200,16 @@ export const WeighbridgeWorkspace: React.FC<WeighbridgeWorkspaceProps> = ({
 
   // Initial fetch and 5s periodic polling
   useEffect(() => {
-    refreshAllQueues();
+    Promise.all([
+      fetchFirstWeightQueue(firstSearchQuery),
+      fetchSecondWeightQueue(secondSearchQuery),
+    ]).finally(() => setIsLoading(false));
     const interval = setInterval(() => {
       fetchFirstWeightQueue(firstSearchQuery);
       fetchSecondWeightQueue(secondSearchQuery);
     }, 5000);
     return () => clearInterval(interval);
-  }, [refreshAllQueues, fetchFirstWeightQueue, fetchSecondWeightQueue, firstSearchQuery, secondSearchQuery]);
+  }, [fetchFirstWeightQueue, fetchSecondWeightQueue, firstSearchQuery, secondSearchQuery]);
 
   // Selected visit objects
   const selectedFirstVisit = firstWeightVisits.find((v) => v.id === selectedFirstVisitId) || null;
