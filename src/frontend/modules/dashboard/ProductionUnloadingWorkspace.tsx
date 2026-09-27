@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Clock, Play, CheckCheck, RefreshCw, MinusCircle } from 'lucide-react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
@@ -106,6 +106,11 @@ interface ProductionUnloadingWorkspaceProps {
   onTabChange?: (tab: ProductionTab) => void;
 }
 
+/** Idempotency key for one silo-issue submission. */
+function newClientRequestId() {
+  return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
 export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspaceProps> = ({
   activeTab: controlledTab,
   onTabChange,
@@ -133,111 +138,108 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
   const [issueQuantityLiters, setIssueQuantityLiters] = useState<string>('');
   const [issuePurpose, setIssuePurpose] = useState<string>('UHT Milk');
   const [issueFlowMeterRef, setIssueFlowMeterRef] = useState<string>('');
-  const [issueOpTimestamp, setIssueOpTimestamp] = useState<string>(toDatetimeLocalInput(new Date()));
+  const [issueOpTimestamp, setIssueOpTimestamp] = useState<string>(() => toDatetimeLocalInput(new Date()));
   const [issueHistory, setIssueHistory] = useState<SiloIssueHistoryDef[]>([]);
-  const [historyLoading, setHistoryLoading] = useState<boolean>(false);
+  // Silo whose issue-history request last settled; a different silo means it is still loading.
+  const [historyLoadedSiloId, setHistoryLoadedSiloId] = useState<string | null>(null);
 
   // Input states for Unloading
   const [portionSiloMap, setPortionSiloMap] = useState<Record<string, string>>({}); // portionId -> siloId
-  const [startOpTimestamp, setStartOpTimestamp] = useState<string>(toDatetimeLocalInput(new Date()));
-  const [completeOpTimestamp, setCompleteOpTimestamp] = useState<string>(toDatetimeLocalInput(new Date()));
+  const [startOpTimestamp, setStartOpTimestamp] = useState<string>(() => toDatetimeLocalInput(new Date()));
+  const [completeOpTimestamp, setCompleteOpTimestamp] = useState<string>(() => toDatetimeLocalInput(new Date()));
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
   const [_errorMsg, setErrorMsg] = useState<string | null>(null);
   const [_successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Local helper for local ISO datetime-local format
-  const getLocalISOString = () => {
-    const now = new Date();
-    const tzOffset = now.getTimezoneOffset() * 60000;
-    return new Date(now.getTime() - tzOffset).toISOString().slice(0, 16);
-  };
-
-  useEffect(() => {
-    setStartOpTimestamp(getLocalISOString());
-    setCompleteOpTimestamp(getLocalISOString());
-    setIssueOpTimestamp(getLocalISOString());
-  }, []);
-
   // Fetch Ready Queue & Silo Data
-  const fetchReadyData = async (query = searchQuery, isCancelledFlag = { current: false }) => {
-    try {
-      setIsLoading(true);
-      const res = await fetch(`/api/production/ready-for-unloading?search=${encodeURIComponent(query)}`);
-      const data = await res.json();
+  const fetchReadyData = useCallback(
+    (query: string, isCancelledFlag = { current: false }) =>
+      fetch(`/api/production/ready-for-unloading?search=${encodeURIComponent(query)}`)
+        .then(async (res) => {
+          const data = await res.json();
 
-      if (isCancelledFlag.current) return;
+          if (isCancelledFlag.current) return;
 
-      if (res.ok) {
-        const fetchedVisits: ReadyVisitDef[] = data.visits || [];
-        const fetchedSilos: SiloOption[] = data.silos || [];
-        setReadyVisits(fetchedVisits);
-        setActiveSilos(fetchedSilos);
+          if (res.ok) {
+            const fetchedVisits: ReadyVisitDef[] = data.visits || [];
+            const fetchedSilos: SiloOption[] = data.silos || [];
+            setReadyVisits(fetchedVisits);
+            setActiveSilos(fetchedSilos);
 
-        // Auto-selection repair for Ready queue
-        setSelectedReadyVisitId((prev) => {
-          if (prev && fetchedVisits.some((v) => v.id === prev)) {
-            return prev;
+            // Auto-selection repair for Ready queue
+            setSelectedReadyVisitId((prev) => {
+              if (prev && fetchedVisits.some((v) => v.id === prev)) {
+                return prev;
+              }
+              return fetchedVisits.length > 0 ? fetchedVisits[0].id : null;
+            });
+
+            // Auto-selection repair for Silo Issue queue
+            setSelectedIssueSiloId((prev) => {
+              if (prev && fetchedSilos.some((s) => s.id === prev)) {
+                return prev;
+              }
+              const eligible = fetchedSilos.filter((s) => s.current_stock_liters > 0);
+              return eligible.length > 0 ? eligible[0].id : fetchedSilos.length > 0 ? fetchedSilos[0].id : null;
+            });
           }
-          return fetchedVisits.length > 0 ? fetchedVisits[0].id : null;
-        });
-
-        // Auto-selection repair for Silo Issue queue
-        setSelectedIssueSiloId((prev) => {
-          if (prev && fetchedSilos.some((s) => s.id === prev)) {
-            return prev;
-          }
-          const eligible = fetchedSilos.filter((s) => s.current_stock_liters > 0);
-          return eligible.length > 0 ? eligible[0].id : fetchedSilos.length > 0 ? fetchedSilos[0].id : null;
-        });
-      }
-    } catch (_err) {
-      // Handled silently
-    } finally {
-      if (!isCancelledFlag.current) setIsLoading(false);
-    }
-  };
+        })
+        .catch(() => {
+          // Handled silently
+        })
+        .finally(() => {
+          // Only the first load shows the loading state; polling refreshes in place.
+          if (!isCancelledFlag.current) setIsLoading(false);
+        }),
+    []
+  );
 
   // Fetch Unloading Active Queue
-  const fetchUnloadingData = async (query = searchQuery, isCancelledFlag = { current: false }) => {
-    try {
-      const res = await fetch(`/api/production/unloading-queue?search=${encodeURIComponent(query)}`);
-      const data = await res.json();
+  const fetchUnloadingData = useCallback(
+    (query: string, isCancelledFlag = { current: false }) =>
+      fetch(`/api/production/unloading-queue?search=${encodeURIComponent(query)}`)
+        .then(async (res) => {
+          const data = await res.json();
 
-      if (isCancelledFlag.current) return;
+          if (isCancelledFlag.current) return;
 
-      if (res.ok) {
-        const fetchedVisits: UnloadingVisitDef[] = data.visits || [];
-        setUnloadingVisits(fetchedVisits);
-        setSelectedUnloadingVisitId((prev) => {
-          if (prev && fetchedVisits.some((v) => v.id === prev)) {
-            return prev;
+          if (res.ok) {
+            const fetchedVisits: UnloadingVisitDef[] = data.visits || [];
+            setUnloadingVisits(fetchedVisits);
+            setSelectedUnloadingVisitId((prev) => {
+              if (prev && fetchedVisits.some((v) => v.id === prev)) {
+                return prev;
+              }
+              return fetchedVisits.length > 0 ? fetchedVisits[0].id : null;
+            });
           }
-          return fetchedVisits.length > 0 ? fetchedVisits[0].id : null;
-        });
-      }
-    } catch (_err) {
-      // Handled silently
-    }
-  };
+        })
+        .catch(() => {
+          // Handled silently
+        }),
+    []
+  );
 
   // Fetch Silo Issue History
-  const fetchIssueHistory = async (siloId: string) => {
-    if (!siloId) return;
-    try {
-      setHistoryLoading(true);
-      const res = await fetch(`/api/production/silo-issue/history?siloId=${siloId}`);
-      const data = await res.json();
-      if (res.ok) {
-        setIssueHistory(data.history || []);
-      }
-    } catch (_err) {
-      // Handled silently
-    } finally {
-      setHistoryLoading(false);
-    }
-  };
+  const fetchIssueHistory = useCallback(
+    (siloId: string) =>
+      fetch(`/api/production/silo-issue/history?siloId=${siloId}`)
+        .then(async (res) => {
+          const data = await res.json();
+          if (res.ok) {
+            setIssueHistory(data.history || []);
+          }
+        })
+        .catch(() => {
+          // Handled silently
+        })
+        .finally(() => {
+          setHistoryLoadedSiloId(siloId);
+        }),
+    []
+  );
 
   // Polling intervals & query effect
   useEffect(() => {
@@ -255,14 +257,16 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
       isCancelledFlag.current = true;
       clearInterval(interval);
     };
-  }, [searchQuery]);
+  }, [searchQuery, fetchReadyData, fetchUnloadingData]);
 
   // Load history when issue silo selection changes
+  const showIssueHistory = Boolean(selectedIssueSiloId) && activeTab === 'SILO_ISSUE';
+  const historyLoading = showIssueHistory && historyLoadedSiloId !== selectedIssueSiloId;
   useEffect(() => {
-    if (selectedIssueSiloId && activeTab === 'SILO_ISSUE') {
+    if (showIssueHistory && selectedIssueSiloId) {
       fetchIssueHistory(selectedIssueSiloId);
     }
-  }, [selectedIssueSiloId, activeTab]);
+  }, [showIssueHistory, selectedIssueSiloId, fetchIssueHistory]);
 
   // Active object references
   const selectedReadyVisit = readyVisits.find((v) => v.id === selectedReadyVisitId) || null;
@@ -276,19 +280,27 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
     return s.silo_code.toLowerCase().includes(q) || s.silo_name.toLowerCase().includes(q);
   });
 
-  // Auto-populate default silo mapping for selected ready visit
-  useEffect(() => {
-    if (selectedReadyVisit && activeSilos.length > 0) {
-      const newMap: Record<string, string> = {};
-      const acceptedPortions = selectedReadyVisit.portions.filter((p) => p.plant_decision === 'ACCEPTED');
-      const activeOnlySilos = activeSilos.filter((s) => s.is_active);
-      acceptedPortions.forEach((p, idx) => {
-        const targetSilo = activeOnlySilos[idx % activeOnlySilos.length] || activeSilos[0];
-        newMap[p.id] = portionSiloMap[p.id] || targetSilo?.id || '';
-      });
-      setPortionSiloMap(newMap);
-    }
-  }, [selectedReadyVisitId, activeSilos]);
+  // Auto-populate default silo mapping when the selected ready visit or silo list changes,
+  // keeping any silo the operator already chose for a portion.
+  const [siloMapSource, setSiloMapSource] = useState<{ visitId: string | null; silos: SiloOption[] }>({
+    visitId: null,
+    silos: [],
+  });
+  if (
+    selectedReadyVisit &&
+    activeSilos.length > 0 &&
+    (siloMapSource.visitId !== selectedReadyVisitId || siloMapSource.silos !== activeSilos)
+  ) {
+    setSiloMapSource({ visitId: selectedReadyVisitId, silos: activeSilos });
+    const newMap: Record<string, string> = {};
+    const acceptedPortions = selectedReadyVisit.portions.filter((p) => p.plant_decision === 'ACCEPTED');
+    const activeOnlySilos = activeSilos.filter((s) => s.is_active);
+    acceptedPortions.forEach((p, idx) => {
+      const targetSilo = activeOnlySilos[idx % activeOnlySilos.length] || activeSilos[0];
+      newMap[p.id] = portionSiloMap[p.id] || targetSilo?.id || '';
+    });
+    setPortionSiloMap(newMap);
+  }
 
   const toast = useToast();
 
@@ -329,8 +341,8 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
       if (res.ok) {
         const successText = `Unloading started for vehicle ${selectedReadyVisit.vehicle_number}.`;
         toast.showSuccess(successText, 'Unloading Started');
-        fetchReadyData();
-        fetchUnloadingData();
+        fetchReadyData(searchQuery);
+        fetchUnloadingData(searchQuery);
         setActiveTab('UNLOADING');
       } else {
         const errText = data.error || 'Failed to start unloading';
@@ -371,8 +383,8 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
       if (res.ok) {
         const successText = `Unloading completed for vehicle ${selectedUnloadingVisit.vehicle_number}. Vehicle moved to READY_FOR_TARE.`;
         toast.showSuccess(successText, 'Unloading Completed');
-        fetchReadyData();
-        fetchUnloadingData();
+        fetchReadyData(searchQuery);
+        fetchUnloadingData(searchQuery);
         setActiveTab('READY');
       } else {
         const errText = data.error || 'Failed to complete unloading';
@@ -412,7 +424,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
     setSuccessMsg(null);
 
     try {
-      const clientRequestId = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+      const clientRequestId = newClientRequestId();
       const res = await fetch('/api/production/silo-issue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -432,7 +444,7 @@ export const ProductionUnloadingWorkspace: React.FC<ProductionUnloadingWorkspace
         toast.showSuccess(successText, 'Silo Issue Recorded');
         setIssueQuantityLiters('');
         setIssueFlowMeterRef('');
-        fetchReadyData();
+        fetchReadyData(searchQuery);
         fetchIssueHistory(selectedIssueSilo.id);
       } else {
         const errText = data.error || 'Failed to record silo milk issue';
