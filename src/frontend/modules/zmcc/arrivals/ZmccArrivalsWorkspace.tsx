@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useEffectEvent, useRef } from 'react';
 import { User } from '@backend/core/types';
 import {
   Truck,
@@ -65,6 +65,12 @@ interface ZmccArrivalsWorkspaceProps {
   hideTabBar?: boolean;
 }
 
+/** Unique client_event_id used to make arrival/exit submissions idempotent. */
+function generateClientEventId(prefix: string) {
+  const random = Math.random().toString(36).substring(2, 10);
+  return `${prefix}-${Date.now()}-${random}`;
+}
+
 export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   currentUser,
   activeTab: controlledTab,
@@ -88,7 +94,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
 
   // MOT Arrival Form State
   const [arrivingJourneys, setArrivingJourneys] = useState<ArrivingJourney[]>([]);
-  const [loadingJourneys, setLoadingJourneys] = useState(false);
+  const [loadingJourneys, setLoadingJourneys] = useState(canSubmit);
   const [selectedJourney, setSelectedJourney] = useState<ArrivingJourney | null>(null);
   const [rawMilkTokenNumber, setRawMilkTokenNumber] = useState('');
   const [rawMilkTokenPolicyMode, setRawMilkTokenPolicyMode] = useState<'REQUIRED' | 'OPTIONAL' | 'DISABLED'>('REQUIRED');
@@ -100,14 +106,14 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
     lng: null,
     acc: null,
   });
-  const [motEventId, setMotEventId] = useState('');
+  const [motEventId, setMotEventId] = useState(() => generateClientEventId('mot-arr'));
   const [motSubmitting, setMotSubmitting] = useState(false);
   const [motSuccessResult, setMotSuccessResult] = useState<MotArrivalRow | null>(null);
   const [motError, setMotError] = useState<string | null>(null);
 
   // Local Supplier Arrival Form State
   const [localSuppliers, setLocalSuppliers] = useState<LocalSupplierRow[]>([]);
-  const [loadingLocalSuppliers, setLoadingLocalSuppliers] = useState(false);
+  const [loadingLocalSuppliers, setLoadingLocalSuppliers] = useState(canSubmit);
   const [supplierSearchTerm, setSupplierSearchTerm] = useState('');
   const [selectedLocalSupplierId, setSelectedLocalSupplierId] = useState('');
   const [localSupplierRawMilkTokenNumber, setLocalSupplierRawMilkTokenNumber] = useState('');
@@ -120,7 +126,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
     lng: null,
     acc: null,
   });
-  const [localSupplierEventId, setLocalSupplierEventId] = useState('');
+  const [localSupplierEventId, setLocalSupplierEventId] = useState(() => generateClientEventId('ls-arr'));
   const [localSupplierSubmitting, setLocalSupplierSubmitting] = useState(false);
   const [localSupplierSuccessResult, setLocalSupplierSuccessResult] = useState<LocalSupplierArrivalRow | null>(null);
   const [localSupplierError, setLocalSupplierError] = useState<string | null>(null);
@@ -129,7 +135,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   const [insideVehicles, setInsideVehicles] = useState<InsideVehicle[]>([]);
   const [insideHasMore, setInsideHasMore] = useState(false);
   const [insideTotalCount, setInsideTotalCount] = useState(0);
-  const [loadingInside, setLoadingInside] = useState(false);
+  const [loadingInside, setLoadingInside] = useState(true);
   const [exitModalTarget, setExitModalTarget] = useState<InsideVehicle | null>(null);
   const [exitEventId, setExitEventId] = useState<string>('');
   const [exitTimestamp, setExitTimestamp] = useState(() => toDatetimeLocalInput(new Date()));
@@ -156,7 +162,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   const [motArrivals, setMotArrivals] = useState<MotArrivalRow[]>([]);
   const [contractorArrivals, setContractorArrivals] = useState<ContractorArrivalRow[]>([]);
   const [localSupplierArrivals, setLocalSupplierArrivals] = useState<LocalSupplierArrivalRow[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [refreshingHistory, setLoadingHistory] = useState(false);
 
   // Correction Modal State
   const [correctionTarget, setCorrectionTarget] = useState<CorrectionTarget | null>(null);
@@ -172,11 +178,6 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   const [corrSubmitting, setCorrSubmitting] = useState(false);
   const [corrError, setCorrError] = useState<string | null>(null);
 
-  // Helpers to generate UUID client_event_id
-  const generateClientEventId = (prefix: string) => {
-    const random = Math.random().toString(36).substring(2, 10);
-    return `${prefix}-${Date.now()}-${random}`;
-  };
 
   const initMotForm = useCallback(() => {
     setSelectedJourney(null);
@@ -199,137 +200,185 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
   }, []);
 
   // Fetch arriving journeys for MOT
-  const fetchArrivingJourneys = useCallback(async () => {
+  const loadArrivingJourneys = useCallback(
+    () =>
+      fetch('/api/zmcc/arrivals/arriving-journeys')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setArrivingJourneys(data || []);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch arriving journeys', err);
+        })
+        .finally(() => {
+          setLoadingJourneys(false);
+        }),
+    []
+  );
+
+  const fetchArrivingJourneys = () => {
     setLoadingJourneys(true);
-    try {
-      const res = await fetch('/api/zmcc/arrivals/arriving-journeys');
-      if (res.ok) {
-        const data = await res.json();
-        setArrivingJourneys(data || []);
-      }
-    } catch (err) {
-      console.error('Failed to fetch arriving journeys', err);
-    } finally {
-      setLoadingJourneys(false);
-    }
-  }, []);
+    return loadArrivingJourneys();
+  };
 
   // Fetch local suppliers for directory selection
-  const fetchLocalSuppliers = useCallback(async () => {
-    setLoadingLocalSuppliers(true);
-    try {
-      const res = await fetch('/api/zmcc/local-suppliers?is_active=true');
-      if (res.ok) {
-        const data = await res.json();
-        setLocalSuppliers(data.suppliers || []);
-      }
-    } catch (err) {
-      console.error('Failed to fetch local suppliers', err);
-    } finally {
-      setLoadingLocalSuppliers(false);
-    }
-  }, []);
+  const loadLocalSuppliers = useCallback(
+    () =>
+      fetch('/api/zmcc/local-suppliers?is_active=true')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setLocalSuppliers(data.suppliers || []);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch local suppliers', err);
+        })
+        .finally(() => {
+          setLoadingLocalSuppliers(false);
+        }),
+    []
+  );
 
   // Fetch inside vehicles
-  const fetchInsideVehicles = useCallback(async () => {
+  const loadInsideVehicles = useCallback(
+    () =>
+      fetch('/api/zmcc/arrivals/inside')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setInsideVehicles(data.vehicles || []);
+            setInsideHasMore(Boolean(data.has_more));
+            setInsideTotalCount(data.total_count ?? (data.vehicles || []).length);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch vehicles inside ZMCC', err);
+        })
+        .finally(() => {
+          setLoadingInside(false);
+        }),
+    []
+  );
+
+  const fetchInsideVehicles = () => {
     setLoadingInside(true);
-    try {
-      const res = await fetch('/api/zmcc/arrivals/inside');
-      if (res.ok) {
-        const data = await res.json();
-        setInsideVehicles(data.vehicles || []);
-        setInsideHasMore(Boolean(data.has_more));
-        setInsideTotalCount(data.total_count ?? (data.vehicles || []).length);
-      }
-    } catch (err) {
-      console.error('Failed to fetch vehicles inside ZMCC', err);
-    } finally {
-      setLoadingInside(false);
-    }
-  }, []);
+    return loadInsideVehicles();
+  };
 
   // Fetch history
-  const fetchHistory = useCallback(async () => {
+  const historyParams = new URLSearchParams();
+  if (historyDate) historyParams.set('date', historyDate);
+  if (historySearch) historyParams.set('search', historySearch);
+  historyParams.set('page', String(historyPage));
+  historyParams.set('pageSize', String(historyPageSize));
+  const historyQuery = historyParams.toString();
+  // Filters whose history request last settled; any other query means a fetch is in flight.
+  const [loadedHistoryQuery, setLoadedHistoryQuery] = useState<string | null>(null);
+  const loadingHistory = refreshingHistory || loadedHistoryQuery !== historyQuery;
+
+  const loadHistory = useCallback(
+    () =>
+      Promise.all([
+        fetch(`/api/zmcc/arrivals/mot?${historyQuery}`),
+        fetch(`/api/zmcc/arrivals/contractor?${historyQuery}`),
+        fetch(`/api/zmcc/arrivals/local-supplier?${historyQuery}`),
+      ])
+        .then(async ([motRes, conRes, lsRes]) => {
+          let totalCount = 0;
+          let maxPages = 1;
+
+          if (motRes.ok) {
+            const motData = await motRes.json();
+            setMotArrivals(motData.items || []);
+            if (motData.total) totalCount += motData.total;
+            if (motData.totalPages && motData.totalPages > maxPages) maxPages = motData.totalPages;
+          }
+          if (conRes.ok) {
+            const conData = await conRes.json();
+            setContractorArrivals(conData.items || []);
+            if (conData.total) totalCount += conData.total;
+            if (conData.totalPages && conData.totalPages > maxPages) maxPages = conData.totalPages;
+          }
+          if (lsRes.ok) {
+            const lsData = await lsRes.json();
+            setLocalSupplierArrivals(lsData.items || []);
+            if (lsData.total) totalCount += lsData.total;
+            if (lsData.totalPages && lsData.totalPages > maxPages) maxPages = lsData.totalPages;
+          }
+
+          setHistoryTotalRecords(totalCount);
+          setHistoryTotalPages(maxPages);
+        })
+        .catch((err) => {
+          console.error('Failed to fetch arrival history', err);
+        })
+        .finally(() => {
+          setLoadingHistory(false);
+          setLoadedHistoryQuery(historyQuery);
+        }),
+    [historyQuery]
+  );
+
+  const fetchHistory = () => {
     setLoadingHistory(true);
-    try {
-      const params = new URLSearchParams();
-      if (historyDate) params.set('date', historyDate);
-      if (historySearch) params.set('search', historySearch);
-      params.set('page', String(historyPage));
-      params.set('pageSize', String(historyPageSize));
-
-      const [motRes, conRes, lsRes] = await Promise.all([
-        fetch(`/api/zmcc/arrivals/mot?${params.toString()}`),
-        fetch(`/api/zmcc/arrivals/contractor?${params.toString()}`),
-        fetch(`/api/zmcc/arrivals/local-supplier?${params.toString()}`),
-      ]);
-
-      let totalCount = 0;
-      let maxPages = 1;
-
-      if (motRes.ok) {
-        const motData = await motRes.json();
-        setMotArrivals(motData.items || []);
-        if (motData.total) totalCount += motData.total;
-        if (motData.totalPages && motData.totalPages > maxPages) maxPages = motData.totalPages;
-      }
-      if (conRes.ok) {
-        const conData = await conRes.json();
-        setContractorArrivals(conData.items || []);
-        if (conData.total) totalCount += conData.total;
-        if (conData.totalPages && conData.totalPages > maxPages) maxPages = conData.totalPages;
-      }
-      if (lsRes.ok) {
-        const lsData = await lsRes.json();
-        setLocalSupplierArrivals(lsData.items || []);
-        if (lsData.total) totalCount += lsData.total;
-        if (lsData.totalPages && lsData.totalPages > maxPages) maxPages = lsData.totalPages;
-      }
-
-      setHistoryTotalRecords(totalCount);
-      setHistoryTotalPages(maxPages);
-    } catch (err) {
-      console.error('Failed to fetch arrival history', err);
-    } finally {
-      setLoadingHistory(false);
-    }
-  }, [historyDate, historySearch, historyPage, historyPageSize]);
+    return loadHistory();
+  };
 
   // Fetch paper reference policies
-  const fetchPolicies = useCallback(async () => {
-    try {
-      const res = await fetch('/api/paper-reference-policies');
-      if (res.ok) {
-        const data = await res.json();
-        const rmtPolicy = (data.policies || []).find((p: { referenceType: string; policyMode?: 'REQUIRED' | 'OPTIONAL' | 'DISABLED' }) => p.referenceType === 'RAW_MILK_TOKEN');
-        if (rmtPolicy?.policyMode) {
-          setRawMilkTokenPolicyMode(rmtPolicy.policyMode);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch paper reference policies', err);
-    }
-  }, []);
+  const loadPolicies = useCallback(
+    () =>
+      fetch('/api/paper-reference-policies')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            const rmtPolicy = (data.policies || []).find((p: { referenceType: string; policyMode?: 'REQUIRED' | 'OPTIONAL' | 'DISABLED' }) => p.referenceType === 'RAW_MILK_TOKEN');
+            if (rmtPolicy?.policyMode) {
+              setRawMilkTokenPolicyMode(rmtPolicy.policyMode);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch paper reference policies', err);
+        }),
+    []
+  );
 
   useEffect(() => {
-    fetchPolicies();
+    loadPolicies();
     if (canSubmit) {
-      fetchArrivingJourneys();
-      fetchLocalSuppliers();
-      initMotForm();
-      initLocalSupplierForm();
+      loadArrivingJourneys();
+      loadLocalSuppliers();
     }
-    fetchInsideVehicles();
-    fetchHistory();
-  }, [canSubmit, fetchPolicies, fetchArrivingJourneys, fetchLocalSuppliers, fetchInsideVehicles, fetchHistory, initMotForm, initLocalSupplierForm]);
+  }, [canSubmit, loadPolicies, loadArrivingJourneys, loadLocalSuppliers]);
+
+  // Initial load; the history list also reloads whenever its filters change.
+  useEffect(() => {
+    loadInsideVehicles();
+  }, [loadInsideVehicles]);
 
   useEffect(() => {
-    if (activeTab === 'INSIDE_ZMCC') {
-      fetchInsideVehicles();
-    } else if (activeTab === 'HISTORY') {
-      fetchHistory();
+    loadHistory();
+  }, [loadHistory]);
+
+  // Refresh the list behind a tab when it becomes active (also for parent-controlled tabs).
+  const refreshTabData = useEffectEvent((tab: MainTab) => {
+    if (tab === 'INSIDE_ZMCC') {
+      loadInsideVehicles();
+    } else if (tab === 'HISTORY') {
+      loadHistory();
     }
-  }, [activeTab, fetchInsideVehicles, fetchHistory]);
+  });
+
+  const lastRefreshedTab = useRef(activeTab);
+  useEffect(() => {
+    // The initial tab is covered by the initial loads above.
+    if (lastRefreshedTab.current === activeTab) return;
+    lastRefreshedTab.current = activeTab;
+    refreshTabData(activeTab);
+  }, [activeTab]);
 
   // Gate Exit Modal Controls
   const openExitModal = (arrival: InsideVehicle) => {
@@ -650,10 +699,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
         <SegmentedTabs
           label="Arrival views"
           value={activeTab}
-          onValueChange={(tab) => {
-            setActiveTab(tab);
-            if (tab === 'INSIDE_ZMCC') fetchInsideVehicles();
-          }}
+          onValueChange={setActiveTab}
           tabs={[
             ...(canSubmit
               ? [
