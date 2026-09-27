@@ -197,6 +197,35 @@ missing or weak `JWT_SECRET` or a missing `DATABASE_URL`.
 
 The real `.env` file must never be committed (it is in `.gitignore` and `.dockerignore`).
 
+## Development Safety
+
+The following should not be committed:
+
+```text
+.env
+node_modules/
+.next/
+log files
+local build/cache files
+```
+
+These are excluded through `.gitignore`.
+
+## Project Verification
+
+Common validation commands:
+
+```bash
+npx prisma validate
+npx prisma generate
+npm run db:drift            # migrations and schema.prisma agree
+npm run lint
+npm run typecheck
+npm test                    # unit tests (no database needed)
+npm run test:integration    # route-handler tests; needs DATABASE_URL on a migrated, seeded DB
+npm run build
+```
+
 ## Security Model
 
 * **Sessions** — HS256 JWT in an `HttpOnly`, `SameSite=Lax` cookie (`Secure` in production), with pinned
@@ -279,4 +308,5 @@ Demo data scripts (`scripts/*demo*`, `prisma/reset-dev-login-passwords.ts`) refu
 This repository contains the development source code for the SFPL Milk Reception Management System.
 
 CI (`.github/workflows/ci.yml`) applies migrations to a fresh PostgreSQL, seeds it, checks for schema
-drift, audits production dependencies, typechecks, lints, builds, and builds the production container image.
+drift, audits production dependencies, typechecks, runs the unit and integration tests, lints, builds,
+and builds the production container image.
