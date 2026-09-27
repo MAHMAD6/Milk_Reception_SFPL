@@ -3,14 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Download, RefreshCw, ShieldAlert, WifiOff } from 'lucide-react';
-
-function fromBase64Url(value: string): Uint8Array<ArrayBuffer> {
-  const padded = value.replace(/-/g, '+').replace(/_/g, '/').padEnd(Math.ceil(value.length / 4) * 4, '=');
-  const binary = atob(padded);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
-  return bytes;
-}
+import { registerPushSubscription } from './pushSubscription';
 
 export function PwaShell() {
   const [mounted, setMounted] = useState(false);
@@ -33,7 +26,6 @@ export function PwaShell() {
     window.addEventListener('milk-sync-state', sync);
     window.addEventListener('milk-auth-expired', expired);
 
-    const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
     const isLoginPage = typeof window !== 'undefined' && (window.location.pathname === '/login' || window.location.pathname === '/workspace-unavailable');
 
     if ('serviceWorker' in navigator) {
@@ -53,34 +45,9 @@ export function PwaShell() {
           });
           if (registration.waiting && hadController) setUpdateAvailable(true);
 
-          if (key && 'PushManager' in window && Notification.permission === 'granted' && !isLoginPage) {
-            try {
-              const subscription =
-                (await registration.pushManager.getSubscription()) ||
-                (await registration.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: fromBase64Url(key),
-                }));
-              const json = subscription?.toJSON();
-              if (json?.endpoint && json?.keys?.p256dh && json?.keys?.auth) {
-                const res = await fetch('/api/notifications/subscriptions', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    endpoint: json.endpoint,
-                    p256dh: json.keys.p256dh,
-                    auth: json.keys.auth,
-                    deviceLabel: navigator.userAgent.slice(0, 100),
-                  }),
-                });
-                if (res.status === 401) {
-                  // Unauthorized - unsubscribe device from push notifications
-                  await subscription.unsubscribe().catch(() => null);
-                }
-              }
-            } catch (_err) {
-              // Ignore push registration errors
-            }
+          // Keep an already-permitted device registered for this user (e.g. after re-login).
+          if ('Notification' in window && Notification.permission === 'granted' && !isLoginPage) {
+            await registerPushSubscription(registration).catch(() => null);
           }
         })
         .catch(() => undefined);

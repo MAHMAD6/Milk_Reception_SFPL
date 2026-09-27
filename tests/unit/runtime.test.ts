@@ -4,6 +4,8 @@ import { validateServerEnv } from '@core/env';
 import { isSmsProviderConfigured, sendSms } from '@/backend/services/smsProvider';
 import { GET as processSms } from '@/app/api/cron/process-sms/route';
 import { fmtNum } from '@/frontend/modules/mpd/format';
+import { isWithinQuietHours, plantMinutesOfDay } from '@/backend/services/pushDeliveryService';
+import { GET as processPush } from '@/app/api/cron/process-push/route';
 import { withEnv } from '../helpers';
 
 const GOOD_SECRET = 'a-perfectly-good-production-secret-of-sufficient-length';
@@ -88,5 +90,41 @@ describe('dashboard number formatting', () => {
     assert.equal(fmtNum(Number.NaN), '—');
     assert.equal(fmtNum(0, ' L'), '0 L');
     assert.equal(fmtNum(4.25, '%'), '4.25%');
+  });
+});
+
+describe('push quiet hours (plant time, UTC+5)', () => {
+  // 17:30 UTC is 22:30 in Asia/Karachi; 03:00 UTC is 08:00.
+  const lateEvening = new Date('2026-01-15T17:30:00Z');
+  const morning = new Date('2026-01-15T03:00:00Z');
+
+  test('converts to plant minutes of day', () => {
+    assert.equal(plantMinutesOfDay(lateEvening), 22 * 60 + 30);
+    assert.equal(plantMinutesOfDay(morning), 8 * 60);
+  });
+
+  test('handles same-day and overnight windows', () => {
+    assert.equal(isWithinQuietHours('22:00', '06:00', lateEvening), true);
+    assert.equal(isWithinQuietHours('22:00', '06:00', morning), false);
+    assert.equal(isWithinQuietHours('07:00', '09:00', morning), true);
+    assert.equal(isWithinQuietHours('08:01', '09:00', morning), false);
+  });
+
+  test('ignores missing, malformed or empty windows', () => {
+    assert.equal(isWithinQuietHours(null, '06:00', lateEvening), false);
+    assert.equal(isWithinQuietHours('25:00', '06:00', lateEvening), false);
+    assert.equal(isWithinQuietHours('22:30', '22:30', lateEvening), false);
+  });
+});
+
+describe('push cron endpoint', () => {
+  test('requires the cron secret and reports when VAPID keys are missing', async () => {
+    const call = (auth?: string) =>
+      processPush(new Request('http://plant.local/api/cron/process-push', { headers: auth ? { authorization: auth } : {} }));
+    await withEnv({ CRON_SECRET: undefined }, async () => assert.equal((await call('Bearer x')).status, 503));
+    await withEnv({ CRON_SECRET: 'right-secret', VAPID_PRIVATE_KEY: undefined }, async () => {
+      assert.equal((await call('Bearer wrong')).status, 401);
+      assert.equal((await (await call('Bearer right-secret')).json()).skipped, true);
+    });
   });
 });

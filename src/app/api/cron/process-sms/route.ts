@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { timingSafeEqual } from 'node:crypto';
 import { prisma } from '@core/db';
+import { rejectUnauthorizedCron } from '@core/cronAuth';
 import { isSmsProviderConfigured, sendSms } from '@/backend/services/smsProvider';
 
 export const dynamic = 'force-dynamic';
@@ -16,27 +16,13 @@ function describeDeliveryError(error: unknown): string {
   return cause ? `${message} (${String(cause)})` : message;
 }
 
-function isAuthorizedCron(req: Request): boolean {
-  const secret = process.env.CRON_SECRET?.trim();
-  if (!secret) return false;
-  const header = req.headers.get('authorization') || '';
-  const presented = header.startsWith('Bearer ') ? header.slice(7).trim() : req.headers.get('x-cron-secret')?.trim() || '';
-  const a = Buffer.from(presented);
-  const b = Buffer.from(secret);
-  return a.length === b.length && timingSafeEqual(a, b);
-}
-
 /**
  * Drains the MOT collection SMS outbox. Call from a scheduler (cron, systemd timer,
  * Kubernetes CronJob) every minute with `Authorization: Bearer $CRON_SECRET`.
  */
 async function processOutbox(req: Request) {
-  if (!process.env.CRON_SECRET?.trim()) {
-    return NextResponse.json({ error: 'Cron endpoint is disabled. Set CRON_SECRET to enable it.' }, { status: 503 });
-  }
-  if (!isAuthorizedCron(req)) {
-    return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
-  }
+  const rejected = rejectUnauthorizedCron(req);
+  if (rejected) return rejected;
   if (!isSmsProviderConfigured()) {
     // Leave messages PENDING rather than pretending they were delivered.
     return NextResponse.json({ success: true, skipped: true, reason: 'SMS provider not configured.' });

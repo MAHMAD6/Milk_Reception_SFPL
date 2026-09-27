@@ -27,6 +27,16 @@ export function validateServerEnv(): void {
     warnings.push('SESSION_COOKIE_SECURE=false sends session cookies over plain HTTP. Serve the app over HTTPS where possible.');
   }
 
+  const vapidVars = {
+    VAPID_PUBLIC_KEY: process.env.VAPID_PUBLIC_KEY?.trim() || process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.trim(),
+    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY?.trim(),
+    VAPID_SUBJECT: process.env.VAPID_SUBJECT?.trim(),
+  };
+  const missingVapid = Object.entries(vapidVars).filter(([, value]) => !value).map(([key]) => key);
+  if (missingVapid.length > 0 && missingVapid.length < 3) {
+    warnings.push(`Web Push is partially configured; set ${missingVapid.join(', ')} or push alerts stay disabled.`);
+  }
+
   for (const warning of warnings) console.warn(`[env] ${warning}`);
   if (errors.length > 0) {
     const message = `Invalid server environment:\n  - ${errors.join('\n  - ')}`;

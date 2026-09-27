@@ -190,7 +190,7 @@ Copy `.env.example` to `.env` and fill it in. Every variable is documented there
 | `SMS_PROVIDER_URL` / `SMS_PROVIDER_TOKEN` / `SMS_SENDER_ID` | for SMS | HTTPS gateway for MOT collection receipts; messages stay `PENDING` until set |
 | `TV_BOARD_ACCESS_KEY` | no | Lets an unattended yard screen open `/tv-board?key=…` without signing in |
 | `ENABLE_DEMO_LOGIN` | no | Demo sign-in shortcuts (on automatically under `npm run dev`); **never** enable on real data |
-| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` | no | Web Push public key, inlined at build time |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | for push | Web Push keys (`npx web-push generate-vapid-keys`); the public key is inlined into the browser bundle at build time |
 
 The server validates its environment at startup and refuses to start in production with a
 missing or weak `JWT_SECRET` or a missing `DATABASE_URL`.
@@ -292,14 +292,20 @@ Demo data scripts (`scripts/*demo*`, `prisma/reset-dev-login-passwords.ts`) refu
 ### Operations
 
 * **Health check** — `GET /api/health` returns `200 {"status":"ok"}` when the database is reachable, `503` otherwise.
-* **SMS outbox** — schedule `curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<host>/api/cron/process-sms`
-  every minute (cron, systemd timer or Kubernetes CronJob). Each message is retried up to 3 times.
+* **Scheduled jobs** — call these every minute from cron, a systemd timer or a Kubernetes CronJob:
+  ```bash
+  curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<host>/api/cron/process-sms    # MOT SMS receipts
+  curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://<host>/api/cron/process-push   # browser push alerts
+  ```
+  SMS messages are retried up to 3 times. Push alerts honour each user's settings (push on/off, quiet hours in
+  plant time, immediate or hourly digest); CRITICAL alerts bypass quiet hours and digests, and devices the push
+  service reports as gone are revoked automatically. Each user turns alerts on per device under
+  **Notification settings → Enable on this device** (browsers only allow the permission prompt from a click).
 * **Reverse proxy** — terminate TLS in front of the app, forward `Host`/`X-Forwarded-*`, and set `TRUST_PROXY=true`.
 * **Migrations** — `npm run db:drift` (also enforced in CI) fails if `schema.prisma` and the migrations disagree.
 
 ### Known limitations
 
-* Web Push subscriptions are stored, but no server-side push sender is wired up yet; notifications are delivered in-app.
 * Emergency vehicle substitution and village-shop rejections are not modelled yet, so the MPD executive
   dashboard shows those sections as empty ("—") rather than estimated figures.
 
