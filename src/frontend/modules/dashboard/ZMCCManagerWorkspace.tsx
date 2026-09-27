@@ -34,40 +34,40 @@ type ManagerHistoryView =
   | 'ARRIVAL_CORRECTIONS'
   | 'LAB_CORRECTIONS';
 
+const MANAGER_TABS: readonly ZMCCManagerTab[] = ['OVERVIEW', 'LIVE', 'RECONCILIATION', 'HISTORY', 'MASTER_DATA'];
+const HISTORY_VIEWS: readonly ManagerHistoryView[] = ['PLANT_HISTORY', 'ARRIVAL_CORRECTIONS', 'LAB_CORRECTIONS'];
+
+function parseManagerTab(raw: string | null | undefined): ZMCCManagerTab | null {
+  const value = raw?.toUpperCase();
+  return MANAGER_TABS.find((tab) => tab === value) ?? null;
+}
+
+function parseHistoryView(raw: string | null | undefined): ManagerHistoryView | null {
+  const value = raw?.toUpperCase();
+  return HISTORY_VIEWS.find((view) => view === value) ?? null;
+}
+
 export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
   currentUser,
 }) => {
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<ZMCCManagerTab>('OVERVIEW');
-  const [historyView, setHistoryView] = useState<ManagerHistoryView>('PLANT_HISTORY');
+  // ?tab= and ?view= select the tab/history view; later URL changes win over manual choices.
+  const urlTab = parseManagerTab(searchParams?.get('tab'));
+  const urlHistoryView = parseHistoryView(searchParams?.get('view'));
+  const [activeTab, setActiveTab] = useState<ZMCCManagerTab>(urlTab ?? 'OVERVIEW');
+  const [historyView, setHistoryView] = useState<ManagerHistoryView>(urlHistoryView ?? 'PLANT_HISTORY');
+  const [syncedUrl, setSyncedUrl] = useState({ tab: urlTab, view: urlHistoryView });
+  if (urlTab !== syncedUrl.tab || urlHistoryView !== syncedUrl.view) {
+    setSyncedUrl({ tab: urlTab, view: urlHistoryView });
+    if (urlTab) setActiveTab(urlTab);
+    if (urlHistoryView) setHistoryView(urlHistoryView);
+  }
   const [summaryDateRange, setSummaryDateRange] = useState<OverviewDateRange>('TODAY');
   const [serverBusinessDate, setServerBusinessDate] = useState<string>('');
   const [serverCalendarDate, setServerCalendarDate] = useState<string>('');
   const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(false);
   const hamburgerButtonRef = useRef<HTMLButtonElement | null>(null);
 
-  useEffect(() => {
-    const rawTab = searchParams?.get('tab')?.toUpperCase();
-    if (
-      rawTab &&
-      (rawTab === 'OVERVIEW' ||
-        rawTab === 'LIVE' ||
-        rawTab === 'RECONCILIATION' ||
-        rawTab === 'HISTORY' ||
-        rawTab === 'MASTER_DATA')
-    ) {
-      setActiveTab(rawTab as ZMCCManagerTab);
-    }
-    const rawView = searchParams?.get('view')?.toUpperCase();
-    if (
-      rawView &&
-      (rawView === 'PLANT_HISTORY' ||
-        rawView === 'ARRIVAL_CORRECTIONS' ||
-        rawView === 'LAB_CORRECTIONS')
-    ) {
-      setHistoryView(rawView as ManagerHistoryView);
-    }
-  }, [searchParams]);
 
   // 1. Independent Live State
   const [liveLogs, setLiveLogs] = useState<MilkProcessLog[]>([]);
@@ -169,31 +169,40 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
   }, [activeTab, historyView, searchParams]);
 
   // Fetch Live Logs: Mode 'live' active pipeline only
-  const fetchLiveLogs = useCallback(async () => {
+  const loadLiveLogs = useCallback(
+    () =>
+      fetch('/api/logs?mode=live')
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || 'Failed to fetch live logs');
+
+          const items = data.items || data.logs;
+          if (items) setLiveLogs(items);
+
+          if (typeof data.summary?.activeInPlantVisits === 'number') {
+            setLiveActiveInPlantCount(data.summary.activeInPlantVisits);
+          } else {
+            setLiveActiveInPlantCount(null);
+          }
+
+          if (data.serverBusinessDate) setServerBusinessDate(data.serverBusinessDate);
+          setLiveError(null);
+        })
+        .catch((err) => {
+          setLiveActiveInPlantCount(null);
+          setLiveError(getErrorMessage(err) || 'Failed to load live pipeline logs');
+        })
+        .finally(() => {
+          setLiveLoading(false);
+        }),
+    []
+  );
+
+  const fetchLiveLogs = () => {
     setLiveLoading(true);
     setLiveError(null);
-    try {
-      const res = await fetch('/api/logs?mode=live');
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Failed to fetch live logs');
-
-      const items = data.items || data.logs;
-      if (items) setLiveLogs(items);
-
-      if (typeof data.summary?.activeInPlantVisits === 'number') {
-        setLiveActiveInPlantCount(data.summary.activeInPlantVisits);
-      } else {
-        setLiveActiveInPlantCount(null);
-      }
-
-      if (data.serverBusinessDate) setServerBusinessDate(data.serverBusinessDate);
-    } catch (err) {
-      setLiveActiveInPlantCount(null);
-      setLiveError(getErrorMessage(err) || 'Failed to load live pipeline logs');
-    } finally {
-      setLiveLoading(false);
-    }
-  }, []);
+    return loadLiveLogs();
+  };
 
   const lastReportingQueryRef = useRef<string>('');
 
@@ -251,82 +260,77 @@ export const ZMCCManagerWorkspace: React.FC<ZMCCManagerWorkspaceProps> = ({
   );
 
   // Fetch local ZMCC operational snapshot metrics (live metrics polled every 15 seconds)
-  const fetchZmccLocalStats = useCallback(async () => {
-    try {
-      const tanksRes = await fetch('/api/zmcc/tanks?active_only=true');
-      if (tanksRes.ok) {
-        const tanksData = await tanksRes.json();
-        const tanks = Array.isArray(tanksData) ? tanksData : tanksData.tanks || tanksData.items;
-        if (Array.isArray(tanks) && tanks.length === 1) {
-          const stock = Number(tanks[0].current_stock);
-          setZmccTankStock(Number.isFinite(stock) ? Number(stock.toFixed(2)) : null);
-        } else {
-          setZmccTankStock(null);
-        }
-      } else {
-        setZmccTankStock(null);
-      }
-    } catch {
-      setZmccTankStock(null);
-    }
-
-    try {
-      const insideRes = await fetch('/api/zmcc/arrivals/inside');
-      if (insideRes.ok) {
-        const insideData = await insideRes.json();
-        if (typeof insideData.total_count === 'number') {
-          setVehiclesInsideZmccCount(insideData.total_count);
-        } else {
-          setVehiclesInsideZmccCount(null);
-        }
-      } else {
-        setVehiclesInsideZmccCount(null);
-      }
-    } catch {
-      setVehiclesInsideZmccCount(null);
-    }
-  }, []);
+  const fetchZmccLocalStats = useCallback(
+    () =>
+      fetch('/api/zmcc/tanks?active_only=true')
+        .then(async (tanksRes) => {
+          if (!tanksRes.ok) {
+            setZmccTankStock(null);
+            return;
+          }
+          const tanksData = await tanksRes.json();
+          const tanks = Array.isArray(tanksData) ? tanksData : tanksData.tanks || tanksData.items;
+          if (Array.isArray(tanks) && tanks.length === 1) {
+            const stock = Number(tanks[0].current_stock);
+            setZmccTankStock(Number.isFinite(stock) ? Number(stock.toFixed(2)) : null);
+          } else {
+            setZmccTankStock(null);
+          }
+        })
+        .catch(() => setZmccTankStock(null))
+        .then(() => fetch('/api/zmcc/arrivals/inside'))
+        .then(async (insideRes) => {
+          if (!insideRes.ok) {
+            setVehiclesInsideZmccCount(null);
+            return;
+          }
+          const insideData = await insideRes.json();
+          if (typeof insideData.total_count === 'number') {
+            setVehiclesInsideZmccCount(insideData.total_count);
+          } else {
+            setVehiclesInsideZmccCount(null);
+          }
+        })
+        .catch(() => setVehiclesInsideZmccCount(null)),
+    []
+  );
 
   // Fetch today's accepted intake volume (authoritative DB aggregate, non-polled)
-  const fetchTodayAcceptedIntakeLiters = useCallback(async () => {
-    try {
-      const todayDate =
-        serverCalendarDate || getPakistanCalendarDate(new Date());
+  const fetchTodayAcceptedIntakeLiters = useCallback(() => {
+    const todayDate = serverCalendarDate || getPakistanCalendarDate(new Date());
+    return fetch(`/api/zmcc/lab/history?date=${todayDate}&decision=ACCEPTED&page=1&pageSize=1`)
+      .then(async (labRes) => {
+        if (!labRes.ok) {
+          setTodayAcceptedIntakeLiters(null);
+          return;
+        }
 
-      const labRes = await fetch(
-        `/api/zmcc/lab/history?date=${todayDate}&decision=ACCEPTED&page=1&pageSize=1`
-      );
+        const labData = await labRes.json();
+        const totalGross = labData.summary?.totalGrossLiters;
 
-      if (!labRes.ok) {
+        if (typeof totalGross === 'number') {
+          setTodayAcceptedIntakeLiters(Number(totalGross.toFixed(2)));
+        } else if (labData.total === 0) {
+          setTodayAcceptedIntakeLiters(0);
+        } else {
+          setTodayAcceptedIntakeLiters(null);
+        }
+      })
+      .catch(() => {
         setTodayAcceptedIntakeLiters(null);
-        return;
-      }
-
-      const labData = await labRes.json();
-      const totalGross = labData.summary?.totalGrossLiters;
-
-      if (typeof totalGross === 'number') {
-        setTodayAcceptedIntakeLiters(Number(totalGross.toFixed(2)));
-      } else if (labData.total === 0) {
-        setTodayAcceptedIntakeLiters(0);
-      } else {
-        setTodayAcceptedIntakeLiters(null);
-      }
-    } catch {
-      setTodayAcceptedIntakeLiters(null);
-    }
+      });
   }, [serverCalendarDate]);
 
   // A. Live Flow: Initial mount and interval polling (LIVE ONLY)
   useEffect(() => {
-    fetchLiveLogs();
+    loadLiveLogs();
     fetchZmccLocalStats();
     const interval = setInterval(() => {
-      fetchLiveLogs();
+      loadLiveLogs();
       fetchZmccLocalStats();
     }, 15000);
     return () => clearInterval(interval);
-  }, [fetchLiveLogs, fetchZmccLocalStats]);
+  }, [loadLiveLogs, fetchZmccLocalStats]);
 
   // Separate non-polled load for accepted intake aggregate
   useEffect(() => {
