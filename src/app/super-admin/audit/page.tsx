@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { ShieldAlert } from 'lucide-react';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface AuditLogItem {
   id: string;
@@ -25,37 +26,46 @@ export default function SuperAdminAuditPage() {
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  async function loadLogs(tbl = '', pageNum = 1) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/super-admin/audit?tableName=${encodeURIComponent(tbl)}&page=${pageNum}&pageSize=${pageSize}`);
-      const data = await res.json();
-      if (res.ok) {
-        setLogs(data.auditLogs || []);
-        if (data.pagination) {
-          setTotalRecords(data.pagination.totalRecords);
-          setTotalPages(data.pagination.totalPages);
-          setPage(data.pagination.page);
-        }
-      } else {
-        setError(data.error);
-      }
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  }
+  // The committed request; a new object re-runs the fetch even for identical values.
+  const [request, setRequest] = useState({ tableName: '', page: 1 });
 
   useEffect(() => {
-    loadLogs(tableNameFilter, page);
-  }, [page]);
+    let ignore = false;
+    fetchJson<{ auditLogs?: AuditLogItem[]; pagination?: { totalRecords: number; totalPages: number; page: number } }>(
+      `/api/super-admin/audit?tableName=${encodeURIComponent(request.tableName)}&page=${request.page}&pageSize=${pageSize}`
+    )
+      .then(
+        (data) => {
+          if (ignore) return;
+          setLogs(data.auditLogs || []);
+          if (data.pagination) {
+            setTotalRecords(data.pagination.totalRecords);
+            setTotalPages(data.pagination.totalPages);
+            setPage(data.pagination.page);
+          }
+          setError(null);
+        },
+        (err) => {
+          if (!ignore) setError(getErrorMessage(err));
+        }
+      )
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [request, pageSize]);
+
+  const goToPage = (pageNum: number) => {
+    setLoading(true);
+    setRequest((current) => ({ ...current, page: pageNum }));
+  };
 
   const handleFilterChange = (tbl: string) => {
     setTableNameFilter(tbl);
-    setPage(1);
-    loadLogs(tbl, 1);
+    setLoading(true);
+    setRequest({ tableName: tbl, page: 1 });
   };
 
   return (
@@ -159,7 +169,7 @@ export default function SuperAdminAuditPage() {
             <button
               type="button"
               disabled={page <= 1 || loading}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => goToPage(Math.max(1, page - 1))}
               className="px-3 py-1.5 rounded-lg border border-border-strong hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold"
             >
               Previous
@@ -167,7 +177,7 @@ export default function SuperAdminAuditPage() {
             <button
               type="button"
               disabled={page >= totalPages || loading}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => goToPage(Math.min(totalPages, page + 1))}
               className="px-3 py-1.5 rounded-lg border border-border-strong hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold"
             >
               Next

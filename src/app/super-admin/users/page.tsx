@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface Source {
   id: string;
@@ -90,28 +91,23 @@ export default function SuperAdminUsersPage() {
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
 
-  async function loadData() {
-    setLoading(true);
-    setError(null);
-    try {
-      const [uRes, sRes] = await Promise.all([
-        fetch('/api/super-admin/users'),
-        fetch('/api/super-admin/procurement-sources'),
-      ]);
-
-      const uData = await uRes.json();
-      const sData = await sRes.json();
-
-      if (uRes.ok) setUsers(uData.users || []);
-      else setError(uData.error);
-
-      if (sRes.ok) setSources(sData.sources || []);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
+  function loadData() {
+    return Promise.allSettled([
+      fetchJson<{ users?: UserItem[] }>('/api/super-admin/users', undefined, 'Failed to load users.'),
+      fetchJson<{ sources?: Source[] }>('/api/super-admin/procurement-sources'),
+    ])
+      .then(([usersResult, sourcesResult]) => {
+        if (usersResult.status === 'fulfilled') {
+          setUsers(usersResult.value.users || []);
+          setError(null);
+        } else {
+          setError(getErrorMessage(usersResult.reason));
+        }
+        if (sourcesResult.status === 'fulfilled') setSources(sourcesResult.value.sources || []);
+      })
+      .finally(() => setLoading(false));
   }
+
 
   useEffect(() => {
     loadData();
@@ -149,21 +145,6 @@ export default function SuperAdminUsersPage() {
     setResetModalError(null);
   };
 
-  // Keyboard accessibility: Escape closes any open modal and securely clears state
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (!isSubmittingCreate && !isSubmittingEdit && !isSubmittingReset && !isSubmittingConfirm) {
-          closeCreateModal();
-          closeEditModal();
-          closeResetModal();
-          closeConfirmModal();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSubmittingCreate, isSubmittingEdit, isSubmittingReset, isSubmittingConfirm]);
 
   const createPolicy = useMemo(
     () => getRoleAssignmentPolicy(role) || ROLE_ASSIGNMENT_POLICIES.SUPER_ADMIN,

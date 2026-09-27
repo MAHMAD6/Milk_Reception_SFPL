@@ -5,6 +5,7 @@ import { Plus, Edit2, ShieldAlert, CheckCircle2, AlertTriangle, X } from 'lucide
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface Source {
   id: string;
@@ -47,23 +48,22 @@ export default function SuperAdminProcurementSourcesPage() {
   // Edit Form states
   const [editName, setEditName] = useState('');
 
-  async function loadSources() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/super-admin/procurement-sources', { cache: 'no-store' });
-      const data = await res.json();
-      if (res.ok) {
-        setSources(data.sources || []);
-      } else {
-        setError(data.error || 'Failed to load procurement sources');
-      }
-    } catch (err) {
-      setError(getErrorMessage(err) || 'Network error loading procurement sources');
-    } finally {
-      setLoading(false);
-    }
+  function loadSources() {
+    return fetchJson<{ sources?: Source[] }>(
+      '/api/super-admin/procurement-sources',
+      { cache: 'no-store' },
+      'Failed to load procurement sources'
+    )
+      .then(
+        (data) => {
+          setSources(data.sources || []);
+          setError(null);
+        },
+        (err) => setError(getErrorMessage(err) || 'Network error loading procurement sources')
+      )
+      .finally(() => setLoading(false));
   }
+
 
   useEffect(() => {
     loadSources();
@@ -92,20 +92,6 @@ export default function SuperAdminProcurementSourcesPage() {
     setConfirmModalError(null);
   };
 
-  // Keyboard accessibility: Escape key listener closes modals when not submitting
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (!isSubmittingCreate && !isSubmittingEdit && !isSubmittingConfirm) {
-          closeCreateModal();
-          closeEditModal();
-          closeConfirmModal();
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSubmittingCreate, isSubmittingEdit, isSubmittingConfirm]);
 
   const handleCreateSource = async (e: React.FormEvent) => {
     e.preventDefault();

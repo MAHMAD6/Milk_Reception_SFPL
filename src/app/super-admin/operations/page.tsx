@@ -5,6 +5,7 @@ import { Search, ShieldAlert, Truck } from 'lucide-react';
 
 import { formatDispatchQuantity } from '@/backend/modules/dispatch/quantity/dispatchQuantityService';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface Portion {
   id: string;
@@ -57,37 +58,46 @@ export default function SuperAdminOperationsPage() {
   const [totalRecords, setTotalRecords] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  async function loadVisits(query = '', pageNum = 1) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/super-admin/operations?q=${encodeURIComponent(query)}&page=${pageNum}&pageSize=${pageSize}`);
-      const data = await res.json();
-      if (res.ok) {
-        setVisits(data.visits || []);
-        if (data.pagination) {
-          setTotalRecords(data.pagination.totalRecords);
-          setTotalPages(data.pagination.totalPages);
-          setPage(data.pagination.page);
-        }
-      } else {
-        setError(data.error);
-      }
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  }
+  // The committed request; a new object re-runs the fetch even for identical values.
+  const [request, setRequest] = useState({ query: '', page: 1 });
 
   useEffect(() => {
-    loadVisits(searchQuery, page);
-  }, [page]);
+    let ignore = false;
+    fetchJson<{ visits?: Visit[]; pagination?: { totalRecords: number; totalPages: number; page: number } }>(
+      `/api/super-admin/operations?q=${encodeURIComponent(request.query)}&page=${request.page}&pageSize=${pageSize}`
+    )
+      .then(
+        (data) => {
+          if (ignore) return;
+          setVisits(data.visits || []);
+          if (data.pagination) {
+            setTotalRecords(data.pagination.totalRecords);
+            setTotalPages(data.pagination.totalPages);
+            setPage(data.pagination.page);
+          }
+          setError(null);
+        },
+        (err) => {
+          if (!ignore) setError(getErrorMessage(err));
+        }
+      )
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [request, pageSize]);
+
+  const goToPage = (pageNum: number) => {
+    setLoading(true);
+    setRequest((current) => ({ ...current, page: pageNum }));
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    setPage(1);
-    loadVisits(searchQuery, 1);
+    setLoading(true);
+    setRequest({ query: searchQuery, page: 1 });
   };
 
   return (
@@ -241,7 +251,7 @@ export default function SuperAdminOperationsPage() {
             <button
               type="button"
               disabled={page <= 1 || loading}
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              onClick={() => goToPage(Math.max(1, page - 1))}
               className="px-3 py-1.5 rounded-lg border border-border-strong hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold"
             >
               Previous
@@ -249,7 +259,7 @@ export default function SuperAdminOperationsPage() {
             <button
               type="button"
               disabled={page >= totalPages || loading}
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              onClick={() => goToPage(Math.min(totalPages, page + 1))}
               className="px-3 py-1.5 rounded-lg border border-border-strong hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed font-semibold"
             >
               Next

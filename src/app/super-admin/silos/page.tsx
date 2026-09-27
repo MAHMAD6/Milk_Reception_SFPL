@@ -5,6 +5,7 @@ import { Plus, ShieldAlert, CheckCircle2, Edit2, AlertTriangle, X } from 'lucide
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface Silo {
   id: string;
@@ -39,16 +40,6 @@ export default function SuperAdminSilosPage() {
   const [editName, setEditName] = useState('');
   const [editCapacity, setEditCapacity] = useState<number | string>(0);
 
-  // Close modals on Escape key when not submitting
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !isSubmitting) {
-        closeModals();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSubmitting]);
 
   function closeModals() {
     setShowCreateModal(false);
@@ -57,20 +48,18 @@ export default function SuperAdminSilosPage() {
     setModalError(null);
   }
 
-  async function loadSilos() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/super-admin/silos');
-      const data = await res.json();
-      if (res.ok) setSilos(data.silos || []);
-      else setError(data.error);
-    } catch (err) {
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
+  function loadSilos() {
+    return fetchJson<{ silos?: Silo[] }>('/api/super-admin/silos', undefined, 'Failed to load silos.')
+      .then(
+        (data) => {
+          setSilos(data.silos || []);
+          setError(null);
+        },
+        (err) => setError(getErrorMessage(err))
+      )
+      .finally(() => setLoading(false));
   }
+
 
   useEffect(() => {
     loadSilos();
@@ -361,7 +350,7 @@ export default function SuperAdminSilosPage() {
 
       {/* CREATE SILO MODAL */}
       <AnimatePresence>{showCreateModal && (
-        <Modal key="modal-0" onClose={closeModals} title="Add silo" className="p-6 max-w-md space-y-4">
+        <Modal key="modal-0" onClose={closeModals} title="Add silo" preventClose={isSubmitting} className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-semibold text-foreground">Add Silo Storage</h3>
               <button
@@ -453,7 +442,7 @@ export default function SuperAdminSilosPage() {
 
       {/* EDIT SILO MODAL */}
       <AnimatePresence>{showEditModal && (
-        <Modal key="modal-1" onClose={closeModals} title="Edit silo capacity" className="p-6 max-w-md space-y-4">
+        <Modal key="modal-1" onClose={closeModals} title="Edit silo capacity" preventClose={isSubmitting} className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-semibold text-foreground">
                 Edit Silo ({showEditModal.siloCode})
@@ -547,7 +536,7 @@ export default function SuperAdminSilosPage() {
 
       {/* DEACTIVATION CONFIRMATION MODAL */}
       <AnimatePresence>{deactivatingSilo && (
-        <Modal key="modal-2" onClose={closeModals} title="Confirm silo deactivation" className="border-rose-200 p-6 max-w-md space-y-4">
+        <Modal key="modal-2" onClose={closeModals} title="Confirm silo deactivation" preventClose={isSubmitting} className="border-rose-200 p-6 max-w-md space-y-4">
             <div className="flex items-center space-x-3 text-rose-700">
               <div className="p-2.5 bg-rose-100 rounded-xl shrink-0">
                 <AlertTriangle className="w-5 h-5 text-rose-700" />

@@ -6,6 +6,7 @@ import { mapScopeCheckboxes } from '@/lib/validations/labTest';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface LabTestResultOption {
   value: string;
@@ -77,20 +78,18 @@ export default function SuperAdminLabTestsPage() {
   // Toggle confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState<ConfirmModalState | null>(null);
 
-  async function loadLabTests() {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch('/api/super-admin/lab-tests', { cache: 'no-store' });
-      const data = await res.json();
-      if (res.ok) setLabTests(data.labTests || []);
-      else setError(data.error || 'Failed to load lab tests');
-    } catch (err) {
-      setError(getErrorMessage(err) || 'Network error loading lab tests');
-    } finally {
-      setLoading(false);
-    }
+  function loadLabTests() {
+    return fetchJson<{ labTests?: LabTest[] }>('/api/super-admin/lab-tests', { cache: 'no-store' }, 'Failed to load lab tests')
+      .then(
+        (data) => {
+          setLabTests(data.labTests || []);
+          setError(null);
+        },
+        (err) => setError(getErrorMessage(err) || 'Network error loading lab tests')
+      )
+      .finally(() => setLoading(false));
   }
+
 
   useEffect(() => {
     loadLabTests();
@@ -127,24 +126,6 @@ export default function SuperAdminLabTestsPage() {
     setConfirmModalError(null);
   };
 
-  // Keyboard accessibility: Escape closes any open modal when not submitting
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        if (!isSubmittingCreate && !isSubmittingEdit && !isSubmittingToggle) {
-          if (showConfirmModal) {
-            closeConfirmModal();
-          } else if (showEditModal) {
-            closeEditModal();
-          } else if (showCreateModal) {
-            closeCreateModal();
-          }
-        }
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSubmittingCreate, isSubmittingEdit, isSubmittingToggle, showConfirmModal, showEditModal, showCreateModal]);
 
   const handleCreateTest = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -493,7 +474,7 @@ export default function SuperAdminLabTestsPage() {
 
       {/* CREATE LAB TEST MODAL */}
       <AnimatePresence>{showCreateModal && (
-        <Modal key="modal-0" onClose={closeCreateModal} title="Create laboratory test" className="p-6 max-w-lg space-y-4">
+        <Modal key="modal-0" onClose={closeCreateModal} title="Create laboratory test" preventClose={isSubmittingCreate} className="p-6 max-w-lg space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold text-foreground">Create New Laboratory Test</h3>
               <button
@@ -726,7 +707,7 @@ export default function SuperAdminLabTestsPage() {
 
       {/* EDIT LAB TEST METADATA MODAL */}
       <AnimatePresence>{showEditModal && (
-        <Modal key="modal-1" onClose={closeEditModal} title="Edit test metadata" className="p-6 max-w-lg space-y-4">
+        <Modal key="modal-1" onClose={closeEditModal} title="Edit test metadata" preventClose={isSubmittingEdit} className="p-6 max-w-lg space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-base font-semibold text-foreground">
                 Edit Test Metadata ({showEditModal.testCode})
@@ -940,7 +921,7 @@ export default function SuperAdminLabTestsPage() {
 
       {/* ACTIVATION / DEACTIVATION CONFIRMATION MODAL */}
       <AnimatePresence>{showConfirmModal && (
-        <Modal key="modal-2" onClose={closeConfirmModal} title="Confirm test status change" className="p-6 max-w-md space-y-4">
+        <Modal key="modal-2" onClose={closeConfirmModal} title="Confirm test status change" preventClose={isSubmittingToggle} className="p-6 max-w-md space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <AlertTriangle
