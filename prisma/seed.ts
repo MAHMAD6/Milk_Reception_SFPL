@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { Prisma } from '@prisma/client';
 import { createPrismaClient } from '../src/backend/core/db';
 
 const prisma = createPrismaClient();
@@ -53,12 +54,12 @@ async function main() {
 
 
   for (const test of LAB_TESTS_SEED) {
-    const defaultOptions = (test as any).resultOptions || (
+    const defaultOptions = (
       test.resultType === 'OK_NOT_OK'
         ? [{ value: 'OK', label: 'OK', isPassing: true }, { value: 'NOT_OK', label: 'Not OK', isPassing: false }]
         : test.resultType === 'POSITIVE_NEGATIVE'
         ? [{ value: 'NEGATIVE', label: 'Negative', isPassing: true }, { value: 'POSITIVE', label: 'Positive', isPassing: false }]
-        : null
+        : Prisma.DbNull
     );
 
     await prisma.labTest.upsert({

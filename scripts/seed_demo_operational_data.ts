@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import type { LabTestRule, VehicleVisit } from '@prisma/client';
 import { prisma } from '../src/backend/core/db';
 import { QualityRuleService } from '../src/backend/services/qualityRuleService';
 import { computeCanonicalMilkMetrics } from '../src/backend/utils/milkFormulas';
@@ -154,11 +155,11 @@ export async function seedOperationalData() {
     { test: testAcidity, point: 'DISPATCH', min: 0.10, max: 0.16, acceptable: null, consequence: 'NEUTRAL', category: 'MONITORING' },
   ];
 
-  const plantRulesMap = new Map<string, any>();
-  const zmccMotRulesMap = new Map<string, any>();
-  const zmccLsRulesMap = new Map<string, any>();
-  const zmccConRulesMap = new Map<string, any>();
-  const dispatchRulesMap = new Map<string, any>();
+  const plantRulesMap = new Map<string, LabTestRule>();
+  const zmccMotRulesMap = new Map<string, LabTestRule>();
+  const zmccLsRulesMap = new Map<string, LabTestRule>();
+  const zmccConRulesMap = new Map<string, LabTestRule>();
+  const dispatchRulesMap = new Map<string, LabTestRule>();
 
   for (const spec of ruleSpecs) {
     if (!spec.test) continue;
@@ -220,8 +221,8 @@ export async function seedOperationalData() {
   let finalReceiptsCount = 0;
   let qaEventsCount = 0;
   const sourceStats: Record<string, number> = {};
-  let visit10Record: any = null;
-  let visit20Record: any = null;
+  let visit10Record: VehicleVisit | null = null;
+  let visit20Record: VehicleVisit | null = null;
 
   console.log('Seeding 4 realistic, deterministic vehicle journeys...\n');
 
@@ -874,10 +875,11 @@ export async function seedOperationalData() {
   // Scenario A (Visit 20): 8,000 L Measured -> 8,000.00 Gross Liters ISSUE
   // Seed opening stock receipt (35,000 L) before the earliest visit dispatch,
   // followed by canonical whole-vehicle tank ISSUEs in Gross Liters.
-  if (visit10Record || visit20Record) {
+  const earliestDispatchRecord = visit10Record ?? visit20Record;
+  if (earliestDispatchRecord) {
     const openingStockLiters = 35000.0;
     const openingMetrics = computeCanonicalMilkMetrics(openingStockLiters, 'LITER', 28.00, 3.80);
-    const earliestDate = visit10Record ? visit10Record.created_at : visit20Record.created_at;
+    const earliestDate = earliestDispatchRecord.created_at;
     const openingTimestamp = new Date(earliestDate.getTime() - 3600000); // 1 hr before earliest dispatch
 
     await prisma.zmccTankInventoryTransaction.upsert({
