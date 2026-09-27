@@ -71,25 +71,27 @@ export default function QAHeadDepartmentPage() {
   const [formDecisionConsequence, setFormDecisionConsequence] = useState('');
   const [formReason, setFormReason] = useState('');
 
-  const loadData = useCallback(async () => {
-    try {
-      const [rulesRes, testsRes] = await Promise.all([
+  const loadData = useCallback(
+    () =>
+      Promise.all([
         fetch(`/api/qa-head/sop-rules?testingPoint=${selectedPoint}`),
         fetch('/api/lab-tests'),
-      ]);
-
-      if (rulesRes.ok) {
-        const rData = await rulesRes.json();
-        setRules(rData.rules || []);
-      }
-      if (testsRes.ok) {
-        const tData = await testsRes.json();
-        setTests(tData.tests || tData || []);
-      }
-    } catch (err) {
-      console.error('Failed to load rules or tests', err);
-    }
-  }, [selectedPoint]);
+      ])
+        .then(async ([rulesRes, testsRes]) => {
+          if (rulesRes.ok) {
+            const rData = await rulesRes.json();
+            setRules(rData.rules || []);
+          }
+          if (testsRes.ok) {
+            const tData = await testsRes.json();
+            setTests(tData.tests || tData || []);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to load rules or tests', err);
+        }),
+    [selectedPoint]
+  );
 
   useEffect(() => {
     async function loadUser() {

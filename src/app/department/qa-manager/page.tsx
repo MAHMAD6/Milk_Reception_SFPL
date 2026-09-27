@@ -63,17 +63,20 @@ export default function QAManagerDepartmentPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const loadQueue = useCallback(async () => {
-    try {
-      const res = await fetch('/api/qa/manager/queue');
-      if (res.ok) {
-        const data = await res.json();
-        setQueue(data.queue || data.portions || []);
-      }
-    } catch (err) {
-      console.error('Failed to load QA manager queue', err);
-    }
-  }, []);
+  const loadQueue = useCallback(
+    () =>
+      fetch('/api/qa/manager/queue')
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setQueue(data.queue || data.portions || []);
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to load QA manager queue', err);
+        }),
+    []
+  );
 
   useEffect(() => {
     async function loadUser() {
