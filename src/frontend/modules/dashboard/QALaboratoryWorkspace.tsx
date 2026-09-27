@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useEffectEvent } from 'react';
 import { FlaskConical, Clock, PauseCircle } from 'lucide-react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
@@ -76,7 +76,6 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
 
   // Per-test form state: testId → TestInputState
   const [testInputs, setTestInputs] = useState<Record<string, TestInputState>>({});
-  const [isFormDirty, setIsFormDirty] = useState(false);
 
   // Action Inputs for Reject / Hold / Datetime
   const [rejectionReason, setRejectionReason] = useState('');
@@ -96,12 +95,20 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
   };
 
   const [isLoadingQueues, setIsLoadingQueues] = useState(true);
-  const [isLoadingVisit, setIsLoadingVisit] = useState(false);
+  const [isRefreshingVisit, setIsLoadingVisit] = useState(false);
+  // Visit whose detail request last settled; a different selection means it is still loading.
+  const [loadedVisitId, setLoadedVisitId] = useState<string | null>(null);
+  const isLoadingVisit = isRefreshingVisit || (selectedTestingVisitId !== null && loadedVisitId !== selectedTestingVisitId);
+
+  // Clearing the visit under test clears its detail.
+  const [trackedTestingVisitId, setTrackedTestingVisitId] = useState(selectedTestingVisitId);
+  if (trackedTestingVisitId !== selectedTestingVisitId) {
+    setTrackedTestingVisitId(selectedTestingVisitId);
+    if (!selectedTestingVisitId) setVisitDetail(null);
+  }
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [_msg, setMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
-  const isInitialQueuesFetch = React.useRef(true);
-  const previousTestingVisitId = React.useRef<string | null>(null);
 
   const selectedWaitingVisit = useMemo(
     () => waitingVisits.find((v) => v.id === selectedWaitingVisitId) || null,
@@ -113,105 +120,54 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
     [onHoldVisits, selectedHeldVisitId]
   );
 
-  useEffect(() => {
-    fetchQueues(searchQuery, true);
-    const interval = setInterval(() => {
-      fetchQueues(searchQuery, false);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [searchQuery]);
+  const fetchQueues = useCallback(
+    (query: string = searchQuery) =>
+      fetch(`/api/qa/sessions/queues?q=${encodeURIComponent(query)}`)
+        .then(async (res) => {
+          const data = await res.json();
+          if (!res.ok) return;
 
-  useEffect(() => {
-    let isCancelled = false;
-    if (selectedTestingVisitId) {
-      const isSwitchingVisit = previousTestingVisitId.current !== selectedTestingVisitId;
-      if (isSwitchingVisit) {
-        setIsLoadingVisit(true);
-        previousTestingVisitId.current = selectedTestingVisitId;
-        setIsFormDirty(false);
-      }
+          const waiting: WaitingVisit[] = data.waiting || [];
+          const inTesting: InTestingVisit[] = data.inTesting || [];
+          const onHold: OnHoldVisit[] = data.onHold || [];
 
-      fetch(`/api/qa/vehicle-visits/${selectedTestingVisitId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (!isCancelled) {
-            if (data.visit) {
-              setVisitDetail(data.visit);
-              if (isSwitchingVisit || !isFormDirty) {
-                if (data.visit.portions && data.visit.portions.length > 0) {
-                  populateInputsForPortion(data.visit.portions[0], data.visit.active_plant_tests || []);
-                }
-              }
-            } else {
-              setVisitDetail(null);
-            }
-            if (isSwitchingVisit) {
-              setIsLoadingVisit(false);
-            }
-          }
+          setWaitingVisits(waiting);
+          setInTestingVisits(inTesting);
+          setOnHoldVisits(onHold);
+
+          setSelectedWaitingVisitId((prev) => {
+            if (prev && waiting.some((v: WaitingVisit) => v.id === prev)) return prev;
+            return waiting.length > 0 ? waiting[0].id : null;
+          });
+
+          setSelectedTestingVisitId((prev) => {
+            if (prev && inTesting.some((v: InTestingVisit) => v.id === prev)) return prev;
+            if (inTesting.length === 0) return null;
+            return inTesting[0].id;
+          });
+
+          setSelectedHeldVisitId((prev) => {
+            if (prev && onHold.some((v: OnHoldVisit) => v.id === prev)) return prev;
+            return onHold.length > 0 ? onHold[0].id : null;
+          });
         })
         .catch((err) => {
-          if (!isCancelled) {
-            setMsg({ text: err.message, isError: true });
-            if (isSwitchingVisit) {
-              setIsLoadingVisit(false);
-            }
-          }
-        });
-    } else {
-      setVisitDetail(null);
-      previousTestingVisitId.current = null;
-      setIsFormDirty(false);
-    }
+          console.error('Failed to fetch QA queues', err);
+        })
+        .finally(() => {
+          // Only the first load shows the queue skeleton; polling refreshes in place.
+          setIsLoadingQueues(false);
+        }),
+    [searchQuery]
+  );
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [selectedTestingVisitId]);
-
-  const fetchQueues = async (query = searchQuery, isInitial = false) => {
-    if (isInitial && isInitialQueuesFetch.current) {
-      setIsLoadingQueues(true);
-    }
-
-    try {
-      const res = await fetch(`/api/qa/sessions/queues?q=${encodeURIComponent(query)}`);
-      const data = await res.json();
-
-      if (res.ok) {
-        const waiting: WaitingVisit[] = data.waiting || [];
-        const inTesting: InTestingVisit[] = data.inTesting || [];
-        const onHold: OnHoldVisit[] = data.onHold || [];
-
-        setWaitingVisits(waiting);
-        setInTestingVisits(inTesting);
-        setOnHoldVisits(onHold);
-
-        setSelectedWaitingVisitId((prev) => {
-          if (prev && waiting.some((v: WaitingVisit) => v.id === prev)) return prev;
-          return waiting.length > 0 ? waiting[0].id : null;
-        });
-
-        setSelectedTestingVisitId((prev) => {
-          if (prev && inTesting.some((v: InTestingVisit) => v.id === prev)) return prev;
-          if (inTesting.length === 0) return null;
-          return inTesting[0].id;
-        });
-
-        setSelectedHeldVisitId((prev) => {
-          if (prev && onHold.some((v: OnHoldVisit) => v.id === prev)) return prev;
-          return onHold.length > 0 ? onHold[0].id : null;
-        });
-      }
-    } catch (err) {
-      console.error('Failed to fetch QA queues', err);
-    } finally {
-      if (isInitial && isInitialQueuesFetch.current) {
-        setIsLoadingQueues(false);
-        isInitialQueuesFetch.current = false;
-      }
-    }
-  };
+  useEffect(() => {
+    fetchQueues(searchQuery);
+    const interval = setInterval(() => {
+      fetchQueues(searchQuery);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [fetchQueues, searchQuery]);
 
   const fetchVisitDetail = async (visitId: string) => {
     setIsLoadingVisit(true);
@@ -254,8 +210,39 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
     });
 
     setTestInputs(inputs);
-    setIsFormDirty(false);
   };
+
+  const applyLoadedVisit = useEffectEvent((visit: VisitDetail | null | undefined) => {
+    if (visit) {
+      setVisitDetail(visit);
+      if (visit.portions && visit.portions.length > 0) {
+        populateInputsForPortion(visit.portions[0], visit.active_plant_tests || []);
+      }
+    } else {
+      setVisitDetail(null);
+    }
+  });
+
+  // Load the selected in-testing visit and prefill its first portion's inputs.
+  useEffect(() => {
+    if (!selectedTestingVisitId) return;
+    let isCancelled = false;
+    fetch(`/api/qa/vehicle-visits/${selectedTestingVisitId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isCancelled) applyLoadedVisit(data.visit);
+      })
+      .catch((err) => {
+        if (!isCancelled) setMsg({ text: getErrorMessage(err), isError: true });
+      })
+      .finally(() => {
+        if (!isCancelled) setLoadedVisitId(selectedTestingVisitId);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [selectedTestingVisitId]);
 
   const handleSelectPortion = (index: number) => {
     if (!visitDetail || !visitDetail.portions[index]) return;
@@ -271,7 +258,6 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
         performanceStatus: status,
       },
     }));
-    setIsFormDirty(true);
   };
 
   const handleTestNumericChange = (testId: string, val: string) => {
@@ -282,7 +268,6 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
         numericValue: val,
       },
     }));
-    setIsFormDirty(true);
   };
 
   const handleTestTextChange = (testId: string, val: string) => {
@@ -293,7 +278,6 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
         textValue: val,
       },
     }));
-    setIsFormDirty(true);
   };
 
   const handleTestReasonChange = (testId: string, val: string) => {
@@ -304,7 +288,6 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
         notPerformedReason: val,
       },
     }));
-    setIsFormDirty(true);
   };
 
   const handleStartTesting = async (e: React.FormEvent) => {
