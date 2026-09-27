@@ -36,6 +36,7 @@ import { PageTransition } from '@/components/motion/page-transition';
 import { Modal } from '@/components/ui/modal';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
+import { useOnlineStatus } from '@/frontend/hooks/useOnlineStatus';
 
 interface StopDetail {
   id: string;
@@ -93,6 +94,57 @@ function toCurrentJourney(cached: CachedJourney): CurrentJourney {
   };
 }
 
+/** A usable offline copy of the journey: cached, prepared for it, and not expired. */
+async function getPreparedCachedJourney(): Promise<CurrentJourney | null> {
+  const cached = await getCachedJourney();
+  const preparation = await getMotOfflinePreparation();
+  if (cached && preparation && preparation.journeyId === cached.id && new Date(preparation.expiresAt).getTime() > Date.now()) {
+    return toCurrentJourney(cached);
+  }
+  return null;
+}
+
+/**
+ * Loads the MOT's current journey online (refreshing the offline cache) or from the offline cache.
+ * `journey: undefined` means "keep whatever is shown"; `error` is the message to display, if any.
+ */
+async function resolveCurrentJourney(): Promise<{ journey?: CurrentJourney | null; error: string | null }> {
+  // Shown even if caching it for offline use fails below.
+  let onlineJourney: CurrentJourney | undefined;
+  try {
+    if (navigator.onLine) {
+      const res = await fetch('/api/zmcc/mot/journeys/current');
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to fetch current journey.');
+      }
+      if (!data.journey) return { journey: null, error: null };
+      onlineJourney = data.journey;
+      await saveCachedJourney(data.journey);
+      if (data.journey.status === 'COLLECTING') {
+        const preparation = await fetch('/api/zmcc/mot/journeys/current/offline-preparation', { method: 'POST' });
+        if (preparation.ok) await saveMotOfflinePreparation(await preparation.json());
+      }
+      return { journey: data.journey, error: null };
+    }
+    // Load from offline store
+    const prepared = await getPreparedCachedJourney();
+    return prepared
+      ? { journey: prepared, error: null }
+      : { journey: null, error: 'Offline preparation is missing or expired. Reconnect and prepare the active journey again.' };
+  } catch (err) {
+    // Fallback to cache on error
+    try {
+      const prepared = await getPreparedCachedJourney();
+      return prepared
+        ? { journey: prepared, error: null }
+        : { journey: onlineJourney, error: getErrorMessage(err) || 'Unable to connect and no cached journey available.' };
+    } catch {
+      return { journey: onlineJourney, error: getErrorMessage(err) || 'Failed to load journey.' };
+    }
+  }
+}
+
 export default function MotDriverPage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -101,7 +153,7 @@ export default function MotDriverPage() {
   const hamburgerButtonRef = useRef<HTMLButtonElement | null>(null);
 
   // Network and Sync States
-  const [isOnline, setIsOnline] = useState<boolean>(true);
+  const isOnline = useOnlineStatus();
   const [unsyncedCount, setUnsyncedCount] = useState<number>(0);
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
   const [syncing, setSyncing] = useState<boolean>(false);
@@ -131,35 +183,16 @@ export default function MotDriverPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const [submittingCollection, setSubmittingCollection] = useState(false);
 
-  // Online / Offline listener
-  useEffect(() => {
-    setIsOnline(navigator.onLine);
-    const handleOnline = () => {
-      setIsOnline(true);
-      triggerSync();
-    };
-    const handleOffline = () => {
-      setIsOnline(false);
-    };
-
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
   // Refresh unsynced count
-  const refreshUnsynced = useCallback(async () => {
-    try {
-      const summary = await getUnsyncedSummary();
-      setUnsyncedCount(summary.totalUnsynced);
-    } catch {
-      // IndexedDB might not be ready
-    }
-  }, []);
+  const refreshUnsynced = useCallback(
+    () =>
+      getUnsyncedSummary()
+        .then((summary) => setUnsyncedCount(summary.totalUnsynced))
+        .catch(() => {
+          // IndexedDB might not be ready
+        }),
+    []
+  );
 
   useEffect(() => {
     refreshUnsynced();
@@ -184,6 +217,15 @@ export default function MotDriverPage() {
       setSyncing(false);
     }
   }, [syncing, refreshUnsynced]);
+
+  // Sync as soon as connectivity returns
+  useEffect(() => {
+    const handleOnline = () => {
+      triggerSync();
+    };
+    window.addEventListener('online', handleOnline);
+    return () => window.removeEventListener('online', handleOnline);
+  }, [triggerSync]);
 
   // Periodic 30s sync when online
   useEffect(() => {
@@ -264,61 +306,22 @@ export default function MotDriverPage() {
   }, [router]);
 
   // Fetch current journey with offline fallback
-  const fetchCurrentJourney = useCallback(async () => {
-    setLoadingJourney(true);
-    setJourneyError(null);
-    try {
-      if (navigator.onLine) {
-        const res = await fetch('/api/zmcc/mot/journeys/current');
-        const data = await res.json();
-        if (res.ok) {
-          if (data.journey) {
-            setJourney(data.journey);
-            await saveCachedJourney(data.journey);
-            if (data.journey.status === 'COLLECTING') {
-              const preparation = await fetch('/api/zmcc/mot/journeys/current/offline-preparation', { method: 'POST' });
-              if (preparation.ok) await saveMotOfflinePreparation(await preparation.json());
-            }
-          } else {
-            setJourney(null);
-          }
-        } else {
-          throw new Error(data.error || 'Failed to fetch current journey.');
-        }
-      } else {
-        // Load from offline store
-        const cached = await getCachedJourney();
-        const preparation = await getMotOfflinePreparation();
-        if (cached && preparation && preparation.journeyId === cached.id && new Date(preparation.expiresAt).getTime() > Date.now()) {
-          setJourney(toCurrentJourney(cached));
-        } else {
-          setJourney(null);
-          setJourneyError('Offline preparation is missing or expired. Reconnect and prepare the active journey again.');
-        }
-      }
-    } catch (err) {
-      // Fallback to cache on error
-      try {
-        const cached = await getCachedJourney();
-        const preparation = await getMotOfflinePreparation();
-        if (cached && preparation && preparation.journeyId === cached.id && new Date(preparation.expiresAt).getTime() > Date.now()) {
-          setJourney(toCurrentJourney(cached));
-        } else {
-          setJourneyError(getErrorMessage(err) || 'Unable to connect and no cached journey available.');
-        }
-      } catch {
-        setJourneyError(getErrorMessage(err) || 'Failed to load journey.');
-      }
-    } finally {
-      setLoadingJourney(false);
-    }
-  }, []);
+  const loadCurrentJourney = useCallback(
+    () =>
+      resolveCurrentJourney()
+        .then((result) => {
+          if (result.journey !== undefined) setJourney(result.journey);
+          setJourneyError(result.error);
+        })
+        .finally(() => setLoadingJourney(false)),
+    []
+  );
 
   useEffect(() => {
     if (currentUser) {
-      fetchCurrentJourney();
+      loadCurrentJourney();
     }
-  }, [currentUser, fetchCurrentJourney]);
+  }, [currentUser, loadCurrentJourney]);
 
   // Handle open collection modal
   const handleOpenCollectionModal = async (stop: StopDetail) => {
