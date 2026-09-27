@@ -27,6 +27,7 @@ import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
 import type { LabTestResultOption } from '@/lib/validations/labTest';
+import { useUrlSearchParam } from '@/frontend/hooks/useUrlSearchParam';
 import type { serializeLabSession } from '@/backend/services/zmccLabService';
 
 interface ZmccLabWorkspaceProps {
@@ -79,34 +80,20 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   const canCorrect = isZmccManager || isSuperAdmin;
   const canReceiveHistorical = isZmccLabAttendant || isSuperAdmin;
 
-  const [activeTab, setActiveTab] = useState<MainTab>(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab')?.toLowerCase();
-      if (tab === 'queue' && canTest) return 'QUEUE';
-      if (tab === 'testing' && canTest) return 'TESTING';
-      if (tab === 'history') return 'HISTORY';
-    }
-    return canTest ? 'QUEUE' : 'HISTORY';
-  });
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const tab = params.get('tab')?.toLowerCase();
-      if (tab === 'queue' && canTest) {
-        setActiveTab('QUEUE');
-      } else if (tab === 'testing' && canTest) {
-        setActiveTab('TESTING');
-      } else if (tab === 'history') {
-        setActiveTab('HISTORY');
-      }
-    }
-  }, [canTest]);
+  // The URL's ?tab= picks the initial view until the user chooses one.
+  const urlTab = useUrlSearchParam('tab')?.toLowerCase();
+  const [selectedTab, setSelectedTab] = useState<MainTab | null>(null);
+  const urlMainTab: MainTab | null =
+    urlTab === 'queue' && canTest ? 'QUEUE'
+    : urlTab === 'testing' && canTest ? 'TESTING'
+    : urlTab === 'history' ? 'HISTORY'
+    : null;
+  const activeTab: MainTab = selectedTab ?? urlMainTab ?? (canTest ? 'QUEUE' : 'HISTORY');
+  const setActiveTab = setSelectedTab;
 
   // Queue State
   const [queueItems, setQueueItems] = useState<LabQueueItem[]>([]);
-  const [loadingQueue, setLoadingQueue] = useState(false);
+  const [loadingQueue, setLoadingQueue] = useState(canTest);
   const [queueSearch, setQueueSearch] = useState('');
 
   // Active Session State
@@ -145,7 +132,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
 
   // History State
   const [historyItems, setHistoryItems] = useState<LabSession[]>([]);
-  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [refreshingHistory, setLoadingHistory] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [historyDate, setHistoryDate] = useState('');
   const [historyDecision, setHistoryDecision] = useState<string>('ALL');
@@ -207,59 +194,81 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   }, []);
 
   // Fetch Queue
-  const fetchQueue = useCallback(async () => {
+  const loadQueue = useCallback(
+    () =>
+      fetch('/api/zmcc/lab/queue', { cache: 'no-store' })
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setQueueItems(Array.isArray(data) ? data : []);
+          } else {
+            const err = await res.json().catch(() => ({}));
+            toast.showError(err.error || 'Failed to fetch queue');
+          }
+        })
+        .catch(() => {
+          toast.showError('Network error while fetching queue');
+        })
+        .finally(() => {
+          setLoadingQueue(false);
+        }),
+    [toast]
+  );
+
+  const fetchQueue = () => {
     setLoadingQueue(true);
-    try {
-      const res = await fetch('/api/zmcc/lab/queue', { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setQueueItems(Array.isArray(data) ? data : []);
-      } else {
-        const err = await res.json().catch(() => ({}));
-        toast.showError(err.error || 'Failed to fetch queue');
-      }
-    } catch {
-      toast.showError('Network error while fetching queue');
-    } finally {
-      setLoadingQueue(false);
-    }
-  }, [toast]);
+    return loadQueue();
+  };
 
   // Fetch History
-  const fetchHistory = useCallback(async () => {
-    setLoadingHistory(true);
-    try {
-      const params = new URLSearchParams();
-      if (historyDate) params.append('date', historyDate);
-      if (historyDecision && historyDecision !== 'ALL') params.append('decision', historyDecision);
-      if (historySearch) params.append('search', historySearch);
-      params.append('page', String(historyPage));
-      params.append('pageSize', String(historyPageSize));
+  const historyParams = new URLSearchParams();
+  if (historyDate) historyParams.append('date', historyDate);
+  if (historyDecision && historyDecision !== 'ALL') historyParams.append('decision', historyDecision);
+  if (historySearch) historyParams.append('search', historySearch);
+  historyParams.append('page', String(historyPage));
+  historyParams.append('pageSize', String(historyPageSize));
+  const historyQuery = historyParams.toString();
+  // Filters whose history request last settled; any other query means a fetch is in flight.
+  const [loadedHistoryQuery, setLoadedHistoryQuery] = useState<string | null>(null);
 
-      const res = await fetch(`/api/zmcc/lab/history?${params.toString()}`, { cache: 'no-store' });
-      if (res.ok) {
-        const data = await res.json();
-        setHistoryItems(data.items || []);
-        if (data.total !== undefined) setHistoryTotal(data.total);
-        if (data.totalPages !== undefined) setHistoryTotalPages(data.totalPages);
-      } else {
-        const err = await res.json().catch(() => ({}));
-        toast.showError(err.error || 'Failed to fetch lab history');
-      }
-    } catch {
-      toast.showError('Network error while fetching lab history');
-    } finally {
-      setLoadingHistory(false);
-    }
-  }, [historyDate, historyDecision, historySearch, historyPage, historyPageSize, toast]);
+  const loadHistory = useCallback(
+    () =>
+      fetch(`/api/zmcc/lab/history?${historyQuery}`, { cache: 'no-store' })
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            setHistoryItems(data.items || []);
+            if (data.total !== undefined) setHistoryTotal(data.total);
+            if (data.totalPages !== undefined) setHistoryTotalPages(data.totalPages);
+          } else {
+            const err = await res.json().catch(() => ({}));
+            toast.showError(err.error || 'Failed to fetch lab history');
+          }
+        })
+        .catch(() => {
+          toast.showError('Network error while fetching lab history');
+        })
+        .finally(() => {
+          setLoadingHistory(false);
+          setLoadedHistoryQuery(historyQuery);
+        }),
+    [historyQuery, toast]
+  );
+
+  const loadingHistory = refreshingHistory || (activeTab === 'HISTORY' && loadedHistoryQuery !== historyQuery);
+
+  const fetchHistory = () => {
+    setLoadingHistory(true);
+    return loadHistory();
+  };
 
   useEffect(() => {
     if (activeTab === 'QUEUE') {
-      fetchQueue();
+      loadQueue();
     } else if (activeTab === 'HISTORY') {
-      fetchHistory();
+      loadHistory();
     }
-  }, [activeTab, fetchQueue, fetchHistory]);
+  }, [activeTab, loadQueue, loadHistory]);
 
   // Start or resume session from queue
   const handleStartOrResume = async (item: LabQueueItem) => {
