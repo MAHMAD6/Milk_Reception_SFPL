@@ -695,7 +695,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
 
       {/* TAB 1: ARRIVALS QUEUE */}
       {activeTab === 'QUEUE' && canTest && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-panel-in">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div className="relative w-full sm:w-80">
               <Search className="w-4 h-4 absolute left-3 top-3 text-slate-400" />
@@ -827,7 +827,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
 
       {/* TAB 2: ACTIVE TESTING SESSION */}
       {activeTab === 'TESTING' && canTest && activeSession && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-panel-in">
           {/* Active Session Card */}
           <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-xs space-y-4">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-slate-100 pb-4">
@@ -1182,7 +1182,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
 
       {/* TAB 3: TEST HISTORY & CORRECTIONS */}
       {activeTab === 'HISTORY' && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-panel-in">
           {/* Filters */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 bg-white p-4 rounded-xl border border-slate-200">
             <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">

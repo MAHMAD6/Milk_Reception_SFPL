@@ -594,7 +594,7 @@ export const QALaboratoryWorkspace: React.FC<QALaboratoryWorkspaceProps> = ({
         </div>
 
         {/* RIGHT COLUMN (7/12): TAB-SPECIFIC WORKSPACE PANEL */}
-        <div className="lg:col-span-7">
+        <div key={activeTab} className="lg:col-span-7 animate-panel-in">
           <QATestingSection
             activeTab={activeTab}
             searchQuery={searchQuery}

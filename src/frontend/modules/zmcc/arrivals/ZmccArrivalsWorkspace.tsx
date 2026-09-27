@@ -720,7 +720,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
 
       {/* 1. MOT ARRIVAL SUB-TAB */}
       {activeTab === 'MOT_ARRIVAL' && canSubmit && (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-panel-in">
           {motSuccessResult ? (
             <div className="bg-emerald-50 border-2 border-emerald-500/40 rounded-xl p-6 space-y-4">
               <div className="flex items-center space-x-3 text-emerald-800">
@@ -1020,7 +1020,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
 
       {/* 2. VEHICLES INSIDE ZMCC SUB-TAB */}
       {activeTab === 'INSIDE_ZMCC' && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-panel-in">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-semibold text-slate-900">
@@ -1140,7 +1140,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
 
       {/* 2.5 LOCAL SUPPLIER ARRIVAL SUB-TAB */}
       {activeTab === 'LOCAL_SUPPLIER_ARRIVAL' && canSubmit && (
-        <div className="max-w-xl mx-auto bg-white rounded-xl border border-emerald-200 p-6 shadow-2xs space-y-4">
+        <div className="max-w-xl mx-auto bg-white rounded-xl border border-emerald-200 p-6 shadow-2xs space-y-4 animate-panel-in">
           <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
             <div>
               <div className="flex items-center space-x-2">
@@ -1390,7 +1390,7 @@ export const ZmccArrivalsWorkspace: React.FC<ZmccArrivalsWorkspaceProps> = ({
 
       {/* 3. ARRIVAL HISTORY SUB-TAB */}
       {activeTab === 'HISTORY' && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-panel-in">
           {/* Filters */}
           <div className="bg-white rounded-xl border border-border p-4 flex flex-wrap items-center justify-between gap-3 shadow-2xs">
             <div className="flex flex-wrap items-center gap-3">

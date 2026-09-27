@@ -751,13 +751,13 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
 
       {/* Success/Error Banners */}
       {successMsg && (
-        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2">
+        <div className="p-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-xs font-semibold text-emerald-800 flex items-center gap-2 animate-panel-in">
           <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
           <span>{successMsg}</span>
         </div>
       )}
       {errorMsg && (
-        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800 flex items-center gap-2">
+        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-xs font-semibold text-rose-800 flex items-center gap-2 animate-panel-in">
           <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
           <span>{errorMsg}</span>
         </div>
@@ -905,8 +905,8 @@ export const ZmccMasterDataWorkspace: React.FC<ZmccMasterDataWorkspaceProps> = (
         )}
       </div>
 
-      {/* Main Content Table */}
-      <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden">
+      {/* Main Content Table (keyed so switching sections replays the entrance) */}
+      <div key={activeTab} className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden animate-panel-in">
         {loading ? (
           <div className="p-12 text-center flex flex-col items-center justify-center text-slate-500 space-y-2">
             <Loader2 className="w-6 h-6 animate-spin text-primary" />

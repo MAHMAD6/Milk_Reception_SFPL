@@ -181,14 +181,14 @@ export const MpdExecutiveWorkspace: React.FC<MpdExecutiveWorkspaceProps> = ({ cu
 
       {/* Error state */}
       {error && (
-        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-center gap-2 animate-panel-in">
           <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
       {/* Tab Screen Content */}
-      <div className="transition-all duration-150">
+      <div key={activeTab} className="animate-panel-in">
         {telemetry ? (
           <>
             {activeTab === 'FLEET_RADAR' && (

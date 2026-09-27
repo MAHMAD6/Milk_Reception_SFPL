@@ -76,7 +76,7 @@ export default function SuperAdminOverviewPage() {
         description="Accounts, procurement sources, storage and quality configuration at a glance."
       />
 
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 stagger-children">
         <StatCard
           label="User accounts"
           icon={Users}

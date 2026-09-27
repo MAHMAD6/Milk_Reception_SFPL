@@ -132,7 +132,7 @@ export default function SuperAdminOperationsPage() {
       </div>
 
       {error && (
-        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2">
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold flex items-center space-x-2 animate-panel-in">
           <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>

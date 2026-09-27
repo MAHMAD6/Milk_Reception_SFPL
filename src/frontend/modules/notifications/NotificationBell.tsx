@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Bell, CheckCheck, Settings, ArrowUpRight, Inbox } from 'lucide-react';
 import { User } from '@core/types';
 import Link from 'next/link';
@@ -31,6 +32,17 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
+  // Bumped when a poll brings in more unread items than before; replays the bell swing.
+  const [ringKey, setRingKey] = useState(0);
+  const unreadRef = useRef<number | null>(null);
+
+  const applyUnreadCount = useCallback((next: number, { fromPoll = false } = {}) => {
+    if (fromPoll && unreadRef.current !== null && next > unreadRef.current) {
+      setRingKey((key) => key + 1);
+    }
+    unreadRef.current = next;
+    setUnreadCount(next);
+  }, []);
 
   const fetchNotifications = useCallback(() => {
     if (!currentUser) return Promise.resolve();
@@ -40,28 +52,32 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
         if (res.ok) {
           const data = await res.json();
           setNotifications(data?.notifications || []);
-          setUnreadCount(Number(data?.unreadCount || 0));
+          applyUnreadCount(Number(data?.unreadCount || 0), { fromPoll: true });
           setFeedOwnerId(ownerId);
         } else if (res.status === 401) {
           setNotifications([]);
-          setUnreadCount(0);
+          applyUnreadCount(0);
         }
       })
       .catch(() => {
         // Ignore network errors during polling
       });
-  }, [currentUser]);
+  }, [currentUser, applyUnreadCount]);
 
   useEffect(() => {
     // Without a user the bell renders nothing; a later user only sees a feed fetched for them.
-    if (!currentUser) return;
+    if (!currentUser) {
+      unreadRef.current = null;
+      return;
+    }
 
     fetchNotifications();
     const interval = window.setInterval(fetchNotifications, 60000);
 
     const handleLoggedOut = () => {
       setNotifications([]);
-      setUnreadCount(0);
+      applyUnreadCount(0);
+      unreadRef.current = null;
       setOpenForUserId(null);
       clearInterval(interval);
     };
@@ -72,7 +88,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
       clearInterval(interval);
       window.removeEventListener('milk-user-logged-out', handleLoggedOut);
     };
-  }, [currentUser, fetchNotifications]);
+  }, [currentUser, fetchNotifications, applyUnreadCount]);
 
   const handleMarkAllRead = async () => {
     if (unreadCount === 0 || loading) return;
@@ -87,7 +103,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
         setNotifications((prev) =>
           prev.map((item) => ({ ...item, readAt: item.readAt || new Date().toISOString() }))
         );
-        setUnreadCount(0);
+        applyUnreadCount(0);
       }
     } catch (_err) {
       // Ignore
@@ -107,7 +123,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
         setNotifications((prev) =>
           prev.map((n) => (n.id === item.id ? { ...n, readAt: new Date().toISOString() } : n))
         );
-        setUnreadCount((prev) => Math.max(0, prev - 1));
+        applyUnreadCount(Math.max(0, (unreadRef.current ?? 0) - 1));
       } catch (_err) {
         // Ignore
       }
@@ -141,12 +157,28 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ currentUser 
         className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring data-[state=open]:bg-muted data-[state=open]:text-foreground"
         aria-label={visibleUnreadCount > 0 ? `Notifications, ${visibleUnreadCount} unread` : 'Notifications'}
       >
-        <Bell className="h-[18px] w-[18px]" />
-        {visibleUnreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-card">
-            {visibleUnreadCount > 99 ? '99+' : visibleUnreadCount}
-          </span>
-        )}
+        <motion.span
+          key={ringKey}
+          className="inline-flex origin-[50%_15%]"
+          animate={ringKey > 0 ? { rotate: [0, -14, 11, -7, 4, 0] } : undefined}
+          transition={{ duration: 0.6, ease: 'easeInOut' }}
+        >
+          <Bell className="h-[18px] w-[18px]" />
+        </motion.span>
+        <AnimatePresence initial={false}>
+          {visibleUnreadCount > 0 && (
+            <motion.span
+              key="unread-badge"
+              className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-[10px] font-semibold leading-none text-white ring-2 ring-card"
+              initial={{ scale: 0.4, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.4, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 520, damping: 26 }}
+            >
+              {visibleUnreadCount > 99 ? '99+' : visibleUnreadCount}
+            </motion.span>
+          )}
+        </AnimatePresence>
       </PopoverTrigger>
 
       <PopoverContent align="end" className="flex w-[min(24rem,calc(100vw-1.5rem))] flex-col overflow-hidden p-0">

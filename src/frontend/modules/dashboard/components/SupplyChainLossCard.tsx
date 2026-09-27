@@ -176,7 +176,7 @@ export const SupplyChainLossCard: React.FC<SupplyChainLossCardProps> = ({
 
       {/* Error View */}
       {error && (
-        <div className="p-4 m-4 rounded-lg bg-red-50 border border-red-200 flex items-center space-x-2 text-xs text-red-800">
+        <div className="p-4 m-4 rounded-lg bg-red-50 border border-red-200 flex items-center space-x-2 text-xs text-red-800 animate-panel-in">
           <AlertTriangle className="w-4 h-4 text-red-600 shrink-0" />
           <span>{error}</span>
         </div>

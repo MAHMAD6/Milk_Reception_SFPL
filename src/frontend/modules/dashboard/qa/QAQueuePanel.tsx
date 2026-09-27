@@ -107,8 +107,8 @@ export const QAQueuePanel: React.FC<QAQueuePanelProps> = ({
         />
       </div>
 
-      {/* Queue Content */}
-      <div className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1">
+      {/* Queue Content (keyed per queue so switching queues replays the staggered entrance) */}
+      <div key={activeTab} className="space-y-2.5 max-h-[520px] overflow-y-auto pr-1 stagger-children">
         {isLoadingQueues ? (
           <div className="p-8 text-center border border-dashed border-border rounded-xl text-sm text-muted-foreground">
             <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-blue-700" />

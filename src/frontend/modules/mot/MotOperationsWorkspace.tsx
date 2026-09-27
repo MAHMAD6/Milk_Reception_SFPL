@@ -716,7 +716,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* Notifications */}
       {error && (
-        <div className="flex items-center justify-between p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold">
+        <div className="flex items-center justify-between p-3.5 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-semibold animate-panel-in">
           <div className="flex items-center space-x-2">
             <AlertTriangle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{error}</span>
@@ -763,7 +763,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 1: ASSIGN & DISPATCH */}
       {activeTab === 'DISPATCH' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 animate-panel-in">
           {/* Dispatch Form */}
           <div className="lg:col-span-2 bg-white p-5 rounded-xl border border-border shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-border pb-3">
@@ -944,7 +944,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 2: ACTIVE JOURNEYS */}
       {activeTab === 'ACTIVE_JOURNEYS' && (
-        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden animate-panel-in">
           <div className="p-4 border-b border-border flex items-center justify-between">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Active Collection Journeys</h2>
@@ -1047,7 +1047,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 3: JOURNEY HISTORY */}
       {activeTab === 'JOURNEY_HISTORY' && (
-        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3 animate-panel-in">
           <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-foreground">Journey Historical Ledger</h2>
@@ -1158,7 +1158,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB: LIVE JOURNEY MAP */}
       {activeTab === 'JOURNEY_MAP' && (
-        <div className="space-y-4">
+        <div className="space-y-4 animate-panel-in">
           <div className="p-3 bg-white rounded-xl border border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center space-x-2">
               <label className="text-xs font-semibold text-slate-700 whitespace-nowrap">
@@ -1202,7 +1202,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 4: MOT PROFILES (SUPER ADMIN & ZMCC MANAGER ONLY) */}
       {activeTab === 'PROFILES' && !isPheOperator && (
-        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3 animate-panel-in">
           <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-foreground">MOT Drivers & Profiles</h2>
@@ -1301,7 +1301,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
 
       {/* TAB 5: MOT VEHICLES (SUPER ADMIN & ZMCC MANAGER ONLY) */}
       {activeTab === 'VEHICLES' && !isPheOperator && (
-        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3">
+        <div className="bg-white rounded-xl border border-border shadow-2xs overflow-hidden space-y-3 animate-panel-in">
           <div className="p-4 border-b border-border flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold text-foreground">MOT Vehicles Fleet</h2>

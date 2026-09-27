@@ -67,6 +67,14 @@
     Menlo, monospace;
 
 
+  /* ── Motion ─────────────────────────────────────────────
+     One easing and a short duration scale keep motion consistent.
+     Entrance animations use `backwards` fill so nothing (transform,
+     stacking context) lingers on the element once they finish. */
+  --ease-emphasized: cubic-bezier(0.2, 0, 0, 1);
+  --animate-panel-in: panel-in 220ms var(--ease-emphasized) backwards;
+  --animate-shimmer: shimmer 1.6s linear infinite;
+
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
@@ -102,6 +110,37 @@
 @utility z-banner { z-index: var(--z-banner); }
 @utility z-toast { z-index: var(--z-toast); }
 @utility z-tooltip { z-index: var(--z-tooltip); }
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Children fade up one after another (KPI rows, card grids). Capped at eight
+   steps so long lists never feel slow. */
+@utility stagger-children {
+  & > * {
+    animation: panel-in 320ms var(--ease-emphasized) backwards;
+  }
+  & > *:nth-child(2) { animation-delay: 40ms; }
+  & > *:nth-child(3) { animation-delay: 80ms; }
+  & > *:nth-child(4) { animation-delay: 120ms; }
+  & > *:nth-child(5) { animation-delay: 160ms; }
+  & > *:nth-child(6) { animation-delay: 200ms; }
+  & > *:nth-child(7) { animation-delay: 240ms; }
+  & > *:nth-child(n + 8) { animation-delay: 280ms; }
+}
 
 @utility scrollbar-none {
   &::-webkit-scrollbar {
@@ -241,6 +280,7 @@
     *::before,
     *::after {
       animation-duration: 0.01ms !important;
+      animation-delay: 0s !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;

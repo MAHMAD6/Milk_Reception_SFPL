@@ -166,7 +166,7 @@ export const ZMCCManagerOverview: React.FC<ZMCCManagerOverviewProps> = ({
         </div>
 
         {/* 2. Primary operational KPIs */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 stagger-children">
           <StatCard
             label="Current tank stock"
             icon={Milk}
