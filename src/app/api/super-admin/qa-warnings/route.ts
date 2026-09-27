@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -88,6 +89,6 @@ export async function GET(req: Request) {
       monthlySummary,
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(err, 'Internal server error.') }, { status: 500 });
   }
 }

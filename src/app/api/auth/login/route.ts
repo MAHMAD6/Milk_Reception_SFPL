@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createSessionToken, NORMAL_SESSION_TTL, REMEMBERED_SESSION_TTL } from '@core/auth';
+import { SESSION_COOKIE_NAME, sessionCookieOptions } from '@core/session';
+import { consumeRateLimit, getClientIp, resetRateLimit } from '@core/rateLimit';
 import { Role, User } from '@core/types';
 import { prisma } from '@core/db';
 import bcrypt from 'bcryptjs';
@@ -11,52 +13,69 @@ const loginSchema = z.object({
   rememberMe: z.boolean().optional().default(false),
 });
 
+const INVALID_CREDENTIALS = 'Invalid username or password';
+const WINDOW_MS = 15 * 60 * 1000;
+const MAX_ATTEMPTS_PER_USERNAME = 10;
+const MAX_ATTEMPTS_PER_IP = 50;
+
+// Compared against when the username does not exist so response timing does not
+// reveal which usernames are valid.
+const DUMMY_HASH = bcrypt.hashSync('timing-equalisation-placeholder', 10);
+
+function tooManyAttempts(retryAfterSeconds: number) {
+  return NextResponse.json(
+    { error: 'Too many sign-in attempts. Please wait and try again.' },
+    { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } }
+  );
+}
+
 export async function POST(req: NextRequest) {
+  let rawBody: unknown;
   try {
-    const rawBody = await req.json();
-    
-    // STRICT ZOD VALIDATION: Block Prototype Pollution & Type Juggling
-    const parseResult = loginSchema.safeParse(rawBody);
-    if (!parseResult.success) {
-      return NextResponse.json({ error: 'Invalid input format' }, { status: 400 });
-    }
-    
-    const { username, password, rememberMe } = parseResult.data;
+    rawBody = await req.json();
+  } catch {
+    return NextResponse.json({ error: 'Invalid input format' }, { status: 400 });
+  }
 
-    let authenticatedUser: User | null = null;
+  // STRICT ZOD VALIDATION: Block Prototype Pollution & Type Juggling
+  const parseResult = loginSchema.safeParse(rawBody);
+  if (!parseResult.success) {
+    return NextResponse.json({ error: 'Invalid input format' }, { status: 400 });
+  }
 
-    // 1. Check PostgreSQL users table
+  const { username, password, rememberMe } = parseResult.data;
+
+  const ip = getClientIp(req);
+  if (ip !== 'direct') {
+    const ipLimit = consumeRateLimit(`login:ip:${ip}`, MAX_ATTEMPTS_PER_IP, WINDOW_MS);
+    if (!ipLimit.allowed) return tooManyAttempts(ipLimit.retryAfterSeconds);
+  }
+  const userLimitKey = `login:user:${username.toLowerCase()}`;
+  const userLimit = consumeRateLimit(userLimitKey, MAX_ATTEMPTS_PER_USERNAME, WINDOW_MS);
+  if (!userLimit.allowed) return tooManyAttempts(userLimit.retryAfterSeconds);
+
+  try {
     const dbUser = await prisma.user.findFirst({
       where: { username },
     });
 
-    if (!dbUser) {
-      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
+    const isPassValid = await bcrypt.compare(password, dbUser?.password_hash || DUMMY_HASH);
+
+    // Unknown user, missing hash, wrong password and deactivated accounts all get the
+    // same response so the endpoint cannot be used to enumerate accounts.
+    if (!dbUser || !dbUser.password_hash || !isPassValid || !dbUser.is_active) {
+      return NextResponse.json({ error: INVALID_CREDENTIALS }, { status: 401 });
     }
 
-    // 2. Strict Deactivation Lock
-    if (!dbUser.is_active) {
-      return NextResponse.json({ error: 'Account is deactivated. Access denied.' }, { status: 401 });
-    }
+    resetRateLimit(userLimitKey);
 
-    // 3. Verify password hash using bcrypt
-    if (!dbUser.password_hash) {
-      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
-    }
-
-    const isPassValid = await bcrypt.compare(password, dbUser.password_hash);
-    if (!isPassValid) {
-      return NextResponse.json({ error: 'Invalid username or password' }, { status: 401 });
-    }
-
-    // Update last_login_at
     const now = new Date();
     await prisma.user.update({
       where: { id: dbUser.id },
       data: { last_login_at: now },
     });
 
-    authenticatedUser = {
+    const authenticatedUser: User = {
       id: dbUser.id.toString(),
       username: dbUser.username,
       name: dbUser.full_name || dbUser.username,
@@ -68,19 +87,13 @@ export async function POST(req: NextRequest) {
     };
 
     const sessionTtl = rememberMe ? REMEMBERED_SESSION_TTL : NORMAL_SESSION_TTL;
-    const token = await createSessionToken(authenticatedUser, rememberMe);
+    const token = await createSessionToken(authenticatedUser, rememberMe, dbUser.password_hash);
 
     const response = NextResponse.json({ success: true, user: authenticatedUser });
-    response.cookies.set('auth_token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-      maxAge: sessionTtl,
-    });
-
+    response.cookies.set(SESSION_COOKIE_NAME, token, sessionCookieOptions(sessionTtl));
     return response;
   } catch (err: unknown) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Login failed' }, { status: 500 });
+    console.error('[AUTH_LOGIN_ERROR]', err);
+    return NextResponse.json({ error: 'Sign-in is temporarily unavailable.' }, { status: 500 });
   }
 }

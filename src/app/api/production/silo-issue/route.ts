@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { recordSiloIssueTransaction } from '@/backend/services/siloInventoryService';
 import { validatePositiveDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function POST(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -17,22 +18,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized. Production Reception Operator role required to issue milk from silos.' }, { status: 403 });
   }
 
-  let dbUser = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { username: authUser.username },
-        { username: authUser.id },
-      ],
-      is_active: true,
-    },
-  });
-
-  if (!dbUser) {
-    dbUser = await prisma.user.upsert({
-      where: { username: authUser.username },
-      update: { role: authUser.role, full_name: authUser.name },
-      create: { username: authUser.username, role: authUser.role, full_name: authUser.name },
-    });
+  const dbUser = await prisma.user.findUnique({ where: { id: BigInt(authUser.id) } });
+  if (!dbUser || !dbUser.is_active) {
+    return NextResponse.json({ error: 'Unauthorized. Active user account required.' }, { status: 401 });
   }
 
   try {
@@ -82,6 +70,6 @@ export async function POST(req: Request) {
     });
   } catch (error: any) {
     const status = error?.message?.includes('INACTIVE') ? 409 : 400;
-    return NextResponse.json({ error: error?.message || 'Failed to record silo milk issue' }, { status });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to record silo milk issue') }, { status });
   }
 }

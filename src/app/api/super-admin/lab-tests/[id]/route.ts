@@ -3,6 +3,7 @@ import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { Prisma } from '@prisma/client';
 import { LabTestResultOption, resultOptionsArraySchema, validatePlantQAResultOptions } from '@/lib/validations/labTest';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function PATCH(
   req: Request,
@@ -133,7 +134,7 @@ export async function PATCH(
       },
     });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Internal Server Error';
+    const message = safeErrorMessage(err, 'Internal Server Error');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -11,6 +11,7 @@ import {
   isValidTestingPoint,
   TestingPoint,
 } from '@/backend/services/milkTestPolicyService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -62,7 +63,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: err.message }, { status: 404 });
     }
     console.error('[API_MILK_TEST_POLICIES_GET_ERROR]', err);
-    const message = err instanceof Error ? err.message : 'Failed to retrieve milk test policies.';
+    const message = safeErrorMessage(err, 'Failed to retrieve milk test policies.');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -117,7 +118,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: err.message }, { status: 409 });
     }
     console.error('[API_MILK_TEST_POLICIES_POST_ERROR]', err);
-    const message = err instanceof Error ? err.message : 'Failed to create milk test policy.';
+    const message = safeErrorMessage(err, 'Failed to create milk test policy.');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

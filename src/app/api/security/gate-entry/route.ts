@@ -4,6 +4,7 @@ import { gateEntrySchema } from '@/lib/validations/security';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const SECURITY_SCOPE = { kind: 'DEPARTMENT', departmentId: 'Security' } as const;
 
@@ -137,6 +138,6 @@ export async function POST(req: Request) {
     if (error?.name === 'ZodError') {
       return NextResponse.json({ error: error.errors[0]?.message || 'Validation failed' }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to record gate entry' }, { status: 400 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to record gate entry') }, { status: 400 });
   }
 }

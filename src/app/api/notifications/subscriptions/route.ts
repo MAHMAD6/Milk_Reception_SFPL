@@ -10,8 +10,8 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const current = await getCurrentUser(req); if (!current) return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
-  const body = await req.json(); const endpoint = String(body.endpoint || ''); const p256dh = String(body.p256dh || ''); const auth = String(body.auth || '');
-  if (!endpoint || !p256dh || !auth || endpoint.length > 10000) return NextResponse.json({ error: 'Valid push subscription keys are required.' }, { status: 400 });
+  const body = await req.json().catch(() => ({})); const endpoint = String(body.endpoint || ''); const p256dh = String(body.p256dh || ''); const auth = String(body.auth || '');
+  if (!endpoint || !p256dh || !auth || endpoint.length > 10000 || p256dh.length > 500 || auth.length > 500 || !/^https:\/\//i.test(endpoint)) return NextResponse.json({ error: 'Valid push subscription keys are required.' }, { status: 400 });
   await prisma.pushSubscription.upsert({ where: { endpoint }, create: { user_id: BigInt(current.id), endpoint, p256dh, auth, device_label: String(body.deviceLabel || '').slice(0, 100) || null }, update: { user_id: BigInt(current.id), p256dh, auth, revoked_at: null, device_label: String(body.deviceLabel || '').slice(0, 100) || null } });
   return NextResponse.json({ ok: true }, { status: 201 });
 }

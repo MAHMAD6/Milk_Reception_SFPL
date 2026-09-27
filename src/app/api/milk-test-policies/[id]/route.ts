@@ -7,6 +7,7 @@ import {
   NotFoundError,
   ConflictError,
 } from '@/backend/services/milkTestPolicyService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function PATCH(
   req: Request,
@@ -54,7 +55,7 @@ export async function PATCH(
       return NextResponse.json({ error: err.message }, { status: 409 });
     }
     console.error('[API_MILK_TEST_POLICIES_PATCH_ERROR]', err);
-    const message = err instanceof Error ? err.message : 'Failed to update milk test policy.';
+    const message = safeErrorMessage(err, 'Failed to update milk test policy.');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

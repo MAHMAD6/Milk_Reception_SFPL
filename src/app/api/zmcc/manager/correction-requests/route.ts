@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/backend/core/auth';
 import { prisma } from '@/backend/core/db';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
   const user = await getCurrentUser(req);
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
     });
     return NextResponse.json({ request: { id: result.id.toString(), status: result.status } });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to review correction request.';
+    const message = safeErrorMessage(error, 'Unable to review correction request.');
     const status = message === 'OUTSIDE_SCOPE' ? 403 : message === 'REQUEST_NOT_AVAILABLE' ? 409 : 500;
     return NextResponse.json({ error: message.replaceAll('_', ' ') }, { status });
   }

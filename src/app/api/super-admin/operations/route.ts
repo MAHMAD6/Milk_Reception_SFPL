@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { calculatePhysicalLiters } from '@/backend/utils/milkFormulas';
 import { isPlantLrTest } from '@/backend/services/vehicleQuantityService';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
   const authUser = await getCurrentUser(req);
@@ -135,6 +136,6 @@ export async function GET(req: Request) {
       },
     });
   } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(err, 'Internal server error.') }, { status: 500 });
   }
 }

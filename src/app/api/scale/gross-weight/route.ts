@@ -4,6 +4,7 @@ import { grossWeightSchema } from '@/lib/validations/scale';
 import { validatePositiveDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const WEIGHBRIDGE_SCOPE = {
   kind: 'DEPARTMENT',
@@ -20,22 +21,9 @@ export async function POST(req: Request) {
   }
   const authUser = access.user;
 
-  let dbUser = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { username: authUser.username },
-        { username: authUser.id },
-      ],
-      is_active: true,
-    },
-  });
-
-  if (!dbUser) {
-    dbUser = await prisma.user.upsert({
-      where: { username: authUser.username },
-      update: { role: authUser.role, full_name: authUser.name },
-      create: { username: authUser.username, role: authUser.role, full_name: authUser.name },
-    });
+  const dbUser = await prisma.user.findUnique({ where: { id: BigInt(authUser.id) } });
+  if (!dbUser || !dbUser.is_active) {
+    return NextResponse.json({ error: 'Unauthorized. Active user account required.' }, { status: 401 });
   }
 
   const userIdBigInt = dbUser.id;
@@ -236,6 +224,6 @@ export async function POST(req: Request) {
     if (error?.name === 'ZodError') {
       return NextResponse.json({ error: error.errors[0]?.message || 'Validation failed' }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to record Scale 1 gross weight' }, { status: 400 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to record Scale 1 gross weight') }, { status: 400 });
   }
 }

@@ -7,6 +7,7 @@ import { validateNonNegativeDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
 import { createNotificationsForEvent } from '@/backend/services/notificationService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 class RouteError extends Error {
   statusCode: number;
@@ -585,7 +586,7 @@ export async function POST(
     });
   } catch (error: any) {
     if (error?.name === 'ZodError' || error?.issues) {
-      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || error.message || 'Validation failed';
+      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || safeErrorMessage(error, 'Validation failed');
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     if (error instanceof RouteError) {

@@ -5,6 +5,7 @@ import {
   getSupplyChainLossHierarchy,
   generateLossReconciliationExcel,
 } from '@/backend/services/lossCalculationService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
   const current = await getCurrentUser(req);
@@ -24,10 +25,9 @@ export async function GET(req: Request) {
     'DATA_EXECUTIVE',
     'QA_MANAGER',
     'QA_HEAD',
-    'ADMIN',
   ];
 
-  if (!user || !allowedRoles.includes(user.role)) {
+  if (!user || !user.is_active || !allowedRoles.includes(user.role)) {
     return NextResponse.json({ error: 'Forbidden.' }, { status: 403 });
   }
 
@@ -38,10 +38,17 @@ export async function GET(req: Request) {
   const to = searchParams.get('to') || undefined;
 
   let zmccId: string | undefined = undefined;
-  if (user.role === 'ZMCC_MANAGER' && user.procurement_source_id) {
+  if (user.role === 'ZMCC_MANAGER') {
+    // Source-scoped: never widen to system scope or accept a caller-chosen ZMCC.
+    if (!user.procurement_source_id) {
+      return NextResponse.json({ error: 'Forbidden. ZMCC Manager must be assigned to a ZMCC.' }, { status: 403 });
+    }
     zmccId = user.procurement_source_id.toString();
   } else if (searchParams.get('zmccId')) {
     zmccId = searchParams.get('zmccId') || undefined;
+    if (!/^\d+$/.test(zmccId || '')) {
+      return NextResponse.json({ error: 'Invalid zmccId parameter.' }, { status: 400 });
+    }
   }
 
   try {
@@ -64,7 +71,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Unable to generate Excel export.';
+    const message = safeErrorMessage(error, 'Unable to generate Excel export.');
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

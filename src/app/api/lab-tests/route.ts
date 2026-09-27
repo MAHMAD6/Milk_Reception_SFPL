@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@core/db';
+import { requireAuthenticated } from '@core/apiGuard';
 
 function serializeLabTest(test: any) {
   return {
@@ -16,6 +17,9 @@ function serializeLabTest(test: any) {
 }
 
 export async function GET(req: Request) {
+  const access = await requireAuthenticated(req);
+  if (!access.ok) return access.response;
+
   const { searchParams } = new URL(req.url);
   const scopeParam = searchParams.get('scope');
   const scope = (scopeParam || 'DISPATCH').trim().toUpperCase();
@@ -59,9 +63,10 @@ export async function GET(req: Request) {
         },
       }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
+    console.error('[API_LAB_TESTS_GET_ERROR]', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to fetch lab tests' },
+      { error: 'Failed to fetch lab tests' },
       {
         status: 500,
         headers: {

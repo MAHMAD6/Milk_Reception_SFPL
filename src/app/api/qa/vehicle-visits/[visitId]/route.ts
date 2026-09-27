@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@core/auth';
+import { requireRoles, ROLE_GROUPS } from '@core/apiGuard';
 import { prisma } from '@core/db';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
 import { MilkTestPolicyService } from '@/backend/services/milkTestPolicyService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 function serializeBigInt(obj: any): any {
   if (obj === null || obj === undefined) return obj;
@@ -24,10 +25,8 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ visitId: string }> }
 ) {
-  const user = await getCurrentUser(req);
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const access = await requireRoles(req, ROLE_GROUPS.PLANT_QA);
+  if (!access.ok) return access.response;
 
   const resolvedParams = await params;
   const visitIdStr = resolvedParams.visitId;
@@ -149,6 +148,6 @@ export async function GET(
 
     return NextResponse.json({ visit: formattedVisit });
   } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch vehicle visit details' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to fetch vehicle visit details') }, { status: 500 });
   }
 }

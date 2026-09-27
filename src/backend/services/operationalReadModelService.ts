@@ -1,5 +1,6 @@
 import { prisma } from '../core/db';
 import { MilkProcessLog, User, ProcessStatus, PortionLabTestResult } from '../core/types';
+import { ROLE_GROUPS, roleIn } from '../core/roleGroups';
 import { vehicleVisitPaperIdentity } from '../modules/paper-references';
 import { PLANT_TIMEZONE, isValidDateOnly, parseStrictDateOnly } from '@/lib/datetime-utils';
 import { getOperationalBusinessDate, getPakistanCalendarDate } from '../core/business-day';
@@ -676,10 +677,26 @@ export function mapVisitToLogs(
 /**
  * Standard query builder and pagination executor for operational read logs.
  */
+export class OperationalLogAccessError extends Error {
+  constructor() {
+    super('Forbidden. Your role cannot read operational logs.');
+    this.name = 'OperationalLogAccessError';
+  }
+}
+
+/** Fail closed: only source-scoped roles (filtered below) and explicit system-wide readers. */
+export function canReadOperationalLogs(user?: User | null): boolean {
+  return Boolean(user) && (roleIn(user!.role, ROLE_GROUPS.SOURCE_SCOPED_READERS) || roleIn(user!.role, ROLE_GROUPS.SYSTEM_WIDE_READERS));
+}
+
 export async function getPaginatedOperationalLogs(
   filters?: OperationalLogFilters,
   currentUser?: User | null
 ): Promise<PaginatedOperationalLogs> {
+  if (!canReadOperationalLogs(currentUser)) {
+    throw new OperationalLogAccessError();
+  }
+
   const mode: RetrievalMode = filters?.mode || 'recent';
   const conditions: any[] = [];
 
@@ -968,6 +985,10 @@ export async function getOperationalLogById(
   id: number | string | bigint,
   currentUser?: User | null
 ): Promise<MilkProcessLog | null> {
+  if (!canReadOperationalLogs(currentUser)) {
+    return null;
+  }
+
   let visitId: bigint;
   try {
     visitId = BigInt(id);

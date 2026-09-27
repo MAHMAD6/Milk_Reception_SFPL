@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
+import { ROLE_GROUPS, roleIn } from '@core/roleGroups';
 import { prisma } from '@core/db';
 import { Prisma } from '@prisma/client';
 import { createDispatchSchema } from '@/lib/validations/dispatch';
@@ -16,6 +17,7 @@ import { getTankPhysicalStock } from '@/backend/services/zmccTankService';
 import { PaperReferenceService, PaperValidationError } from '@/backend/services/paperReferenceService';
 import { PaperReferenceType } from '@prisma/client';
 import { paperLinkedIdentity } from '@/backend/modules/paper-references';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 function serializeDispatch(visit: any) {
   const portions = visit.portions || [];
@@ -180,11 +182,13 @@ export async function GET(req: Request) {
   // SOURCE AUTHORIZATION FILTERING:
   // For ordinary MPD operators and source-scoped managers (ZMCC_MANAGER, CONTRACTOR_MANAGER),
   // strictly scope dispatches to their assigned procurement source at DB level (fail-closed if unbound).
-  const isSourceScoped =
-    dbUser.role === 'ZMCC_LAB_ATTENDANT' ||
-    dbUser.role === 'CONTRACTOR_OPERATOR' ||
-    dbUser.role === 'ZMCC_MANAGER' ||
-    dbUser.role === 'CONTRACTOR_MANAGER';
+  const isSourceScoped = roleIn(dbUser.role, ROLE_GROUPS.SOURCE_SCOPED_READERS) || dbUser.role === 'PHE_OPERATOR';
+
+  // Fail closed: any role that is neither source-scoped nor an explicit system-wide reader
+  // (e.g. MOT, plant floor operators) has no business reading dispatch history.
+  if (!isSourceScoped && !roleIn(dbUser.role, ROLE_GROUPS.SYSTEM_WIDE_READERS)) {
+    return NextResponse.json({ error: 'Forbidden. Your role cannot read dispatch records.' }, { status: 403 });
+  }
 
   if (isSourceScoped) {
     if (dbUser.procurement_source_id) {
@@ -197,6 +201,9 @@ export async function GET(req: Request) {
     // Privileged/Global roles may specify optional procurementSourceId query param
     const sourceParam = searchParams.get('procurementSourceId');
     if (sourceParam) {
+      if (!/^\d+$/.test(sourceParam)) {
+        return NextResponse.json({ error: 'Invalid procurementSourceId parameter.' }, { status: 400 });
+      }
       whereClause.procurement_source_id = BigInt(sourceParam);
     }
   }
@@ -318,7 +325,7 @@ export async function GET(req: Request) {
       },
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to fetch dispatches' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to fetch dispatches') }, { status: 500 });
   }
 }
 
@@ -442,7 +449,7 @@ export async function POST(req: Request) {
         }
       );
     } catch (err: any) {
-      return NextResponse.json({ error: err.message || 'Invalid Raw Milk Dispatch Note number.' }, { status: 400 });
+      return NextResponse.json({ error: safeErrorMessage(err, 'Invalid Raw Milk Dispatch Note number.') }, { status: 400 });
     }
 
     const sourceType = sourceRecord.source_type || 'ZMCC';
@@ -982,6 +989,6 @@ export async function POST(req: Request) {
       const firstMsg = error.issues?.[0]?.message || error.errors?.[0]?.message || 'Validation failed';
       return NextResponse.json({ error: firstMsg }, { status: 400 });
     }
-    return NextResponse.json({ error: error?.message || 'Failed to create vehicle dispatch' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to create vehicle dispatch') }, { status: 500 });
   }
 }

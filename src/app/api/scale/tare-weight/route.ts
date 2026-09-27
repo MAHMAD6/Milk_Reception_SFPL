@@ -5,6 +5,7 @@ import { finalizeSiloReceiptForVisit } from '@/backend/services/siloInventorySer
 import { validatePositiveDecimal } from '@/lib/validation-helpers';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const WEIGHBRIDGE_SCOPE = {
   kind: 'DEPARTMENT',
@@ -21,22 +22,9 @@ export async function POST(req: Request) {
   }
   const authUser = access.user;
 
-  let dbUser = await prisma.user.findFirst({
-    where: {
-      OR: [
-        { username: authUser.username },
-        { username: authUser.id },
-      ],
-      is_active: true,
-    },
-  });
-
-  if (!dbUser) {
-    dbUser = await prisma.user.upsert({
-      where: { username: authUser.username },
-      update: { role: authUser.role, full_name: authUser.name },
-      create: { username: authUser.username, role: authUser.role, full_name: authUser.name },
-    });
+  const dbUser = await prisma.user.findUnique({ where: { id: BigInt(authUser.id) } });
+  if (!dbUser || !dbUser.is_active) {
+    return NextResponse.json({ error: 'Unauthorized. Active user account required.' }, { status: 401 });
   }
 
   const userIdBigInt = dbUser.id;
@@ -237,7 +225,7 @@ export async function POST(req: Request) {
       message: msg,
     });
   } catch (error: any) {
-    const errorMsg = error?.message || 'Failed to record tare weight';
+    const errorMsg = safeErrorMessage(error, 'Failed to record tare weight');
     const status = errorMsg.includes('INACTIVE') ? 409 : 400;
     return NextResponse.json({ error: errorMsg }, { status });
   }

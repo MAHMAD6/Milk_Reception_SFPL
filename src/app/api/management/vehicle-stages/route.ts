@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/backend/core/auth';
 import { prisma } from '@/backend/core/db';
 import { getCurrentVehicleStages } from '@/backend/services/managementVehicleStageProjectionService';
 import type { ManagementFilters, ManagementScope } from '@/backend/modules/management-reporting';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
   const startedAt = performance.now();
@@ -35,6 +36,6 @@ export async function GET(req: Request) {
       headers: { 'Cache-Control': 'private, no-store', 'Server-Timing': `management-vehicle-stages;dur=${durationMs.toFixed(1)}` },
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Unable to load vehicle stages.' }, { status: 400 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Unable to load vehicle stages.') }, { status: 400 });
   }
 }

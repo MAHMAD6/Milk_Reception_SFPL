@@ -7,6 +7,7 @@ import { PaperReferenceService, PaperValidationError } from '@/backend/services/
 import { computeCanonicalMilkMetrics, calculateDensity, calculateGrossLiters } from '@/backend/utils/milkFormulas';
 import { calculateDualReconciliation } from '@/backend/services/reconciliationService';
 import { getTankPhysicalStock } from '@/backend/services/zmccTankService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const correctDispatchSchema = z.object({
   reason: z.string().trim().min(3, 'A substantive correction reason of at least 3 characters is required.'),
@@ -467,7 +468,7 @@ export async function PATCH(
       return NextResponse.json({ error: err.issues?.[0]?.message || 'Validation error' }, { status: 400 });
     }
     console.error('PATCH /api/dispatches/[id]/correction error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to correct dispatch.' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(err, 'Failed to correct dispatch.') }, { status: 500 });
   }
 }
 

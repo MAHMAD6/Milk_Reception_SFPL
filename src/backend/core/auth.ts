@@ -1,26 +1,34 @@
-import { SignJWT, jwtVerify } from 'jose';
+import { SignJWT } from 'jose';
 import { cookies } from 'next/headers';
 import { Role, User, DEFAULT_USERS, AUTHENTICATED_USERS } from './types';
 import { prisma } from './db';
+import {
+  MOT_OFFLINE_AUDIENCE,
+  NORMAL_SESSION_TTL,
+  REMEMBERED_SESSION_TTL,
+  SESSION_AUDIENCE,
+  SESSION_COOKIE_NAME,
+  SESSION_ISSUER,
+  fingerprintsMatch,
+  getJwtSecretKey,
+  passwordFingerprint,
+  readSessionTokenFromCookieHeader,
+  verifySessionJwt,
+} from './session';
 
-export { DEFAULT_USERS, AUTHENTICATED_USERS };
+export { DEFAULT_USERS, AUTHENTICATED_USERS, NORMAL_SESSION_TTL, REMEMBERED_SESSION_TTL };
 
-function getJwtSecretKey(): Uint8Array {
-  const secret = process.env.JWT_SECRET;
-  if (!secret || !secret.trim()) {
-    throw new Error('JWT_SECRET environment variable is missing or empty. Token operations cannot be performed.');
-  }
-  return new TextEncoder().encode(secret.trim());
-}
-
-export const NORMAL_SESSION_TTL = 12 * 60 * 60; // 12 hours in seconds
-export const REMEMBERED_SESSION_TTL = 30 * 24 * 60 * 60; // 30 days in seconds
-
-export async function createSessionToken(user: User, rememberMe: boolean = false): Promise<string> {
-  const secretKey = getJwtSecretKey();
-  const expTime = rememberMe ? '30d' : '12h';
-
+/**
+ * Issues a session JWT. `passwordHash` is fingerprinted into the token so a password
+ * change or admin reset revokes every session issued before it.
+ */
+export async function createSessionToken(
+  user: User,
+  rememberMe: boolean,
+  passwordHash: string
+): Promise<string> {
   return await new SignJWT({
+    token_use: 'session',
     id: user.id,
     username: user.username,
     name: user.name,
@@ -30,56 +38,59 @@ export async function createSessionToken(user: User, rememberMe: boolean = false
     scope_type: user.scope_type || 'ALL',
     procurement_source_id: user.procurement_source_id || null,
     last_login_at: user.last_login_at || null,
+    pwv: passwordFingerprint(passwordHash),
   })
     .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(user.id)
+    .setIssuer(SESSION_ISSUER)
+    .setAudience(SESSION_AUDIENCE)
     .setIssuedAt()
-    .setExpirationTime(expTime)
-    .sign(secretKey);
+    .setExpirationTime(rememberMe ? '30d' : '12h')
+    .sign(getJwtSecretKey());
 }
 
 /** This token is an offline preparation receipt, never an authenticated session. */
 export async function createMotOfflinePreparationToken(input: { userId: string; journeyId: string; zmccId: string; expiresAt: Date }): Promise<string> {
   return new SignJWT({ token_use: 'mot_offline_preparation', journey_id: input.journeyId, zmcc_id: input.zmccId })
-    .setProtectedHeader({ alg: 'HS256' }).setSubject(input.userId).setIssuedAt().setExpirationTime(Math.floor(input.expiresAt.getTime() / 1000)).sign(getJwtSecretKey());
+    .setProtectedHeader({ alg: 'HS256' })
+    .setSubject(input.userId)
+    .setIssuer(SESSION_ISSUER)
+    .setAudience(MOT_OFFLINE_AUDIENCE)
+    .setIssuedAt()
+    .setExpirationTime(Math.floor(input.expiresAt.getTime() / 1000))
+    .sign(getJwtSecretKey());
 }
 
-export async function verifySessionToken(token: string): Promise<User | null> {
-  try {
-    const secretKey = getJwtSecretKey();
-    const verified = await jwtVerify(token, secretKey);
-    const payload = verified.payload;
-    if (payload.token_use === 'mot_offline_preparation') return null;
-    return {
-      id: payload.id as string,
-      username: (payload.username as string) || (payload.id as string),
-      name: payload.name as string,
-      role: payload.role as Role,
-      department: payload.department as string,
-      zone: (payload.zone as string) || null,
-      scope_type: (payload.scope_type as string) || 'ALL',
-      procurement_source_id: (payload.procurement_source_id as string) || null,
-      last_login_at: (payload.last_login_at as string) || null,
-    };
-  } catch (_err) {
-    return null;
-  }
+export async function verifySessionToken(token: string): Promise<(User & { pwv: string | null }) | null> {
+  const payload = await verifySessionJwt(token);
+  if (!payload) return null;
+  return {
+    id: payload.id as string,
+    username: (payload.username as string) || (payload.id as string),
+    name: payload.name as string,
+    role: payload.role as Role,
+    department: payload.department as string,
+    zone: (payload.zone as string) || null,
+    scope_type: (payload.scope_type as string) || 'ALL',
+    procurement_source_id: (payload.procurement_source_id as string) || null,
+    last_login_at: (payload.last_login_at as string) || null,
+    pwv: typeof payload.pwv === 'string' ? payload.pwv : null,
+  };
 }
 
 /**
- * Next.js 15 Asynchronous Cookies Helper with Live Database Authority Resolution
+ * Resolves the authenticated user. The JWT only proves identity; role, scope and
+ * active status are always re-read from PostgreSQL on every request.
  */
 export async function getCurrentUser(req?: Request): Promise<User | null> {
-  let token: string | undefined | null = null;
+  let token: string | null = null;
 
   if (req) {
-    const cookieHeader = req.headers.get('cookie') || '';
-    const tokenMatch = cookieHeader.match(/auth_token=([^;]+)/);
-    if (tokenMatch && tokenMatch[1]) {
-      token = tokenMatch[1];
-    } else {
+    token = readSessionTokenFromCookieHeader(req.headers.get('cookie'));
+    if (!token) {
       const authHeader = req.headers.get('authorization') || '';
       if (authHeader.startsWith('Bearer ')) {
-        token = authHeader.substring(7).trim();
+        token = authHeader.substring(7).trim() || null;
       }
     }
   }
@@ -87,7 +98,7 @@ export async function getCurrentUser(req?: Request): Promise<User | null> {
   if (!token) {
     try {
       const cookieStore = await cookies();
-      token = cookieStore.get('auth_token')?.value;
+      token = cookieStore.get(SESSION_COOKIE_NAME)?.value || null;
     } catch (_err) {
       // cookies() may fail if called outside Next.js request scope
     }
@@ -98,19 +109,18 @@ export async function getCurrentUser(req?: Request): Promise<User | null> {
   }
 
   const sessionUser = await verifySessionToken(token);
-  if (!sessionUser) {
+  if (!sessionUser || !sessionUser.pwv) {
     return null;
   }
 
-    // Require a valid numeric persisted database user ID from the verified JWT
-    if (!sessionUser.id || !/^\d+$/.test(sessionUser.id.trim())) {
-      return null;
-    }
+  // Require a valid numeric persisted database user ID from the verified JWT
+  if (!sessionUser.id || !/^\d+$/.test(sessionUser.id.trim())) {
+    return null;
+  }
 
-    const idBigInt = BigInt(sessionUser.id.trim());
+  const idBigInt = BigInt(sessionUser.id.trim());
 
-    try {
-
+  try {
     const dbUser = await prisma.user.findUnique({
       where: { id: idBigInt },
       select: {
@@ -123,6 +133,7 @@ export async function getCurrentUser(req?: Request): Promise<User | null> {
         procurement_source_id: true,
         is_active: true,
         last_login_at: true,
+        password_hash: true,
         procurement_source: {
           select: {
             id: true,
@@ -135,13 +146,13 @@ export async function getCurrentUser(req?: Request): Promise<User | null> {
       },
     });
 
-    // Missing database user: UNAUTHORIZED
-    if (!dbUser) {
+    // Missing or inactive database user: UNAUTHORIZED IMMEDIATELY
+    if (!dbUser || !dbUser.is_active || !dbUser.password_hash) {
       return null;
     }
 
-    // Inactive database user: UNAUTHORIZED IMMEDIATELY
-    if (!dbUser.is_active) {
+    // Password changed or reset since this session was issued: revoked
+    if (!fingerprintsMatch(passwordFingerprint(dbUser.password_hash), sessionUser.pwv)) {
       return null;
     }
 

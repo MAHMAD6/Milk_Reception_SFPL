@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { resolveMotAuth, assignAndDispatchJourney } from '@/backend/services/motService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function POST(req: Request) {
   const { auth, errorResponse } = await resolveMotAuth(req, 'ASSIGN_DISPATCH');
@@ -21,6 +22,6 @@ export async function POST(req: Request) {
     return NextResponse.json({ journey: result.data }, { status: result.status });
   } catch (err: any) {
     console.error('DISPATCH ERROR:', err);
-    return NextResponse.json({ error: err?.message || 'An unexpected error occurred while dispatching journey.' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(err, 'An unexpected error occurred while dispatching journey.') }, { status: 500 });
   }
 }

@@ -4,6 +4,7 @@ import { prisma } from '@core/db';
 import { z } from 'zod';
 import { PaperReferenceService } from '@/backend/services/paperReferenceService';
 import { PaperReferenceType, PaperPolicyMode } from '@prisma/client';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const updatePolicySchema = z.object({
   referenceType: z.enum(['SHOP_RMR', 'RAW_MILK_TOKEN', 'RAW_MILK_DISPATCH_NOTE']),
@@ -104,10 +105,10 @@ export async function PUT(req: Request) {
     });
   } catch (error: any) {
     if (error?.name === 'ZodError' || error?.issues) {
-      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || error.message || 'Validation failed';
+      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || safeErrorMessage(error, 'Validation failed');
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     console.error('Error updating paper reference policy:', error);
-    return NextResponse.json({ error: error.message || 'Failed to update paper reference policy' }, { status: 400 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to update paper reference policy') }, { status: 400 });
   }
 }

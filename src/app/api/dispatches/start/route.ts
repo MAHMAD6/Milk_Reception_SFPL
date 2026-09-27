@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { getOrAssignDispatchTests, serializeAssignment } from '@/backend/services/labTestAssignmentService';
 import { getOrFreezeDispatchQuantityPolicy } from '@/backend/modules/dispatch/quantity-policy/quantityPolicyService';
 import { getPakistanCalendarDate } from '@/backend/core/business-day';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 
 
@@ -219,13 +220,13 @@ export async function POST(req: Request) {
     if (error?.code === 'SNAPSHOT_SOURCE_MISMATCH' || error?.code === 'VISIT_SOURCE_MISMATCH') {
       return NextResponse.json(
         {
-          error: error.message || 'Procurement source mismatch.',
+          error: safeErrorMessage(error, 'Procurement source mismatch.'),
           code: error.code,
         },
         { status: 400 }
       );
     }
-    return NextResponse.json({ error: error?.message || 'Failed to start dispatch work item' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to start dispatch work item') }, { status: 500 });
   }
 }
 

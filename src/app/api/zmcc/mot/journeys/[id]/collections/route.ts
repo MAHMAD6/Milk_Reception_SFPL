@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getJourneyCollections } from '@/backend/services/motService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(
   req: Request,
@@ -14,7 +15,7 @@ export async function GET(
     return NextResponse.json(result.data, { status: result.status });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err?.message || 'An unexpected error occurred while fetching journey collections.' },
+      { error: safeErrorMessage(err, 'An unexpected error occurred while fetching journey collections.') },
       { status: 500 }
     );
   }

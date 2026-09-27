@@ -5,6 +5,7 @@ import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { QualityRuleService } from '@/backend/services/qualityRuleService';
 import { getOrAssignPlantQATests } from '@/backend/services/labTestAssignmentService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const correctResultItemSchema = z.object({
   test_id: z.string().or(z.number()),
@@ -321,7 +322,7 @@ export async function POST(
       return NextResponse.json({ error: err.issues?.[0]?.message || 'Validation error' }, { status: 400 });
     }
     console.error('POST /api/qa/vehicle-visits/[visitId]/portions/[portionId]/correct-results error:', err);
-    return NextResponse.json({ error: err.message || 'Failed to correct QA test results.' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(err, 'Failed to correct QA test results.') }, { status: 500 });
   }
 }
 

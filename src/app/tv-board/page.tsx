@@ -13,7 +13,8 @@ export default function PublicYardTVBoardPage() {
   const [activeVehicles, setActiveVehicles] = useState<
     Array<{ visitId: string; vehicleNumber: string; stage: string }>
   >([]);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  // Set on mount only: a server-rendered time would never match the client's (hydration error).
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const hamburgerButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -36,7 +37,9 @@ export default function PublicYardTVBoardPage() {
 
   const fetchLogs = useCallback(async () => {
     try {
-      const res = await fetch('/api/tv-board');
+      // Kiosk displays pass their access key through from the page URL.
+      const key = new URLSearchParams(window.location.search).get('key');
+      const res = await fetch(key ? `/api/tv-board?key=${encodeURIComponent(key)}` : '/api/tv-board', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setActiveVehicles(data.vehicles || []);
@@ -48,6 +51,7 @@ export default function PublicYardTVBoardPage() {
 
   useEffect(() => {
     fetchLogs();
+    setCurrentTime(new Date());
     const interval = setInterval(() => {
       fetchLogs();
       setCurrentTime(new Date());
@@ -146,7 +150,7 @@ export default function PublicYardTVBoardPage() {
                 <span>LIVE YARD FEED</span>
               </div>
               <div className="px-3.5 py-1.5 rounded-xl bg-muted border border-border tabular-nums text-xs sm:text-sm font-semibold text-foreground">
-                {currentTime.toLocaleTimeString()}
+                {currentTime ? currentTime.toLocaleTimeString() : '—'}
               </div>
             </div>
           </div>

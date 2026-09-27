@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@core/db';
 import { getCurrentUser } from '@core/auth';
 import { validateOperationalTimestamp } from '@/backend/services/chronology-validator';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function POST(
   req: NextRequest,
@@ -143,6 +144,6 @@ export async function POST(
     });
   } catch (err: any) {
     console.error('Error completing unloading:', err);
-    return NextResponse.json({ error: err.message || 'Failed to complete unloading' }, { status: 400 });
+    return NextResponse.json({ error: safeErrorMessage(err, 'Failed to complete unloading') }, { status: 400 });
   }
 }

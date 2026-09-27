@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/backend/core/auth';
 import { requireCapability } from '@/backend/modules/access-control/serverGuard';
 import { getZmccManagerOverview } from '@/backend/services/zmccManagerOverviewService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
   const user = await getCurrentUser(req);
@@ -22,6 +23,6 @@ export async function GET(req: Request) {
   try {
     return NextResponse.json({ overview: await getZmccManagerOverview(BigInt(trustedSourceId)) });
   } catch (error) {
-    return NextResponse.json({ error: error instanceof Error ? error.message : 'Unable to load ZMCC manager overview.' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Unable to load ZMCC manager overview.') }, { status: 500 });
   }
 }

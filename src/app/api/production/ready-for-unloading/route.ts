@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@core/db';
-import { getCurrentUser } from '@core/auth';
+import { requireRoles, ROLE_GROUPS } from '@core/apiGuard';
 import {
   getSiloCurrentStockLiters,
   getSiloActiveReservedLiters,
@@ -20,10 +20,8 @@ import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser(req);
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const access = await requireRoles(req, ROLE_GROUPS.PRODUCTION);
+    if (!access.ok) return access.response;
 
     const { searchParams } = new URL(req.url);
     const search = searchParams.get('search')?.trim().toUpperCase() || '';

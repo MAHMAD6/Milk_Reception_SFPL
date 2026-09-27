@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/backend/core/auth';
 import { prisma } from '@/backend/core/db';
 import { getMpdExecutiveTelemetry } from '@/backend/services/mpdExecutiveService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +28,6 @@ export async function GET(req: Request) {
       'HEAD_OF_MPD',
       'DATA_EXECUTIVE',
       'EXECUTIVE_MANAGEMENT',
-      'ADMIN',
       'QA_HEAD',
       'ZMCC_MANAGER',
     ];
@@ -58,7 +58,7 @@ export async function GET(req: Request) {
   } catch (error: any) {
     console.error('Error loading MPD Executive telemetry:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to load MPD Executive telemetry.' },
+      { error: safeErrorMessage(error, 'Failed to load MPD Executive telemetry.') },
       { status: 500 }
     );
   }

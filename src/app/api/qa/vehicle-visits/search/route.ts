@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
-import { getCurrentUser } from '@core/auth';
+import { requireRoles, ROLE_GROUPS } from '@core/apiGuard';
 import { prisma } from '@core/db';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function GET(req: Request) {
-  const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const access = await requireRoles(req, ROLE_GROUPS.PLANT_QA);
+  if (!access.ok) return access.response;
 
   const { searchParams } = new URL(req.url);
   const query = searchParams.get('q')?.trim() || '';
@@ -71,6 +70,6 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ visits: formatted });
   } catch (error: any) {
-    return NextResponse.json({ error: error?.message || 'Failed to search vehicle visits' }, { status: 500 });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to search vehicle visits') }, { status: 500 });
   }
 }

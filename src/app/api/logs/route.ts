@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@backend/core/auth';
 import { prisma } from '@backend/core/db';
 import { User, Role } from '@backend/core/types';
-import { getPaginatedOperationalLogs, RetrievalMode } from '@backend/services/operationalReadModelService';
+import { getPaginatedOperationalLogs, OperationalLogAccessError, RetrievalMode } from '@backend/services/operationalReadModelService';
+import { errorResponse } from '@backend/core/apiGuard';
 import { getOperationalBusinessDate } from '@backend/core/business-day';
 import { isValidDateOnly } from '@/lib/datetime-utils';
 
@@ -92,7 +93,10 @@ export async function GET(req: NextRequest | Request) {
 
     return NextResponse.json(result);
   } catch (err: unknown) {
-    return NextResponse.json({ error: err instanceof Error ? err.message : 'Failed to fetch logs' }, { status: 500 });
+    if (err instanceof OperationalLogAccessError) {
+      return NextResponse.json({ error: err.message }, { status: 403 });
+    }
+    return errorResponse('API_LOGS_GET_ERROR', err, 'Failed to fetch logs');
   }
 }
 

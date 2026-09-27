@@ -3,6 +3,7 @@ import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { z } from 'zod';
 import { QualityRuleService } from '@/backend/services/qualityRuleService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const createRuleSchema = z.object({
   labTestId: z.union([z.string(), z.number()]),
@@ -90,7 +91,7 @@ export async function GET(req: Request) {
     });
   } catch (error: unknown) {
     console.error('Error fetching SOP rules:', error);
-    const message = error instanceof Error ? error.message : 'Failed to fetch SOP rules';
+    const message = safeErrorMessage(error, 'Failed to fetch SOP rules');
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

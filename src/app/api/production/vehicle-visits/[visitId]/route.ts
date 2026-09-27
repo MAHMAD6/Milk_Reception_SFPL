@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@core/db';
-import { getCurrentUser } from '@core/auth';
+import { requireRoles, ROLE_GROUPS } from '@core/apiGuard';
 import { vehicleVisitPaperIdentity } from '@/backend/modules/paper-references';
 
 export async function GET(
@@ -8,10 +8,8 @@ export async function GET(
   { params }: { params: Promise<{ visitId: string }> }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const access = await requireRoles(req, ROLE_GROUPS.PRODUCTION);
+    if (!access.ok) return access.response;
 
     const { visitId: visitIdStr } = await params;
     const visitId = BigInt(visitIdStr);

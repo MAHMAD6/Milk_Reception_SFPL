@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@core/auth';
 import { prisma } from '@core/db';
 import { z } from 'zod';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 const correctDecisionSchema = z.object({
   decision: z.enum(['APPROVE', 'REJECT'] as const),
@@ -355,7 +356,7 @@ export async function POST(
     });
   } catch (error: any) {
     if (error?.name === 'ZodError' || error?.issues) {
-      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || error.message || 'Validation failed';
+      const msg = error.issues?.[0]?.message || error.errors?.[0]?.message || safeErrorMessage(error, 'Validation failed');
       return NextResponse.json({ error: msg }, { status: 400 });
     }
     if (error.message?.startsWith('IDEMPOTENCY_CONFLICT:')) {
@@ -365,6 +366,6 @@ export async function POST(
       return NextResponse.json({ error: error.message.split(':')[1] }, { status: 422 });
     }
     const statusCode = error.message?.includes('VEHICLE_ALREADY_EXITED_REVIEW_ONLY') ? 409 : 400;
-    return NextResponse.json({ error: error.message || 'Failed to process QA Manager decision' }, { status: statusCode });
+    return NextResponse.json({ error: safeErrorMessage(error, 'Failed to process QA Manager decision') }, { status: statusCode });
   }
 }

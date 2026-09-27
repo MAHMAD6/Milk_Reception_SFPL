@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { recordGpsBatch } from '@/backend/services/motService';
+import { safeErrorMessage } from '@/backend/core/apiGuard';
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +12,7 @@ export async function POST(req: Request) {
     return NextResponse.json(result.data, { status: result.status });
   } catch (err: any) {
     return NextResponse.json(
-      { error: err?.message || 'An unexpected error occurred while recording GPS batch.' },
+      { error: safeErrorMessage(err, 'An unexpected error occurred while recording GPS batch.') },
       { status: 500 }
     );
   }
