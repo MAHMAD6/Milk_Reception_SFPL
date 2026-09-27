@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useSyncExternalStore } from 'react';
 import {
   Truck,
   Send,
@@ -154,6 +154,54 @@ interface MotOperationsWorkspaceProps {
   hideTabBar?: boolean;
 }
 
+const subscribeToNothing = () => () => {};
+
+/** Tabs whose lists are loaded by fetchMotTabData. */
+const MOT_DATA_TABS = new Set<MotWorkspaceTab>(['DISPATCH', 'ACTIVE_JOURNEYS', 'JOURNEY_HISTORY', 'PROFILES', 'VEHICLES']);
+
+/** Fetches the lists a MOT operations tab shows; only the lists that tab needs are returned. */
+async function fetchMotTabData(
+  tab: MotWorkspaceTab,
+  zmccId: string | null | undefined,
+  historyStatusFilter: string
+): Promise<{
+  routes?: RouteOption[];
+  profiles?: MotProfileItem[];
+  vehicles?: MotVehicleItem[];
+  journeys?: JourneyItem[];
+}> {
+  const zmccParam = zmccId ? `zmcc_id=${zmccId}` : '';
+  const getJson = async (url: string) => (await fetch(url)).json();
+
+  if (tab === 'DISPATCH') {
+    // Load active routes, active profiles, active vehicles
+    const [rData, pData, vData] = await Promise.all([
+      getJson(`/api/zmcc/routes?${zmccParam}&is_active=true`),
+      getJson(`/api/zmcc/mot/profiles?${zmccParam}&is_active=true`),
+      getJson(`/api/zmcc/mot/vehicles?${zmccParam}&is_active=true`),
+    ]);
+    return { routes: rData.routes || [], profiles: pData.profiles || [], vehicles: vData.vehicles || [] };
+  }
+  if (tab === 'ACTIVE_JOURNEYS') {
+    const data = await getJson(`/api/zmcc/mot/journeys?${zmccParam}&status=COLLECTING`);
+    return { journeys: data.journeys || [] };
+  }
+  if (tab === 'JOURNEY_HISTORY') {
+    const statusParam = historyStatusFilter !== 'all' ? `&status=${historyStatusFilter}` : '';
+    const data = await getJson(`/api/zmcc/mot/journeys?${zmccParam}${statusParam}`);
+    return { journeys: data.journeys || [] };
+  }
+  if (tab === 'PROFILES') {
+    const data = await getJson(`/api/zmcc/mot/profiles?${zmccParam}`);
+    return { profiles: data.profiles || [] };
+  }
+  if (tab === 'VEHICLES') {
+    const data = await getJson(`/api/zmcc/mot/vehicles?${zmccParam}`);
+    return { vehicles: data.vehicles || [] };
+  }
+  return {};
+}
+
 export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
   currentUser,
   initialTab = 'DISPATCH',
@@ -193,13 +241,6 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
     if (onTabChange) onTabChange(tab);
   };
 
-  useEffect(() => {
-    if (controlledTab) {
-      setInternalTab(controlledTab);
-      setError(null);
-      setSuccessMessage(null);
-    }
-  }, [controlledTab]);
   const [selectedMapJourneyId, setSelectedMapJourneyId] = useState<string | null>(null);
 
   // ZMCC Scope
@@ -211,10 +252,21 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
   const [vehicles, setVehicles] = useState<MotVehicleItem[]>([]);
   const [routes, setRoutes] = useState<RouteOption[]>([]);
   const [journeys, setJourneys] = useState<JourneyItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [refreshing, setLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // A parent-driven tab change clears the previous tab's messages.
+  const [previousControlledTab, setPreviousControlledTab] = useState(controlledTab);
+  if (controlledTab !== previousControlledTab) {
+    setPreviousControlledTab(controlledTab);
+    if (controlledTab) {
+      setInternalTab(controlledTab);
+      setError(null);
+      setSuccessMessage(null);
+    }
+  }
 
   // Search & Filter
   const [historyStatusFilter, setHistoryStatusFilter] = useState('all');
@@ -275,15 +327,14 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
     }
   }, [isSuperAdmin, selectedZmccId]);
 
-  // Acquire GPS on Dispatch tab
-  const acquireGps = useCallback(() => {
-    if (!navigator.geolocation) {
-      setGpsStatus('ERROR');
-      setGpsErrorMsg('Geolocation is not supported by your browser.');
-      return;
-    }
-    setGpsStatus('ACQUIRING');
-    setGpsErrorMsg('');
+  // Acquire GPS on Dispatch tab. Results arrive in the geolocation callbacks.
+  const geolocationSupported = useSyncExternalStore(
+    subscribeToNothing,
+    () => 'geolocation' in navigator,
+    () => true
+  );
+
+  const requestGpsPosition = useCallback(() => {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setGpsLocation({
@@ -301,58 +352,55 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
     );
   }, []);
 
+  const acquireGps = () => {
+    if (!geolocationSupported) return;
+    setGpsStatus('ACQUIRING');
+    setGpsErrorMsg('');
+    requestGpsPosition();
+  };
+
+  // Opening the Dispatch tab starts acquisition automatically, so it counts as acquiring.
+  const autoAcquiringGps = geolocationSupported && activeTab === 'DISPATCH' && gpsStatus === 'IDLE';
+  const displayedGpsStatus = !geolocationSupported ? 'ERROR' : autoAcquiringGps ? 'ACQUIRING' : gpsStatus;
+  const displayedGpsErrorMsg = geolocationSupported ? gpsErrorMsg : 'Geolocation is not supported by your browser.';
+
   useEffect(() => {
-    if (activeTab === 'DISPATCH' && gpsStatus === 'IDLE') {
-      acquireGps();
+    if (autoAcquiringGps) {
+      requestGpsPosition();
     }
-  }, [activeTab, gpsStatus, acquireGps]);
+  }, [autoAcquiringGps, requestGpsPosition]);
 
   // Load Data based on activeTab and effectiveZmccId
-  const loadData = useCallback(async () => {
-    if (!effectiveZmccId && !isSuperAdmin) return;
+  const canLoadData = Boolean(effectiveZmccId) || isSuperAdmin;
+  const dataRequestKey = `${activeTab}|${effectiveZmccId ?? ''}|${historyStatusFilter}`;
+  // Request whose response last settled; any other key means a fetch is in flight.
+  const [loadedDataKey, setLoadedDataKey] = useState<string | null>(null);
+  const loading = refreshing || (canLoadData && MOT_DATA_TABS.has(activeTab) && loadedDataKey !== dataRequestKey);
+
+  const loadData = useCallback(() => {
+    if (!effectiveZmccId && !isSuperAdmin) return Promise.resolve();
+    const requestKey = `${activeTab}|${effectiveZmccId ?? ''}|${historyStatusFilter}`;
+    return fetchMotTabData(activeTab, effectiveZmccId, historyStatusFilter)
+      .then(
+        (result) => {
+          if (result.routes) setRoutes(result.routes);
+          if (result.profiles) setProfiles(result.profiles);
+          if (result.vehicles) setVehicles(result.vehicles);
+          if (result.journeys) setJourneys(result.journeys);
+        },
+        (err) => setError(getErrorMessage(err) || 'Failed to load MOT data.')
+      )
+      .finally(() => {
+        setLoading(false);
+        setLoadedDataKey(requestKey);
+      });
+  }, [activeTab, effectiveZmccId, isSuperAdmin, historyStatusFilter]);
+
+  const refreshData = () => {
     setLoading(true);
     setError(null);
-
-    const zmccParam = effectiveZmccId ? `zmcc_id=${effectiveZmccId}` : '';
-
-    try {
-      if (activeTab === 'DISPATCH') {
-        // Load active routes, active profiles, active vehicles
-        const [rRes, pRes, vRes] = await Promise.all([
-          fetch(`/api/zmcc/routes?${zmccParam}&is_active=true`),
-          fetch(`/api/zmcc/mot/profiles?${zmccParam}&is_active=true`),
-          fetch(`/api/zmcc/mot/vehicles?${zmccParam}&is_active=true`),
-        ]);
-        const rData = await rRes.json();
-        const pData = await pRes.json();
-        const vData = await vRes.json();
-        setRoutes(rData.routes || []);
-        setProfiles(pData.profiles || []);
-        setVehicles(vData.vehicles || []);
-      } else if (activeTab === 'ACTIVE_JOURNEYS') {
-        const res = await fetch(`/api/zmcc/mot/journeys?${zmccParam}&status=COLLECTING`);
-        const data = await res.json();
-        setJourneys(data.journeys || []);
-      } else if (activeTab === 'JOURNEY_HISTORY') {
-        const statusParam = historyStatusFilter !== 'all' ? `&status=${historyStatusFilter}` : '';
-        const res = await fetch(`/api/zmcc/mot/journeys?${zmccParam}${statusParam}`);
-        const data = await res.json();
-        setJourneys(data.journeys || []);
-      } else if (activeTab === 'PROFILES') {
-        const res = await fetch(`/api/zmcc/mot/profiles?${zmccParam}`);
-        const data = await res.json();
-        setProfiles(data.profiles || []);
-      } else if (activeTab === 'VEHICLES') {
-        const res = await fetch(`/api/zmcc/mot/vehicles?${zmccParam}`);
-        const data = await res.json();
-        setVehicles(data.vehicles || []);
-      }
-    } catch (err) {
-      setError(getErrorMessage(err) || 'Failed to load MOT data.');
-    } finally {
-      setLoading(false);
-    }
-  }, [activeTab, effectiveZmccId, isSuperAdmin, historyStatusFilter]);
+    return loadData();
+  };
 
   useEffect(() => {
     loadData();
@@ -818,15 +866,15 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                   <button
                     type="button"
                     onClick={acquireGps}
-                    disabled={gpsStatus === 'ACQUIRING'}
+                    disabled={displayedGpsStatus === 'ACQUIRING'}
                     className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white border border-border text-[11px] font-semibold text-slate-700 hover:bg-muted"
                   >
-                    <RotateCw className={`w-3 h-3 ${gpsStatus === 'ACQUIRING' ? 'animate-spin' : ''}`} />
-                    <span>{gpsStatus === 'ACQUIRING' ? 'Acquiring...' : 'Refresh GPS'}</span>
+                    <RotateCw className={`w-3 h-3 ${displayedGpsStatus === 'ACQUIRING' ? 'animate-spin' : ''}`} />
+                    <span>{displayedGpsStatus === 'ACQUIRING' ? 'Acquiring...' : 'Refresh GPS'}</span>
                   </button>
                 </div>
 
-                {gpsStatus === 'SUCCESS' && gpsLocation && (
+                {displayedGpsStatus === 'SUCCESS' && gpsLocation && (
                   <div className="flex items-center space-x-2 text-xs tabular-nums text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                     <span>
@@ -836,13 +884,13 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
                   </div>
                 )}
 
-                {gpsStatus === 'ERROR' && (
+                {displayedGpsStatus === 'ERROR' && (
                   <div className="text-xs text-rose-700 bg-rose-50 p-2 rounded-lg border border-rose-200">
-                    {gpsErrorMsg || 'Failed to obtain GPS coordinates.'}
+                    {displayedGpsErrorMsg || 'Failed to obtain GPS coordinates.'}
                   </div>
                 )}
 
-                {gpsStatus === 'IDLE' && (
+                {displayedGpsStatus === 'IDLE' && (
                   <p className="text-xs text-slate-500">Acquiring current GPS location from browser...</p>
                 )}
               </div>
@@ -906,7 +954,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             </div>
             <button
               type="button"
-              onClick={loadData}
+              onClick={refreshData}
               className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
             >
               <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -1018,7 +1066,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
               </select>
               <button
                 type="button"
-                onClick={loadData}
+                onClick={refreshData}
                 className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
               >
                 <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -1131,7 +1179,7 @@ export const MotOperationsWorkspace: React.FC<MotOperationsWorkspaceProps> = ({
             </div>
             <button
               type="button"
-              onClick={loadData}
+              onClick={refreshData}
               className="flex items-center space-x-1 px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 hover:bg-muted"
             >
               <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
