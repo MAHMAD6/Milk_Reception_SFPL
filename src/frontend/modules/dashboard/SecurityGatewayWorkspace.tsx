@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ShieldCheck, Truck, Clock, Search, LogOut, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { useToast } from '@/frontend/context/ToastContext';
 import { toDatetimeLocalInput, datetimeLocalToIso } from '@/lib/datetime-utils';
@@ -66,6 +66,11 @@ interface SecurityGatewayWorkspaceProps {
   onLogGateOut?: (logId: number, outTime: string) => Promise<void>;
 }
 
+/** Suggested gate token for the next entry; the guard can overwrite it. */
+function suggestTokenNumber() {
+  return `TK-${Math.floor(1000 + Math.random() * 9000)}`;
+}
+
 export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> = ({
   activeTab: controlledTab,
   onTabChange,
@@ -92,53 +97,61 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
   const [selectedExitVisitId, setSelectedExitVisitId] = useState<string | null>(null);
 
   // Entry & Exit Form state
-  const [tokenNumber, setTokenNumber] = useState(`TK-${Math.floor(1000 + Math.random() * 9000)}`);
-  const [entryOpTimestamp, setEntryOpTimestamp] = useState<string>(toDatetimeLocalInput(new Date()));
-  const [exitOpTimestamp, setExitOpTimestamp] = useState<string>(toDatetimeLocalInput(new Date()));
+  const [tokenNumber, setTokenNumber] = useState(suggestTokenNumber);
+  const [entryOpTimestamp, setEntryOpTimestamp] = useState<string>(() => toDatetimeLocalInput(new Date()));
+  const [exitOpTimestamp, setExitOpTimestamp] = useState<string>(() => toDatetimeLocalInput(new Date()));
 
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [_msg, setMsg] = useState<{ text: string; isError: boolean } | null>(null);
 
-  useEffect(() => {
-    fetchSecurityData();
-  }, []);
+  const loadSecurityData = useCallback(
+    (entryQuery: string, exitQuery: string) =>
+      Promise.all([
+        fetch(`/api/security/dispatched-visits?q=${encodeURIComponent(entryQuery)}`),
+        fetch('/api/security/active-visits'),
+        fetch(`/api/security/ready-for-exit?q=${encodeURIComponent(exitQuery)}`),
+      ])
+        .then(async ([dispRes, actRes, exitRes]) => {
+          const dispData = await dispRes.json();
+          const actData = await actRes.json();
+          const exitData = await exitRes.json();
 
-  const fetchSecurityData = async () => {
+          if (dispData.visits) {
+            setDispatchedVisits(dispData.visits);
+            if (dispData.visits.length > 0) {
+              setSelectedEntryVisitId((current) => current ?? dispData.visits[0].id);
+            }
+          }
+          if (actData.visits) {
+            setActiveVisits(actData.visits);
+          }
+          if (exitData.visits) {
+            setReadyExitVisits(exitData.visits);
+            if (exitData.visits.length > 0) {
+              setSelectedExitVisitId((current) => current ?? exitData.visits[0].id);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error('Failed to fetch security data', err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        }),
+    []
+  );
+
+  const fetchSecurityData = () => {
     setIsLoading(true);
     setMsg(null);
-    try {
-      const [dispRes, actRes, exitRes] = await Promise.all([
-        fetch(`/api/security/dispatched-visits?q=${encodeURIComponent(entrySearchQuery)}`),
-        fetch('/api/security/active-visits'),
-        fetch(`/api/security/ready-for-exit?q=${encodeURIComponent(exitSearchQuery)}`),
-      ]);
-
-      const dispData = await dispRes.json();
-      const actData = await actRes.json();
-      const exitData = await exitRes.json();
-
-      if (dispData.visits) {
-        setDispatchedVisits(dispData.visits);
-        if (dispData.visits.length > 0 && !selectedEntryVisitId) {
-          setSelectedEntryVisitId(dispData.visits[0].id);
-        }
-      }
-      if (actData.visits) {
-        setActiveVisits(actData.visits);
-      }
-      if (exitData.visits) {
-        setReadyExitVisits(exitData.visits);
-        if (exitData.visits.length > 0 && !selectedExitVisitId) {
-          setSelectedExitVisitId(exitData.visits[0].id);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch security data', err);
-    } finally {
-      setIsLoading(false);
-    }
+    return loadSecurityData(entrySearchQuery, exitSearchQuery);
   };
+
+  // Initial load (search boxes start empty).
+  useEffect(() => {
+    loadSecurityData('', '');
+  }, [loadSecurityData]);
 
   const handleEntrySearch = (val: string) => {
     setEntrySearchQuery(val);
@@ -186,7 +199,7 @@ export const SecurityGatewayWorkspace: React.FC<SecurityGatewayWorkspaceProps> =
 
       const successMsgText = `Gate Entry recorded. Token ${data.visit?.token_number || tokenNumber} issued successfully.`;
       toast.showSuccess(successMsgText, 'Gate Entry Recorded');
-      setTokenNumber(`TK-${Math.floor(1000 + Math.random() * 9000)}`);
+      setTokenNumber(suggestTokenNumber());
       setSelectedEntryVisitId(null);
       fetchSecurityData();
     } catch (err) {
