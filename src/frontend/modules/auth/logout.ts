@@ -44,6 +44,7 @@ export async function logoutUser(): Promise<void> {
   // Trigger custom event so any in-app notification listeners or state stop immediately
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('milk-user-logged-out'));
-    window.location.href = '/login';
+    // Full reload (not client routing) so no signed-in state survives; replace keeps it out of history.
+    window.location.replace('/login');
   }
 }

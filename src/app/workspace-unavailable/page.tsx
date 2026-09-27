@@ -18,7 +18,8 @@ export default function WorkspaceUnavailablePage() {
     }
     // Clear cookie client-side as well
     document.cookie = 'auth_token=; path=/; max-age=0; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    window.location.href = '/login';
+    // Full reload (not client routing) so no signed-in state survives; replace keeps it out of history.
+    window.location.replace('/login');
   };
 
   return (

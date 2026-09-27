@@ -104,7 +104,8 @@ export const LoginPage: React.FC = () => {
       }
 
       const destination = resolveRoleHome(data.user?.role);
-      window.location.href = destination;
+      // Full reload so the workspace boots with the new session; the login page leaves history.
+      window.location.replace(destination);
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Login failed');
       setIsSubmitting(false);
@@ -145,7 +146,8 @@ export const LoginPage: React.FC = () => {
       }
 
       const destination = resolveRoleHome(data.user?.role);
-      window.location.href = destination;
+      // Full reload so the workspace boots with the new session; the login page leaves history.
+      window.location.replace(destination);
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Invalid username or password');
       setIsSubmitting(false);
