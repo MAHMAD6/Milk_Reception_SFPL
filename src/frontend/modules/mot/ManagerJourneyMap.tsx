@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { User } from '@core/types';
 import {
   MapPin,
@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { onActivateKey } from '@/lib/a11y';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface ManagerJourneyMapProps {
   currentUser: User | null;
@@ -117,28 +118,39 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
   const isAuthorized = isSuperAdmin || isZmccManager || isPheOperator;
 
   // Fetch journey map data
-  const fetchMapData = async (id: string) => {
+  // Journey whose request last settled; a different journeyId means its map is still loading.
+  const [loadedJourneyId, setLoadedJourneyId] = useState<string | null>(null);
+
+  const loadMapData = useCallback(
+    (id: string) =>
+      fetchJson<MapData>(`/api/zmcc/mot/journeys/${id}/map`, undefined, 'Failed to load journey map data.')
+        .then(
+          (json) => {
+            setMapData(json);
+            setError(null);
+          },
+          (err) => setError(getErrorMessage(err) || 'Error loading map data.')
+        )
+        .finally(() => {
+          setLoading(false);
+          setLoadedJourneyId(id);
+        }),
+    []
+  );
+
+  const fetchMapData = (id: string) => {
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch(`/api/zmcc/mot/journeys/${id}/map`);
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.error || 'Failed to load journey map data.');
-      }
-      setMapData(json);
-    } catch (err) {
-      setError(getErrorMessage(err) || 'Error loading map data.');
-    } finally {
-      setLoading(false);
-    }
+    return loadMapData(id);
   };
 
   useEffect(() => {
     if (journeyId && isAuthorized) {
-      fetchMapData(journeyId);
+      loadMapData(journeyId);
     }
-  }, [journeyId, isAuthorized]);
+  }, [journeyId, isAuthorized, loadMapData]);
+
+  const isLoading = loading || (Boolean(journeyId && isAuthorized) && loadedJourneyId !== journeyId);
 
   // Project coordinates into SVG viewbox (800 x 480)
   const projection = useMemo(() => {
@@ -240,7 +252,7 @@ export const ManagerJourneyMap: React.FC<ManagerJourneyMapProps> = ({
     );
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="p-16 bg-white rounded-xl border border-border text-center space-y-3">
         <RotateCw className="w-8 h-8 text-primary animate-spin mx-auto" />

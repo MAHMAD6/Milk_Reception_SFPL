@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { User } from '@core/types';
 import { Phone, RotateCw, AlertTriangle, CheckCircle2, Clock } from 'lucide-react';
 import { getErrorMessage } from '@/lib/errors';
+import { fetchJson } from '@/lib/fetch-json';
 
 interface SmsOutboxViewProps {
   currentUser: User | null;
@@ -29,34 +30,35 @@ interface SmsOutboxItem {
 }
 
 export const SmsOutboxView: React.FC<SmsOutboxViewProps> = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<SmsOutboxItem[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
-  const fetchOutbox = async () => {
+  const loadOutbox = useCallback(() => {
+    const url = statusFilter === 'ALL'
+      ? '/api/zmcc/mot/sms-outbox'
+      : `/api/zmcc/mot/sms-outbox?status=${statusFilter}`;
+    return fetchJson<{ items?: SmsOutboxItem[] }>(url, undefined, 'Failed to fetch SMS outbox.')
+      .then(
+        (json) => {
+          setItems(json.items || []);
+          setError(null);
+        },
+        (err) => setError(getErrorMessage(err) || 'Error loading SMS outbox.')
+      )
+      .finally(() => setLoading(false));
+  }, [statusFilter]);
+
+  const fetchOutbox = () => {
     setLoading(true);
     setError(null);
-    try {
-      const url = statusFilter === 'ALL'
-        ? '/api/zmcc/mot/sms-outbox'
-        : `/api/zmcc/mot/sms-outbox?status=${statusFilter}`;
-      const res = await fetch(url);
-      const json = await res.json();
-      if (!res.ok) {
-        throw new Error(json.error || 'Failed to fetch SMS outbox.');
-      }
-      setItems(json.items || []);
-    } catch (err) {
-      setError(getErrorMessage(err) || 'Error loading SMS outbox.');
-    } finally {
-      setLoading(false);
-    }
+    return loadOutbox();
   };
 
   useEffect(() => {
-    fetchOutbox();
-  }, [statusFilter]);
+    loadOutbox();
+  }, [loadOutbox]);
 
   return (
     <div className="space-y-4">
@@ -77,7 +79,10 @@ export const SmsOutboxView: React.FC<SmsOutboxViewProps> = () => {
         <div className="flex items-center space-x-2">
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setLoading(true);
+              setStatusFilter(e.target.value);
+            }}
             className="px-3 py-1.5 rounded-xl border border-border text-xs font-semibold text-slate-700 bg-white"
           >
             <option value="ALL">All Statuses</option>
