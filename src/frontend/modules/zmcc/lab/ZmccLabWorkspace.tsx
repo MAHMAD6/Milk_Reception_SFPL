@@ -27,12 +27,48 @@ import { SegmentedTabs } from '@/components/ui/segmented-tabs';
 import { AnimatePresence } from 'framer-motion';
 import { getErrorMessage } from '@/lib/errors';
 import type { LabTestResultOption } from '@/lib/validations/labTest';
+import type { serializeLabSession } from '@/backend/services/zmccLabService';
 
 interface ZmccLabWorkspaceProps {
   currentUser: User | null;
 }
 
 type MainTab = 'QUEUE' | 'TESTING' | 'HISTORY';
+
+type LabSession = ReturnType<typeof serializeLabSession>;
+type LabResult = LabSession['results'][number];
+type ResultDraft = { numeric_value: number | string; text_value: string };
+type ResultDrafts = Record<string, ResultDraft>;
+type ActiveTank = { id: string; tank_code: string; tank_name: string; capacity_liters: number; available_capacity: number };
+
+/** Row shape of GET /api/zmcc/lab/queue (see getArrivalsQueue). */
+type LabQueueItem = {
+  queue_type: 'MOT' | 'CONTRACTOR' | 'LOCAL_SUPPLIER';
+  arrival_id: string;
+  zmcc_id: string;
+  zmcc_code: string;
+  zmcc_name: string;
+  zmcc_token: string | null;
+  arrival_timestamp: string;
+  arrival_date: string;
+  vehicle_number: string | null;
+  lab_session_id: string | null;
+  lab_session_status: string | null;
+  route_milk_token?: string | null;
+  journey_id?: string;
+  journey_number?: string;
+  route_code?: string | null;
+  route_name?: string | null;
+  mot_code?: string | null;
+  mot_name?: string | null;
+  contractor_source_id?: string;
+  contractor_code?: string;
+  contractor_name?: string;
+  local_supplier_id?: string;
+  local_supplier_code?: string;
+  local_supplier_name?: string;
+  rmr_number?: string | null;
+};
 
 export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser }) => {
   const toast = useToast();
@@ -69,14 +105,14 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   }, [canTest]);
 
   // Queue State
-  const [queueItems, setQueueItems] = useState<any[]>([]);
+  const [queueItems, setQueueItems] = useState<LabQueueItem[]>([]);
   const [loadingQueue, setLoadingQueue] = useState(false);
   const [queueSearch, setQueueSearch] = useState('');
 
   // Active Session State
-  const [activeSession, setActiveSession] = useState<any | null>(null);
+  const [activeSession, setActiveSession] = useState<LabSession | null>(null);
   const [loadingSession, setLoadingSession] = useState(false);
-  const [draftValues, setDraftValues] = useState<Record<string, { numeric_value: any; text_value: any }>>({});
+  const [draftValues, setDraftValues] = useState<ResultDrafts>({});
   const [draftRemarks, setDraftRemarks] = useState('');
   const [savingDraft, setSavingDraft] = useState(false);
   const liveEvaluationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -91,24 +127,24 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   const [completionRemarks, setCompletionRemarks] = useState('');
   const [completingSession, setCompletingSession] = useState(false);
   const [completionEventId, setCompletionEventId] = useState('');
-  const [tanks, setTanks] = useState<any[]>([]);
+  const [tanks, setTanks] = useState<ActiveTank[]>([]);
   const [loadingTanks, setLoadingTanks] = useState(false);
   const [selectedTankId, setSelectedTankId] = useState('');
 
   // Historical Receive Modal State
   const [showHistoricalReceiveModal, setShowHistoricalReceiveModal] = useState(false);
-  const [historicalSession, setHistoricalSession] = useState<any | null>(null);
-  const [historicalTanks, setHistoricalTanks] = useState<any[]>([]);
+  const [historicalSession, setHistoricalSession] = useState<LabSession | null>(null);
+  const [historicalTanks, setHistoricalTanks] = useState<ActiveTank[]>([]);
   const [selectedHistoricalTankId, setSelectedHistoricalTankId] = useState('');
   const [submittingHistoricalReceive, setSubmittingHistoricalReceive] = useState(false);
-  const [rmrSession, setRmrSession] = useState<any | null>(null);
+  const [rmrSession, setRmrSession] = useState<LabSession | null>(null);
   const [rmrSeries, setRmrSeries] = useState('LSR');
   const [rmrBookNumber, setRmrBookNumber] = useState('');
   const [rmrReceiptNumber, setRmrReceiptNumber] = useState('');
   const [issuingRmr, setIssuingRmr] = useState(false);
 
   // History State
-  const [historyItems, setHistoryItems] = useState<any[]>([]);
+  const [historyItems, setHistoryItems] = useState<LabSession[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historySearch, setHistorySearch] = useState('');
   const [historyDate, setHistoryDate] = useState('');
@@ -119,7 +155,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   const [historyTotalPages, setHistoryTotalPages] = useState(1);
 
   // View / Correction Modal State
-  const [selectedHistorySession, setSelectedHistorySession] = useState<any | null>(null);
+  const [selectedHistorySession, setSelectedHistorySession] = useState<LabSession | null>(null);
   const [showCorrectionModal, setShowCorrectionModal] = useState(false);
   const [correctionReason, setCorrectionReason] = useState('');
   const [correctionQuantityValue, setCorrectionQuantityValue] = useState<string>('');
@@ -127,15 +163,15 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   const [correctionDecision, setCorrectionDecision] = useState<'ACCEPTED' | 'REJECTED'>('ACCEPTED');
   const [correctionRejectionReason, setCorrectionRejectionReason] = useState('');
   const [correctionRemarks, setCorrectionRemarks] = useState('');
-  const [correctionValues, setCorrectionValues] = useState<Record<string, { numeric_value: any; text_value: any }>>({});
+  const [correctionValues, setCorrectionValues] = useState<ResultDrafts>({});
   const [savingCorrection, setSavingCorrection] = useState(false);
 
   // Helper to compute live preview metrics using canonical core resolver
   const calculatePreview = useCallback((
     qtyStr: string,
     unit: 'KG' | 'LITER',
-    values: Record<string, { numeric_value: any; text_value: any }>,
-    results: any[]
+    values: ResultDrafts,
+    results: LabResult[]
   ) => {
     const q = Number(qtyStr);
     if (!qtyStr || isNaN(q) || q <= 0) return null;
@@ -226,7 +262,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   }, [activeTab, fetchQueue, fetchHistory]);
 
   // Start or resume session from queue
-  const handleStartOrResume = async (item: any) => {
+  const handleStartOrResume = async (item: LabQueueItem) => {
     setLoadingSession(true);
     try {
       const res = await fetch('/api/zmcc/lab/sessions', {
@@ -254,12 +290,12 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
     }
   };
 
-  const loadSessionIntoState = (session: any) => {
+  const loadSessionIntoState = (session: LabSession) => {
     setActiveSession(session);
     setDraftRemarks(session.remarks || '');
     setDraftQuantityValue(session.quantity_value !== null && session.quantity_value !== undefined ? String(session.quantity_value) : '');
     setDraftQuantityUnit((session.quantity_unit as 'KG' | 'LITER') || 'KG');
-    const initialVals: Record<string, { numeric_value: any; text_value: any }> = {};
+    const initialVals: ResultDrafts = {};
     if (session.results) {
       for (const r of session.results) {
         initialVals[r.test_id] = {
@@ -310,7 +346,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
 
   // Save a short-lived draft after input pauses so the server evaluates each
   // result using the same active QA rule that completion will use.
-  const queueLiveEvaluation = (nextValues: Record<string, { numeric_value: any; text_value: any }>) => {
+  const queueLiveEvaluation = (nextValues: ResultDrafts) => {
     if (!activeSession) return;
     if (liveEvaluationTimer.current) clearTimeout(liveEvaluationTimer.current);
     liveEvaluationTimer.current = setTimeout(async () => {
@@ -328,8 +364,8 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
           body: JSON.stringify({ results: payloadResults }),
         });
         if (res.ok) {
-          const updated = await res.json();
-          setActiveSession((current: any) => current?.id === updated.id
+          const updated: LabSession = await res.json();
+          setActiveSession((current) => current && current.id === updated.id
             ? { ...current, results: updated.results }
             : current);
         }
@@ -399,7 +435,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
 
     setCompletingSession(true);
     try {
-      const payloadResults = (activeSession.results || []).map((r: any) => {
+      const payloadResults = (activeSession.results || []).map((r) => {
         const testId = String(r.test_id);
         const dv = draftValues[testId] || { numeric_value: '', text_value: '' };
         if (r.result_type_snapshot === 'CALCULATED') {
@@ -455,7 +491,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   };
 
   // Historical Receive Handlers
-  const openHistoricalReceiveModal = async (session: any) => {
+  const openHistoricalReceiveModal = async (session: LabSession) => {
     setHistoricalSession(session);
     setSelectedHistoricalTankId('');
     try {
@@ -532,15 +568,15 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
   };
 
   // Open correction modal
-  const openCorrection = (session: any) => {
+  const openCorrection = (session: LabSession) => {
     setSelectedHistorySession(session);
     setCorrectionReason('');
     setCorrectionQuantityValue(session.quantity_value !== null && session.quantity_value !== undefined ? String(session.quantity_value) : '');
     setCorrectionQuantityUnit((session.quantity_unit as 'KG' | 'LITER') || 'KG');
-    setCorrectionDecision(session.decision || 'ACCEPTED');
+    setCorrectionDecision(session.decision === 'REJECTED' ? 'REJECTED' : 'ACCEPTED');
     setCorrectionRejectionReason(session.rejection_reason || '');
     setCorrectionRemarks(session.remarks || '');
-    const vals: Record<string, { numeric_value: any; text_value: any }> = {};
+    const vals: ResultDrafts = {};
     if (session.results) {
       for (const r of session.results) {
         vals[r.test_id] = {
@@ -974,7 +1010,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {activeSession.results?.map((res: any) => {
+                    {activeSession.results?.map((res) => {
                       const testId = res.test_id;
                       const current = draftValues[testId] || { numeric_value: '', text_value: '' };
                       const isCalculated = res.result_type_snapshot === 'CALCULATED';
@@ -1037,7 +1073,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                                 className="w-36 px-2 py-1.5 border border-slate-300 rounded-lg text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
                               >
                                 <option value="">-- Select --</option>
-                                {options.map((opt: any) => (
+                                {options.map((opt) => (
                                   <option key={opt.value} value={opt.value}>
                                     {opt.label || opt.value}
                                   </option>
@@ -1571,7 +1607,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 </label>
                 <select
                   value={correctionDecision}
-                  onChange={(e) => setCorrectionDecision(e.target.value as any)}
+                  onChange={(e) => setCorrectionDecision(e.target.value as 'ACCEPTED' | 'REJECTED')}
                   className="w-full p-2.5 border border-slate-300 rounded-xl text-xs focus:outline-hidden focus:ring-1 focus:ring-primary"
                 >
                   <option value="ACCEPTED">ACCEPTED</option>
@@ -1705,7 +1741,7 @@ export const ZmccLabWorkspace: React.FC<ZmccLabWorkspaceProps> = ({ currentUser 
                 Override Parameter Values
               </label>
               <div className="max-h-60 overflow-y-auto border border-slate-200 rounded-xl p-3 space-y-2">
-                {selectedHistorySession.results?.map((res: any) => {
+                {selectedHistorySession.results?.map((res) => {
                   const testId = res.test_id;
                   const current = correctionValues[testId] || { numeric_value: '', text_value: '' };
                   const isCalculated = res.result_type_snapshot === 'CALCULATED';
